@@ -259,6 +259,20 @@
             screen.addEventListener('touchcancel', () => {
               tracking = false; stop();
             }, { passive: false, capture: true });
+            
+            // Force scroll to bottom on load (as data streams in from ttyd)
+            [100, 300, 600, 1000].forEach(delay => {
+              setTimeout(() => {
+                if (viewport) viewport.scrollTop = viewport.scrollHeight;
+              }, delay);
+            });
+            
+            // Force scroll to bottom when window resizes (e.g., closing Android keyboard)
+            iframeWin.addEventListener('resize', () => {
+              setTimeout(() => {
+                if (viewport) viewport.scrollTop = viewport.scrollHeight;
+              }, 50);
+            });
           }
         }, 500);
       } catch(err) {
