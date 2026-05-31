@@ -171,6 +171,53 @@
         notif.classList.remove('show');
       }, 5000);
     }
+
+    // Touch-to-Scroll translation for mobile devices
+    const iframe = document.getElementById('term-frame');
+    iframe.onload = () => {
+      try {
+        const iframeWin = iframe.contentWindow;
+        const iframeDoc = iframeWin.document;
+        
+        const interval = setInterval(() => {
+          const xterm = iframeDoc.querySelector('.xterm');
+          if (xterm) {
+            clearInterval(interval);
+            
+            let lastY = 0;
+            xterm.addEventListener('touchstart', (e) => {
+              if (e.touches.length === 1) {
+                lastY = e.touches[0].clientY;
+              }
+            }, { passive: false, capture: true });
+            
+            xterm.addEventListener('touchmove', (e) => {
+              if (e.touches.length === 1) {
+                const deltaY = lastY - e.touches[0].clientY;
+                lastY = e.touches[0].clientY;
+                
+                if (Math.abs(deltaY) > 0) {
+                  const wheelEvent = new WheelEvent('wheel', {
+                    deltaY: deltaY * 3, // Multiplier for better mobile scroll speed
+                    deltaX: 0,
+                    deltaZ: 0,
+                    deltaMode: 0,
+                    bubbles: true,
+                    cancelable: true,
+                    view: iframeWin
+                  });
+                  e.target.dispatchEvent(wheelEvent);
+                  e.preventDefault();
+                  e.stopImmediatePropagation();
+                }
+              }
+            }, { passive: false, capture: true });
+          }
+        }, 500);
+      } catch(err) {
+        console.error("Iframe access error:", err);
+      }
+    };
   </script>
 </body>
 </html>
