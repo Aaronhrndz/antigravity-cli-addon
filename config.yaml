@@ -16,5 +16,7 @@ host_network: true
 ingress: true
 ingress_port: 8099
 panel_icon: mdi:robot-outline
+icon: true
+logo: true
 options: {}
 schema: {}
