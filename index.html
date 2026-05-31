@@ -189,15 +189,27 @@
             clearInterval(interval);
             
             const FRICTION = 0.97;
-            const MIN_VELOCITY = 0.3;
+            const MIN_VELOCITY = 0.1;
             
             let lastY = 0, lastTime = 0, velocity = 0;
             let animId = null, tracking = false;
+            let lastAnimTime = 0;
             
-            function coast() {
-              velocity *= FRICTION;
+            function coast(time) {
+              if (!lastAnimTime) lastAnimTime = time;
+              const dt = time - lastAnimTime;
+              lastAnimTime = time;
+              
+              // Frame-rate independent friction (base 16ms/60fps)
+              // This ensures identical slide distance on 60Hz and 120Hz screens
+              const frames = dt / 16.666;
+              velocity *= Math.pow(FRICTION, frames);
+              
               if (Math.abs(velocity) < MIN_VELOCITY) { animId = null; return; }
-              viewport.scrollTop += velocity;
+              
+              // Apply velocity scaled by time elapsed
+              viewport.scrollTop += velocity * frames;
+              
               animId = iframeWin.requestAnimationFrame(coast);
             }
             
@@ -221,13 +233,12 @@
               const dt = now - lastTime;
               const dy = lastY - y; // positive = finger up = scroll down
               
-              // Track velocity for momentum
+              // Track velocity (pixels per 16ms frame)
               if (dt > 0) {
-                const v = (dy / dt) * 16; // normalize to ~60fps
+                const v = (dy / dt) * 16.666;
                 velocity = velocity * 0.2 + v * 0.8;
               }
               
-              // Move viewport immediately
               viewport.scrollTop += dy;
               
               lastY = y;
@@ -240,6 +251,7 @@
               if (!tracking) return;
               tracking = false;
               if (Math.abs(velocity) > MIN_VELOCITY) {
+                lastAnimTime = 0;
                 animId = iframeWin.requestAnimationFrame(coast);
               }
             }, { passive: false, capture: true });
