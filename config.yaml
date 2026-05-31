@@ -1,6 +1,6 @@
 name: "Antigravity CLI"
 description: "AI Agent with total control over domotics via Home Assistant Supervisor API"
-version: "1.2.8"
+version: "1.2.9"
 slug: "antigravity_cli"
 arch:
   - aarch64
@@ -15,7 +15,7 @@ homeassistant_api: true
 host_network: true
 ingress: true
 ingress_port: 8099
-panel_icon: mdi:robot-outline
+panel_icon: mdi:triangle-outline
 icon: true
 logo: true
 map:
