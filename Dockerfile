@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl bash ttyd jq git nano ca-certificates && \
+    curl bash ttyd jq git nano ca-certificates tmux && \
     rm -rf /var/lib/apt/lists/*
 
 # Set HOME for persistence

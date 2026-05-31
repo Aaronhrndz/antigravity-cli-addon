@@ -32,4 +32,4 @@ echo "Starting ttyd on port 8099 with Antigravity CLI..."
 # Run the CLI
 export COLORTERM=truecolor
 export TERM=xterm-256color
-exec ttyd -t lineHeight=1.0 -t "fontFamily='Cascadia Code', 'Consolas', 'Liberation Mono', monospace" -t "theme={'background': '#0c0c0c'}" -p 8099 env COLORTERM=truecolor TERM=xterm-256color /usr/local/bin/agy
+exec ttyd -t lineHeight=1.0 -t "fontFamily='Cascadia Code', 'Consolas', 'Liberation Mono', monospace" -t "theme={'background': '#0c0c0c'}" -p 8099 tmux new-session -A -s antigravity /usr/local/bin/agy
