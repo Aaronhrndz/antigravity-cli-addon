@@ -6,17 +6,13 @@ echo "Starting Antigravity CLI Add-on..."
 # Create configuration directory for MCP
 mkdir -p /data/.gemini/antigravity-cli
 
-# Create mcp_config.json pointing to Supervisor API
+# Create mcp_config.json pointing to our lightweight local bridge
 cat << JSON > /data/.gemini/antigravity-cli/mcp_config.json
 {
   "mcpServers": {
     "homeassistant": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-everything"],
-      "env": {
-        "HA_URL": "http://supervisor/core/api",
-        "HA_TOKEN": "${SUPERVISOR_TOKEN}"
-      }
+      "command": "node",
+      "args": ["/config/mcp_bridge.js"]
     }
   }
 }
@@ -34,4 +30,4 @@ echo "Ingress URL is $INGRESS_URL"
 echo "Starting ttyd on port 8099 with Antigravity CLI..."
 
 # Run the CLI
-exec ttyd -W -b "$INGRESS_URL" -p 8099 /usr/local/bin/agy
+exec ttyd -W -p 8099 /usr/local/bin/agy
