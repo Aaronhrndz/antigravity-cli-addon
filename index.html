@@ -185,31 +185,48 @@
             clearInterval(interval);
             
             let lastY = 0;
+            let accumulatedDelta = 0;
+            const PIXELS_PER_TICK = 40; // Pixels of finger drag needed for one scroll tick
+            
             xterm.addEventListener('touchstart', (e) => {
               if (e.touches.length === 1) {
                 lastY = e.touches[0].clientY;
+                accumulatedDelta = 0;
               }
             }, { passive: false, capture: true });
             
             xterm.addEventListener('touchmove', (e) => {
               if (e.touches.length === 1) {
-                const deltaY = lastY - e.touches[0].clientY;
-                lastY = e.touches[0].clientY;
+                const currentY = e.touches[0].clientY;
+                const deltaY = lastY - currentY;
+                lastY = currentY;
                 
-                if (Math.abs(deltaY) > 0) {
-                  const wheelEvent = new WheelEvent('wheel', {
-                    deltaY: deltaY * 3, // Multiplier for better mobile scroll speed
-                    deltaX: 0,
-                    deltaZ: 0,
-                    deltaMode: 0,
-                    bubbles: true,
-                    cancelable: true,
-                    view: iframeWin
-                  });
-                  e.target.dispatchEvent(wheelEvent);
-                  e.preventDefault();
-                  e.stopImmediatePropagation();
+                accumulatedDelta += deltaY;
+                
+                if (Math.abs(accumulatedDelta) >= PIXELS_PER_TICK) {
+                  const ticks = Math.floor(Math.abs(accumulatedDelta) / PIXELS_PER_TICK);
+                  const sign = Math.sign(accumulatedDelta);
+                  
+                  // Fire exactly ONE wheel event per tick, since xterm.js maps each WheelEvent
+                  // to a discrete ANSI sequence when in Mouse Mode.
+                  for(let i = 0; i < ticks; i++) {
+                    const wheelEvent = new WheelEvent('wheel', {
+                      deltaY: sign * 100, // Standard delta
+                      deltaX: 0,
+                      deltaZ: 0,
+                      deltaMode: 0,
+                      bubbles: true,
+                      cancelable: true,
+                      view: iframeWin
+                    });
+                    e.target.dispatchEvent(wheelEvent);
+                  }
+                  
+                  accumulatedDelta -= sign * ticks * PIXELS_PER_TICK;
                 }
+                
+                e.preventDefault();
+                e.stopImmediatePropagation();
               }
             }, { passive: false, capture: true });
           }
