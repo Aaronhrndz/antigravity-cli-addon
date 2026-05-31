@@ -25,4 +25,4 @@ JSON
 echo "Configured MCP server with Supervisor Token."
 echo "Starting ttyd on port 8099..."
 
-exec ttyd -p 8099 bash
+exec ttyd -W -p 8099 bash
