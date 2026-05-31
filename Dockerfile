@@ -14,9 +14,10 @@ COPY upload.py /opt/antigravity/upload.py
 COPY index.html /opt/antigravity/html/index.html
 COPY logo.png /opt/antigravity/html/logo.png
 
-# Set HOME for persistence
+# Set HOME for persistence and default directory
 ENV HOME=/data
-WORKDIR /usr/local/bin
+WORKDIR /config
+RUN ln -s /config /homeassistant
 
 # Install AI CLI
 RUN curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- -d /usr/local/bin
