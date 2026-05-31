@@ -17,8 +17,10 @@ COPY logo.png /opt/antigravity/html/logo.png
 
 # Set HOME for persistence and default directory
 ENV HOME=/data
-WORKDIR /config
-RUN ln -s /config /homeassistant
+RUN mkdir /homeassistant && \
+    ln -s /config /homeassistant/config && \
+    ln -s /share /homeassistant/share
+WORKDIR /homeassistant
 
 # Install AI CLI
 RUN curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- -d /usr/local/bin

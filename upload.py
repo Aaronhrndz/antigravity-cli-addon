@@ -18,7 +18,7 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
             if fileitem.filename:
                 # Get the absolute path inside the container workspace
                 filename = os.path.basename(fileitem.filename)
-                filepath = os.path.join('/config', filename)
+                filepath = os.path.join('/share', filename)
                 with open(filepath, 'wb') as f:
                     f.write(fileitem.file.read())
                 
