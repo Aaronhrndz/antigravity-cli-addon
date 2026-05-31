@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,12 +104,12 @@
 <body>
   <div id="header">
     <h1>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 22h20L12 2z"></path></svg>
+      <img src="logo.png" width="20" height="20" alt="Logo">
       Antigravity CLI
     </h1>
     <div>
       <input type="file" id="file" style="display: none;" onchange="uploadImage()">
-      <button id="upload-btn" onclick="document.getElementById('file').click()">Subir Imagen</button>
+      <button id="upload-btn" onclick="document.getElementById('file').click()">Upload Image</button>
     </div>
   </div>
   
@@ -128,7 +128,7 @@
       const btn = document.getElementById('upload-btn');
       const originalText = btn.textContent;
       
-      btn.textContent = "Subiendo...";
+      btn.textContent = "Uploading...";
       btn.disabled = true;
       
       const formData = new FormData();
@@ -139,20 +139,20 @@
         const data = await res.json();
         
         if (data.path) {
-          showNotification(`Imagen subida: ${data.path}`);
+          showNotification(`Image uploaded: ${data.path}`);
           // Send path directly to clipboard if browser supports it
           try {
             await navigator.clipboard.writeText(data.path);
-            showNotification(`¡Ruta copiada al portapapeles!\n${data.path}`);
+            showNotification(`Path copied to clipboard!\n${data.path}`);
           } catch(err) {
             // Clipboard not supported without HTTPS or secure context, just show the path
-            showNotification(`Ruta: ${data.path}`);
+            showNotification(`Path: ${data.path}`);
           }
         } else {
           showNotification("Error: " + data.error);
         }
       } catch(e) {
-        showNotification("Fallo de red al subir la imagen");
+        showNotification("Network failed during upload");
       }
       
       btn.textContent = originalText;

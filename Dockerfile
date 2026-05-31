@@ -12,6 +12,7 @@ RUN mkdir -p /opt/antigravity/html
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY upload.py /opt/antigravity/upload.py
 COPY index.html /opt/antigravity/html/index.html
+COPY logo.png /opt/antigravity/html/logo.png
 
 # Set HOME for persistence
 ENV HOME=/data
