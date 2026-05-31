@@ -173,9 +173,9 @@
     }
 
     // Enable native touch scrolling inside xterm.js
-    // xterm.js has an internal .xterm-viewport div with overflow-y:scroll.
-    // By injecting -webkit-overflow-scrolling:touch and removing xterm's
-    // touch event interception, we get 100% native iOS/Android momentum scroll.
+    // Strategy: inject CSS to tell the browser to handle vertical pan natively,
+    // then intercept touch events at capture phase (passive) to stop them from
+    // reaching xterm.js's handlers, without breaking canvas rendering or keyboard.
     const iframe = document.getElementById('term-frame');
     iframe.onload = () => {
       try {
@@ -186,26 +186,30 @@
           if (viewport) {
             clearInterval(interval);
             
-            // Inject CSS for native touch momentum scrolling
+            // 1. Inject CSS for native touch momentum
             const style = iframeDoc.createElement('style');
             style.textContent = `
               .xterm-viewport {
                 -webkit-overflow-scrolling: touch !important;
                 overflow-y: scroll !important;
               }
-              /* Prevent xterm's screen element from capturing touch events */
               .xterm-screen {
                 touch-action: pan-y !important;
               }
             `;
             iframeDoc.head.appendChild(style);
             
-            // Remove xterm.js's touch event listeners that prevent native scroll.
-            // We clone the screen element to strip all JS-attached listeners.
+            // 2. Intercept touch events at capture phase so they never reach
+            //    xterm.js's handlers (which would call preventDefault and kill
+            //    native scroll). Using passive:true tells the browser we won't
+            //    block, so it can start native scrolling immediately.
             const screen = iframeDoc.querySelector('.xterm-screen');
             if (screen) {
-              const clone = screen.cloneNode(true);
-              screen.parentNode.replaceChild(clone, screen);
+              ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(evt => {
+                screen.addEventListener(evt, (e) => {
+                  e.stopPropagation();
+                }, { capture: true, passive: true });
+              });
             }
           }
         }, 500);

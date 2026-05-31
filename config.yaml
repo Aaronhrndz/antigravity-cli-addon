@@ -1,6 +1,6 @@
 name: "Antigravity CLI"
 description: "AI Agent with total control over domotics via Home Assistant Supervisor API"
-version: "1.3.3"
+version: "1.3.4"
 slug: "antigravity_cli"
 arch:
   - aarch64
