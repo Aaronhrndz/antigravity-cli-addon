@@ -268,6 +268,22 @@
       color: #ffffff; 
     }
 
+    .footer-right .tool-btn {
+      margin-left: 8px;
+    }
+
+    .shortcut-kbd {
+      background: #2a2b2e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 10px;
+      color: #9aa0a6;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    }
+
     @media (max-width: 480px) {
       .desktop-only-text {
         display: none !important;
@@ -345,8 +361,24 @@
       <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px; flex-shrink: 0;" onclick="toggleContextMenu(event)">
         <img src="logo.png" class="footer-logo" style="width: 24px; height: 24px; border-radius: 4px; pointer-events: none;" alt="Logo">
       </button>
-      <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
-        <span class="desktop-only-text" style="font-size: 11px; color: #888; opacity: 0.7; white-space: nowrap; user-select: none; transform: translateY(-1px);">COPY Ctrl+Shift+C &nbsp;|&nbsp; PASTE Ctrl+Shift+V</span>
+      <div class="desktop-only-text" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 16px; user-select: none;">
+        <div style="display: flex; align-items: center; gap: 6px; opacity: 0.8;">
+          <span style="font-size: 10px; color: #888; font-weight: 600; letter-spacing: 0.5px;">COPY</span>
+          <div style="display: flex; gap: 3px;">
+            <kbd class="shortcut-kbd">Ctrl</kbd>
+            <kbd class="shortcut-kbd">Shift</kbd>
+            <kbd class="shortcut-kbd">C</kbd>
+          </div>
+        </div>
+        <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.1);"></div>
+        <div style="display: flex; align-items: center; gap: 6px; opacity: 0.8;">
+          <span style="font-size: 10px; color: #888; font-weight: 600; letter-spacing: 0.5px;">PASTE</span>
+          <div style="display: flex; gap: 3px;">
+            <kbd class="shortcut-kbd">Ctrl</kbd>
+            <kbd class="shortcut-kbd">Shift</kbd>
+            <kbd class="shortcut-kbd">V</kbd>
+          </div>
+        </div>
       </div>
     </div>
     
