@@ -1,5 +1,6 @@
 #!/bin/bash
 SESSION_ID=${1:-1}
+echo "[DEBUG] attach.sh called with args: '$@' => SESSION_ID=$SESSION_ID"
 
 # If session log exists, print it so xterm.js gets the scrollback history
 if [ -f /data/session_${SESSION_ID}.log ]; then
