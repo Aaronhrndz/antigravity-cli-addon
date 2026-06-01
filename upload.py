@@ -3,6 +3,13 @@ import socketserver
 import cgi
 import os
 import json
+import shutil
+
+UPLOAD_DIR = '/tmp/uploads'
+
+if os.path.exists(UPLOAD_DIR):
+    shutil.rmtree(UPLOAD_DIR)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 class UploadHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -18,7 +25,7 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
             if fileitem.filename:
                 # Get the absolute path inside the container workspace
                 filename = os.path.basename(fileitem.filename)
-                filepath = os.path.join('/share', filename)
+                filepath = os.path.join(UPLOAD_DIR, filename)
                 with open(filepath, 'wb') as f:
                     f.write(fileitem.file.read())
                 

@@ -94,7 +94,7 @@
     }
     
     #upload-btn {
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      background: linear-gradient(135deg, #facc15 0%, #f97316 15%, #ef4444 30%, #22c55e 45%, #a855f7 65%, #38bdf8 85%, #1d4ed8 100%);
       color: white;
       border: none;
       padding: 4px 10px;
@@ -210,12 +210,28 @@
         const data = await res.json();
         
         if (data.path) {
-          showNotification(`Image uploaded: ${data.path}`);
           try {
-            await navigator.clipboard.writeText(data.path);
-            showNotification(`Path copied to clipboard!\n${data.path}`);
+            const dt = new DataTransfer();
+            dt.setData('text/plain', ` "${data.path}" `);
+            const iframeDoc = document.getElementById('term-frame').contentWindow.document;
+            const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
+            if (target) {
+              target.dispatchEvent(new ClipboardEvent('paste', {
+                  clipboardData: dt,
+                  bubbles: true,
+                  cancelable: true
+              }));
+              showNotification(`Image inserted: ${data.path}`);
+            } else {
+              throw new Error("No terminal target found");
+            }
           } catch(err) {
-            showNotification(`Path: ${data.path}`);
+            try {
+              await navigator.clipboard.writeText(`"${data.path}"`);
+              showNotification(`Path copied to clipboard!\n${data.path}`);
+            } catch(e) {
+              showNotification(`Path: ${data.path}`);
+            }
           }
         } else {
           showNotification("Error: " + data.error);
