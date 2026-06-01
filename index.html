@@ -815,6 +815,12 @@
               if (wasAtBottom) scrollToBottom();
             });
             resizeObserver.observe(viewport);
+            
+            // Prevent native context menu since terminal has its own
+            iframeDoc.addEventListener('contextmenu', e => {
+              if (e.ctrlKey && e.shiftKey) return; // allow shift+right click to show native
+              e.preventDefault();
+            });
           }
         }, 500);
       } catch(err) {
