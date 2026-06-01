@@ -72,7 +72,7 @@ def download_file(url, dest_path):
 
 def pexpect_thread():
     global child
-    child = pexpect.spawn('dtach -A /tmp/agy.socket', encoding='utf-8', dimensions=(24, 80))
+    child = pexpect.spawn('dtach -A /tmp/agy_1.socket', encoding='utf-8', dimensions=(24, 80))
     
     buffer = ""
     last_typing_time = 0

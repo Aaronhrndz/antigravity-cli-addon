@@ -41,6 +41,38 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
+    def do_GET(self):
+        from urllib.parse import urlparse, parse_qs
+        import subprocess
+        
+        parsed_path = urlparse(self.path)
+        if parsed_path.path == '/kill':
+            query = parse_qs(parsed_path.query)
+            session_id = query.get('session_id', [None])[0]
+            if session_id and session_id.isdigit():
+                socket_file = f"/tmp/agy_{session_id}.socket"
+                log_file = f"/data/session_{session_id}.log"
+                # Kill processes attached to the socket and remove files
+                subprocess.run(["fuser", "-k", socket_file], capture_output=True)
+                if os.path.exists(socket_file):
+                    try: os.remove(socket_file)
+                    except: pass
+                if os.path.exists(log_file):
+                    try: os.remove(log_file)
+                    except: pass
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(b'{"status": "killed"}')
+            else:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'{"error": "Invalid session_id"}')
+        else:
+            self.send_response(404)
+            self.end_headers()
+
 if __name__ == "__main__":
     PORT = 8097
     print(f"Starting upload server on port {PORT}")

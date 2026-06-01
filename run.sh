@@ -31,20 +31,9 @@ echo "Ingress URL is $INGRESS_URL"
 python3 /opt/antigravity/upload.py &
 
 # Run the CLI via dtach to support session persistence natively without alternate screen (perfect mobile scrolling)
+# The dtach sessions are now created lazily by attach.sh on demand
 export COLORTERM=truecolor
 export TERM=xterm-256color
-
-# Keep log small
-if [ -f /data/session.log ]; then
-    tail -n 1000 /data/session.log > /tmp/session.log.tmp
-    mv /tmp/session.log.tmp /data/session.log
-fi
-
-# Clean socket
-rm -f /tmp/agy.socket
-
-# Start dtach background process recording to session.log
-dtach -n /tmp/agy.socket script -q -f -a /data/session.log -c "/usr/local/bin/agy" &
 
 # Run ttyd connected to the attach script
 # Using disableResizeOverlay=true removes the annoying 100x40 banner

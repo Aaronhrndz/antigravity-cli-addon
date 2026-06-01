@@ -155,6 +155,51 @@
       pointer-events: auto;
     }
 
+    /* Tabs CSS */
+    #tab-bar {
+      display: flex;
+      background: #111111;
+      border-bottom: 1px solid #333;
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    #tab-bar::-webkit-scrollbar { display: none; }
+    
+    .tab {
+      display: flex;
+      align-items: center;
+      background: #222222;
+      color: #888;
+      padding: 8px 14px;
+      border-right: 1px solid #333;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .tab.active {
+      background: #000000;
+      color: #fff;
+    }
+    .tab-close {
+      margin-left: 8px;
+      color: #666;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .tab-close:hover { color: #ff4444; }
+    
+    .tab-add {
+      background: transparent;
+      color: #888;
+      border: none;
+      font-size: 18px;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+    .tab-add:hover { color: #fff; }
+
     @media (max-width: 480px) {
       .toolbar-footer {
         padding: 4px;
@@ -193,8 +238,9 @@
   </style>
 </head>
 <body>
+  <div id="tab-bar"></div>
   <div id="terminal-container">
-    <iframe src="ttyd/" id="term-frame"></iframe>
+    <iframe id="term-frame"></iframe>
   </div>
   
   <div id="notification"></div>
@@ -234,6 +280,73 @@
   </div>
 
   <script>
+    // Tab Management
+    let sessions = JSON.parse(localStorage.getItem('agy_sessions')) || [{id: 1, name: 'Sesión 1'}];
+    let currentSessionId = localStorage.getItem('agy_current_session') ? parseInt(localStorage.getItem('agy_current_session')) : sessions[0].id;
+    if (!sessions.find(s => s.id === currentSessionId)) currentSessionId = sessions[0].id;
+
+    function saveSessions() {
+      localStorage.setItem('agy_sessions', JSON.stringify(sessions));
+      localStorage.setItem('agy_current_session', currentSessionId);
+    }
+
+    window.switchSession = function(id) {
+      currentSessionId = id;
+      saveSessions();
+      renderTabs();
+      document.getElementById('term-frame').src = 'ttyd/?arg=' + id;
+    };
+
+    window.createSession = function() {
+      const maxId = sessions.reduce((max, s) => Math.max(max, s.id), 0);
+      const newId = maxId + 1;
+      sessions.push({id: newId, name: 'Sesión ' + newId});
+      switchSession(newId);
+    };
+
+    window.closeSession = async function(e, id) {
+      e.stopPropagation();
+      if (sessions.length <= 1) return; // Cannot close the last session
+      
+      const idx = sessions.findIndex(s => s.id === id);
+      sessions.splice(idx, 1);
+      
+      if (currentSessionId === id) {
+        switchSession(sessions[Math.max(0, idx - 1)].id);
+      } else {
+        saveSessions();
+        renderTabs();
+      }
+      
+      try {
+        await fetch('kill?session_id=' + id);
+      } catch(err) { console.error('Failed to kill session', err); }
+    };
+
+    function renderTabs() {
+      const tabBar = document.getElementById('tab-bar');
+      tabBar.innerHTML = '';
+      
+      sessions.forEach(s => {
+        const tab = document.createElement('div');
+        tab.className = 'tab' + (s.id === currentSessionId ? ' active' : '');
+        let closeHtml = sessions.length > 1 ? `<span class="tab-close" onclick="closeSession(event, ${s.id})">×</span>` : '';
+        tab.innerHTML = `<span>${s.name}</span>${closeHtml}`;
+        tab.onclick = () => switchSession(s.id);
+        tabBar.appendChild(tab);
+      });
+      
+      const addBtn = document.createElement('button');
+      addBtn.className = 'tab-add';
+      addBtn.innerHTML = '+';
+      addBtn.onclick = createSession;
+      tabBar.appendChild(addBtn);
+    }
+
+    // Initialize tabs
+    renderTabs();
+    document.getElementById('term-frame').src = 'ttyd/?arg=' + currentSessionId;
+
     async function uploadImage() {
       const fileInput = document.getElementById('file');
       if (!fileInput.files.length) return;
