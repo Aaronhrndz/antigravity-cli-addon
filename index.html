@@ -261,6 +261,10 @@
 </head>
 <body>
   <div id="tab-bar"></div>
+  <div id="update-banner" style="display: none; background: #856404; color: #ffeeba; padding: 8px 12px; font-size: 13px; justify-content: space-between; align-items: center; border-bottom: 1px solid #664d03; flex-shrink: 0;">
+    <span id="update-text">Update available!</span>
+    <button onclick="installUpdate()" style="background: #ffeeba; color: #856404; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Update Now</button>
+  </div>
   <div id="terminal-container">
     <iframe id="term-frame"></iframe>
   </div>
@@ -368,6 +372,42 @@
     // Initialize tabs
     renderTabs();
     document.getElementById('term-frame').src = 'ttyd/?arg=' + currentSessionId;
+
+    async function checkVersion() {
+      try {
+        const res = await fetch('version_check');
+        const data = await res.json();
+        if (data.update_available) {
+          const banner = document.getElementById('update-banner');
+          document.getElementById('update-text').innerText = `New version available! ${data.current} -> ${data.latest}`;
+          banner.style.display = 'flex';
+        }
+      } catch(e) {}
+    }
+    
+    async function installUpdate() {
+      const banner = document.getElementById('update-banner');
+      const btn = banner.querySelector('button');
+      btn.innerText = 'Updating...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('update_cli');
+        if (res.ok) {
+          document.getElementById('update-text').innerText = 'Update installed! Please close active tabs and open new ones to use the new version.';
+          btn.style.display = 'none';
+          banner.style.background = '#155724';
+          banner.style.color = '#d4edda';
+          banner.style.borderColor = '#c3e6cb';
+        } else {
+          throw new Error('Update failed');
+        }
+      } catch(e) {
+        btn.innerText = 'Failed';
+        btn.disabled = false;
+      }
+    }
+
+    checkVersion();
 
     async function uploadImage() {
       const fileInput = document.getElementById('file');

@@ -69,6 +69,44 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(b'{"error": "Invalid session_id"}')
+        elif parsed_path.path == '/version_check':
+            import subprocess, urllib.request, json
+            try:
+                current = subprocess.check_output(['/usr/local/bin/agy', '--version'], stderr=subprocess.STDOUT).decode().strip()
+            except:
+                current = "unknown"
+            
+            try:
+                req = urllib.request.Request('https://antigravity.google/cli/version.txt')
+                with urllib.request.urlopen(req, timeout=3) as response:
+                    latest = response.read().decode('utf-8').strip()
+            except:
+                latest = current # If it fails, assume up to date
+                
+            update_available = (latest != current and latest != "" and current != "unknown")
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'update_available': update_available,
+                'current': current,
+                'latest': latest
+            }).encode())
+            
+        elif parsed_path.path == '/update_cli':
+            import subprocess
+            try:
+                # Run the update script
+                subprocess.run(['bash', '-c', 'curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- -d /usr/local/bin'], check=True)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(b'{"status": "success"}')
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(b'{"status": "error"}')
         else:
             self.send_response(404)
             self.end_headers()
