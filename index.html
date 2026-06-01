@@ -347,10 +347,12 @@
       </div>
     </div>
     <div class="footer-left" style="display: flex; align-items: center;">
-      <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px;" onclick="toggleContextMenu(event)">
+      <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px; flex-shrink: 0;" onclick="toggleContextMenu(event)">
         <img src="logo.png" class="footer-logo" style="width: 24px; height: 24px; border-radius: 4px; pointer-events: none;" alt="Logo">
       </button>
-      <span class="desktop-only-text" style="font-size: 11px; color: #888; opacity: 0.7; margin-left: 10px; white-space: nowrap; user-select: none;">Copy: Ctrl+Shift+C &nbsp;|&nbsp; Paste: Ctrl+Shift+V</span>
+      <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+        <span class="desktop-only-text" style="font-size: 11px; color: #888; opacity: 0.7; white-space: nowrap; user-select: none; transform: translateY(-1px);">Copy: Ctrl+Shift+C &nbsp;|&nbsp; Paste: Ctrl+Shift+V</span>
+      </div>
     </div>
     
     <div class="footer-center">
