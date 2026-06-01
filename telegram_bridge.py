@@ -47,13 +47,15 @@ def clean_text(text):
             
     return '\n'.join(final_lines)
 
-def send_message(text, parse_mode="Markdown"):
+def send_message(text, parse_mode=None):
     url = f"{API_URL}/sendMessage"
     data = {
         "chat_id": CHAT_ID,
-        "text": text,
-        "parse_mode": parse_mode
+        "text": text
     }
+    if parse_mode:
+        data["parse_mode"] = parse_mode
+        
     req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers={'Content-Type': 'application/json'})
     try:
         urllib.request.urlopen(req)
@@ -102,8 +104,8 @@ def pexpect_thread():
     
     while True:
         try:
-            # Read in chunks, waiting up to 0.5s for more data
-            chunk = child.read_nonblocking(size=4096, timeout=0.5)
+            # Read in chunks, waiting up to 1.0s for more data to prevent fragmented messages
+            chunk = child.read_nonblocking(size=4096, timeout=1.0)
             buffer += chunk
             
             current_time = time.time()
@@ -112,13 +114,13 @@ def pexpect_thread():
                 last_typing_time = current_time
                 
         except pexpect.TIMEOUT:
-            # When output pauses for 0.5s, process and send the buffer if it has content
+            # When output pauses for 1.0s, process and send the buffer if it has content
             if buffer.strip():
                 clean = clean_text(buffer)
-                if clean:
-                    # Markdown escaping
-                    clean = clean.replace('_', '\\_').replace('*', '\\*').replace('[', '\\[')
-                    send_message(f"```\n{clean}\n```")
+                # Filter out the empty CLI prompts to reduce noise in Telegram
+                if clean and not clean.endswith("For shortcuts"):
+                    # We send as plain native text (no code block, no markdown escaping needed)
+                    send_message(clean)
                 buffer = ""
         except pexpect.EOF:
             print("Pexpect EOF")
