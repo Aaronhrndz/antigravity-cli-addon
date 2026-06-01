@@ -1,6 +1,6 @@
 name: "Antigravity CLI"
 description: "AI Agent with total control over domotics via Home Assistant Supervisor API"
-version: "1.7.0"
+version: "1.7.1"
 slug: "antigravity_cli"
 panel_icon: "mdi:triangle"
 panel_title: "Antigravity"
@@ -25,9 +25,9 @@ map:
   - share:rw
 options:
   ha_token: ""
-  mqtt_host: ""
+  mqtt_host: "core-mosquitto"
   mqtt_port: "1883"
-  mqtt_user: ""
+  mqtt_user: "addons"
   mqtt_pass: ""
 schema:
   ha_token: "str?"

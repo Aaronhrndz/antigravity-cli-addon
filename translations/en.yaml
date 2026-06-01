@@ -1,0 +1,16 @@
+configuration:
+  ha_token:
+    name: "Home Assistant Token"
+    description: "Your Long-Lived Access Token. Create it in your HA Profile > Security. Example: eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
+  mqtt_host:
+    name: "MQTT Host"
+    description: "IP or hostname of your MQTT Broker. Example: core-mosquitto"
+  mqtt_port:
+    name: "MQTT Port"
+    description: "Port of your MQTT Broker. Example: 1883"
+  mqtt_user:
+    name: "MQTT Username"
+    description: "Username to connect to MQTT. Example: homeassistant"
+  mqtt_pass:
+    name: "MQTT Password"
+    description: "Password to connect to MQTT."
