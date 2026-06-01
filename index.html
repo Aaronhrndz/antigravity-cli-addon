@@ -158,8 +158,8 @@
     /* Tabs CSS */
     #tab-bar {
       display: flex;
-      background: #111111;
-      border-bottom: 1px solid #333;
+      background: #202124;
+      padding: 6px 6px 0 6px;
       overflow-x: auto;
       flex-shrink: 0;
       scrollbar-width: none;
@@ -169,36 +169,58 @@
     .tab {
       display: flex;
       align-items: center;
-      background: #222222;
-      color: #888;
-      padding: 8px 14px;
-      border-right: 1px solid #333;
-      font-size: 12px;
+      background: #3c4043;
+      color: #9aa0a6;
+      padding: 8px 16px;
+      margin-right: 2px;
+      border-radius: 8px 8px 0 0;
+      font-size: 13px;
       cursor: pointer;
       user-select: none;
       white-space: nowrap;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .tab:hover:not(.active) {
+      background: #4a4d51;
     }
     .tab.active {
       background: #000000;
-      color: #fff;
+      color: #ffffff;
+      z-index: 2;
     }
     .tab-close {
       margin-left: 8px;
-      color: #666;
+      color: #9aa0a6;
       font-size: 16px;
       line-height: 1;
+      padding: 2px 4px;
+      border-radius: 50%;
     }
-    .tab-close:hover { color: #ff4444; }
+    .tab-close:hover { 
+      background: rgba(255, 255, 255, 0.1); 
+      color: #e8eaed; 
+    }
     
     .tab-add {
       background: transparent;
-      color: #888;
+      color: #9aa0a6;
       border: none;
-      font-size: 18px;
-      padding: 0 16px;
+      font-size: 20px;
+      padding: 0 10px;
+      margin-left: 4px;
       cursor: pointer;
+      border-radius: 50%;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: center;
     }
-    .tab-add:hover { color: #fff; }
+    .tab-add:hover { 
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff; 
+    }
 
     @media (max-width: 480px) {
       .toolbar-footer {
