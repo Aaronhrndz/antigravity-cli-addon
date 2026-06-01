@@ -37,7 +37,7 @@ export TERM=xterm-256color
 
 # Run ttyd connected to the attach script
 # Using disableResizeOverlay=true removes the annoying 100x40 banner
-ttyd -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t 'theme={"background": "#000000"}' -p 8098 /opt/antigravity/attach.sh &
+ttyd -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t 'theme={"background": "#2b2b2b"}' -p 8098 /opt/antigravity/attach.sh &
 
 # Check and start Telegram Bridge
 TELEGRAM_TOKEN=$(jq -r '.telegram_bot_token // empty' /data/options.json)
