@@ -72,7 +72,9 @@ def download_file(url, dest_path):
 
 def pexpect_thread():
     global child
-    child = pexpect.spawn('dtach -A /tmp/agy_1.socket', encoding='utf-8', dimensions=(24, 80))
+    # Telegram gets its own dedicated and isolated CLI session
+    # We pass NO_COLOR to avoid complex ANSI stripping issues
+    child = pexpect.spawn('/usr/local/bin/agy', env={"NO_COLOR": "1", **os.environ}, encoding='utf-8', dimensions=(50, 100))
     
     buffer = ""
     last_typing_time = 0
