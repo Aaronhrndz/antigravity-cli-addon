@@ -269,6 +269,9 @@
     }
 
     @media (max-width: 480px) {
+      .desktop-only-text {
+        display: none !important;
+      }
       .toolbar-footer {
         padding: 4px;
       }
@@ -347,7 +350,7 @@
       <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px;" onclick="toggleContextMenu(event)">
         <img src="logo.png" class="footer-logo" style="width: 24px; height: 24px; border-radius: 4px; pointer-events: none;" alt="Logo">
       </button>
-      <span class="desktop-only-text" style="font-size: 10px; color: #888; margin-left: 10px; white-space: nowrap;">Copy: Ctrl+Shift+C &nbsp;|&nbsp; Paste: Ctrl+Shift+V</span>
+      <span class="desktop-only-text" style="font-size: 8px; color: #666; opacity: 0.6; margin-left: 10px; white-space: nowrap; user-select: none;">Copy: Ctrl+Shift+C &nbsp;|&nbsp; Paste: Ctrl+Shift+V</span>
     </div>
     
     <div class="footer-center">
