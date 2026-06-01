@@ -14,7 +14,8 @@
       color: #ffffff;
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: 100%;
+      height: 100dvh; /* Fix for mobile address bar / keyboard height issues */
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overflow: hidden;
     }
@@ -140,12 +141,10 @@
         
         if (data.path) {
           showNotification(`Image uploaded: ${data.path}`);
-          // Send path directly to clipboard if browser supports it
           try {
             await navigator.clipboard.writeText(data.path);
             showNotification(`Path copied to clipboard!\n${data.path}`);
           } catch(err) {
-            // Clipboard not supported without HTTPS or secure context, just show the path
             showNotification(`Path: ${data.path}`);
           }
         } else {
@@ -172,10 +171,6 @@
       }, 5000);
     }
 
-    // Smooth touch scroll via direct scrollTop manipulation.
-    // Instead of dispatching WheelEvents (which cause discrete line jumps),
-    // we directly set .xterm-viewport.scrollTop pixel by pixel.
-    // xterm.js watches scrollTop via a 'scroll' event and updates smoothly.
     const iframe = document.getElementById('term-frame');
     iframe.onload = () => {
       try {
@@ -185,19 +180,19 @@
         const interval = setInterval(() => {
           const viewport = iframeDoc.querySelector('.xterm-viewport');
           const screen = iframeDoc.querySelector('.xterm-screen');
+          
+          if (viewport && screen) {
+            clearInterval(interval);
+            
             // Auto-hide resize banners and auto-reconnect on disconnect.
-            // ttyd creates unclassed DIVs for overlays (resize banner, disconnect notice).
-            // We observe the DOM, hide the resize banner, and simulate 'Enter' if disconnected.
             const observer = new MutationObserver((mutations) => {
               mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
                   if (node.nodeType === 1 && node.tagName === 'DIV' && !node.className) {
                     const text = node.textContent || '';
                     if (text.match(/^\d+x\d+$/)) {
-                      // It's a resize overlay (e.g. "80x24"), hide it instantly
                       node.style.display = 'none';
                     } else if (text.includes('Reconnect') || text.includes('Closed')) {
-                      // Connection dropped (e.g. mobile browser slept). Hide notice & reconnect.
                       node.style.display = 'none';
                       setTimeout(() => {
                         const textarea = iframeDoc.querySelector('.xterm-helper-textarea');
@@ -221,25 +216,22 @@
             const FRICTION = 0.97;
             const MIN_VELOCITY = 0.1;
             
-            let lastY = 0, lastTime = 0, velocity = 0;
+            let lastY = 0, velocity = 0;
             let animId = null, tracking = false;
             let lastAnimTime = 0;
+            let touchHistory = [];
             
             function coast(time) {
               if (!lastAnimTime) lastAnimTime = time;
               const dt = time - lastAnimTime;
               lastAnimTime = time;
               
-              // Frame-rate independent friction (base 16ms/60fps)
-              // This ensures identical slide distance on 60Hz and 120Hz screens
               const frames = dt / 16.666;
               velocity *= Math.pow(FRICTION, frames);
               
               if (Math.abs(velocity) < MIN_VELOCITY) { animId = null; return; }
               
-              // Apply velocity scaled by time elapsed
               viewport.scrollTop += velocity * frames;
-              
               animId = iframeWin.requestAnimationFrame(coast);
             }
 
@@ -258,10 +250,9 @@
               if (!tracking) return;
               const y = e.touches[0].clientY;
               const now = performance.now();
-              const dy = lastY - y; // positive = finger up = scroll down
+              const dy = lastY - y; 
               
               touchHistory.push({ y: y, time: now });
-              // Keep only the history from the last 100ms
               touchHistory = touchHistory.filter(point => now - point.time < 100);
               
               lastY = y;
@@ -275,19 +266,17 @@
               if (!tracking) return;
               tracking = false;
               
-              // Calculate velocity over the recorded history window (up to 100ms)
               const now = performance.now();
-              // If the finger rested on the screen for >100ms without moving, history might be empty or just the current point.
               touchHistory = touchHistory.filter(point => now - point.time < 100);
               
               if (touchHistory.length > 1) {
                 const oldest = touchHistory[0];
                 const newest = touchHistory[touchHistory.length - 1];
                 const dt = newest.time - oldest.time;
-                const dy = oldest.y - newest.y; // total distance moved in that time
+                const dy = oldest.y - newest.y; 
                 
                 if (dt > 0) {
-                  velocity = (dy / dt) * 16.666; // pixels per 16ms frame
+                  velocity = (dy / dt) * 16.666; 
                 } else {
                   velocity = 0;
                 }
@@ -305,14 +294,12 @@
               tracking = false; 
             }, { passive: false, capture: true });
             
-            // Force scroll to bottom on load (as data streams in from ttyd)
             [100, 300, 600, 1000].forEach(delay => {
               setTimeout(() => {
                 if (viewport) viewport.scrollTop = viewport.scrollHeight;
               }, delay);
             });
             
-            // Force scroll to bottom when window resizes (e.g., closing Android keyboard)
             iframeWin.addEventListener('resize', () => {
               setTimeout(() => {
                 if (viewport) viewport.scrollTop = viewport.scrollHeight;
