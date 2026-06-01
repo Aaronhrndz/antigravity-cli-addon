@@ -24,6 +24,7 @@ What makes this add-on special is its **zero-friction mobile experience**. You c
   - **High-Precision D-Pad**: Vectorized SVG arrow keys that render perfectly centered on any iOS or Android device.
   - **Terminal Essentials**: Dedicated `Esc` and `Tab` keys.
   - **Macro Actions**: Instantly execute common commands like `/new` (new chat) and `/quota` (check usage) with a single tap.
+  - **Smart Login Button**: A dedicated login button appears in the bottom navigation bar when authentication is required, bypassing the need to copy text from the terminal.
 - 🖼️ **Direct Image Uploads**: Need to give the AI visual context? Tap the "Upload Image" button on your phone, select a photo, and it is instantly uploaded to an ephemeral secure container directory (`/tmp/uploads`) and the path is automatically typed into your terminal prompt.
 - 🔒 **Deep & Secure Integration**: Automatically bridges the AI with your Home Assistant Supervisor Token in a secure sandbox.
 - 🎨 **Beautiful Aesthetics**: Complete with a dynamic mesh-gradient footer that feels right at home on modern devices.

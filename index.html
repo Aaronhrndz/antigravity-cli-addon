@@ -369,6 +369,7 @@
       <button class="tool-btn" data-cmd="/quota" style="padding: 0;" title="/quota">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
       </button>
+      <button class="tool-btn" id="footer-login-btn" onclick="openLoginUrl()" style="width: auto; padding: 0 8px; margin-left: 8px; font-weight: bold; background: #1f6feb; color: white; display: none;" title="Login">Login</button>
     </div>
     
     <div class="footer-right">
@@ -469,11 +470,14 @@
         const res = await fetch('get_login_url?session_id=' + currentSessionId);
         const data = await res.json();
         const banner = document.getElementById('login-banner');
+        const footerBtn = document.getElementById('footer-login-btn');
         if (data.url) {
           currentLoginUrl = data.url;
           banner.style.display = 'flex';
+          if (footerBtn) footerBtn.style.display = 'block';
         } else {
           banner.style.display = 'none';
+          if (footerBtn) footerBtn.style.display = 'none';
         }
       } catch(e) {}
     }

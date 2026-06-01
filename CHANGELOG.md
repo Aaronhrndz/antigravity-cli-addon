@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.6
+- Added a dedicated Login button to the bottom navigation bar to avoid text selection issues.
+
+
 ## 1.7.5
 - Add a beautiful Google Login floating action button to easily authenticate.
 - Captures and joins wrapped login URLs from tmux session on the fly.

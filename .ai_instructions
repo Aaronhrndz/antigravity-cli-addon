@@ -1,0 +1,8 @@
+# AI Agent Development Instructions
+
+Whenever an AI Agent makes changes to this repository or Add-on, the following rules MUST be strictly followed:
+
+1. **Update CHANGELOG.md**: You must add a new entry in the `CHANGELOG.md` file documenting the changes you made. Do this every time you introduce a new feature or bug fix.
+2. **Update README.md**: If you introduce a new feature, add a new UI element, or change how something is configured, you must update the `README.md` to reflect these changes.
+3. **Increment Version**: Always remember to increment the `version` field in `config.yaml` after making changes, so the Home Assistant supervisor knows an update is available.
+4. **Adhere to these rules**: Do not ask the user for permission to do this, do it automatically as part of your standard workflow.
