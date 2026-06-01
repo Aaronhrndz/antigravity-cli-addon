@@ -322,10 +322,6 @@
   <div id="footer" class="toolbar-footer">
     <div id="extra-keys-menu" class="context-menu">
       <div class="context-menu-grid">
-        <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true">Ctrl+C</button>
-        <button class="tool-btn" data-key="CtrlD" data-code="68" data-ctrl="true">Ctrl+D</button>
-        <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true">Ctrl+Z</button>
-        <button class="tool-btn paste-menu-btn" style="background: #34A853; color: white;">Paste</button>
         <button class="tool-btn" data-key="F1" data-code="112">F1</button>
         <button class="tool-btn" data-key="F2" data-code="113">F2</button>
         <button class="tool-btn" data-key="F3" data-code="114">F3</button>
@@ -337,15 +333,32 @@
         <button class="tool-btn" data-key="PageDown" data-code="34">PgDn</button>
       </div>
     </div>
-    <div class="footer-left">
+    <div class="footer-left" style="display: flex; align-items: center;">
       <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px;" onclick="toggleContextMenu(event)">
         <img src="logo.png" class="footer-logo" style="width: 24px; height: 24px; border-radius: 4px; pointer-events: none;" alt="Logo">
       </button>
+      <span class="desktop-only-text" style="font-size: 10px; color: #888; margin-left: 10px; white-space: nowrap;">Copy: Ctrl+Shift+C &nbsp;|&nbsp; Paste: Ctrl+Shift+V</span>
     </div>
     
     <div class="footer-center">
       <button class="tool-btn" data-key="Escape" data-code="27" style="width: auto; padding: 0 6px; font-weight: bold;">Esc</button>
-      <button class="tool-btn tab-btn" data-key="Tab" data-code="9" style="width: auto; padding: 0 8px; margin-right: 8px; font-weight: bold;">Tab</button>
+      <button class="tool-btn tab-btn" data-key="Tab" data-code="9" style="width: auto; padding: 0 8px; font-weight: bold;">Tab</button>
+      
+      <div style="width: 1px; height: 16px; background: #333; margin: 0 6px;"></div>
+      
+      <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="width: auto; padding: 2px 4px; font-weight: bold; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1;">
+        <span style="font-size: 7px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Copy/Break</span>
+        <span>Ctrl+C</span>
+      </button>
+      <button class="tool-btn paste-menu-btn" style="width: auto; padding: 2px 4px; font-weight: bold; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1;">
+        <span style="font-size: 7px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
+        <span>Ctrl+V</span>
+      </button>
+      <button class="tool-btn" data-key="CtrlD" data-code="68" data-ctrl="true" style="width: auto; padding: 0 4px; font-weight: bold;">Ctrl+D</button>
+      <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true" style="width: auto; padding: 0 4px; font-weight: bold;">Ctrl+Z</button>
+
+      <div style="width: 1px; height: 16px; background: #333; margin: 0 6px;"></div>
+
       <button class="tool-btn" data-key="ArrowLeft" data-code="37" style="padding: 0;">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
       </button>
@@ -358,10 +371,13 @@
       <button class="tool-btn" data-key="ArrowRight" data-code="39" style="padding: 0;">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
       </button>
-      <button class="tool-btn new-btn" data-cmd="/new" style="padding: 0; margin-left: 8px;" title="/new">
+      
+      <div style="width: 1px; height: 16px; background: #333; margin: 0 6px;"></div>
+
+      <button class="tool-btn new-btn" data-cmd="/new" style="padding: 0;" title="/new">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="12" y1="7" x2="12" y2="13"></line><line x1="9" y1="10" x2="15" y2="10"></line></svg>
       </button>
-      <button class="tool-btn" data-cmd="/quota" style="padding: 0;" title="/quota">
+      <button class="tool-btn" data-cmd="/quota" style="padding: 0; margin-left: 4px;" title="/quota">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
       </button>
     </div>
