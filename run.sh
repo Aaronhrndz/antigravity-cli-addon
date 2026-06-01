@@ -1,10 +1,21 @@
 #!/bin/bash
 set -e
 
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LANGUAGE=en_US:en
+
 echo "Starting Antigravity CLI Add-on..."
 
 # Create configuration directory for MCP
 mkdir -p /data/.gemini/antigravity-cli
+
+# Configure readline for Spanish/UTF-8 character input (no meta conversion)
+cat << 'EOF' > /data/.inputrc
+set input-meta on
+set output-meta on
+set convert-meta off
+EOF
 
 # Create mcp_config.json pointing to our lightweight local bridge
 cat << JSON > /data/.gemini/antigravity-cli/mcp_config.json

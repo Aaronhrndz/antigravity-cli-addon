@@ -2,7 +2,8 @@ FROM ubuntu:22.04
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl bash ttyd tmux jq git nano ca-certificates lrzsz nginx python3 python3-pexpect nodejs npm && \
+    curl bash ttyd tmux jq git nano ca-certificates lrzsz nginx python3 python3-pexpect nodejs npm locales && \
+    locale-gen en_US.UTF-8 && \
     rm -rf /var/lib/apt/lists/*
 
 # Setup UI wrapper directories
@@ -20,6 +21,9 @@ RUN chmod +x /opt/antigravity/attach.sh
 
 # Set HOME for persistence and default directory
 ENV HOME=/data
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 RUN mkdir /homeassistant && \
     ln -s /config /homeassistant/config && \
     ln -s /share /homeassistant/share
