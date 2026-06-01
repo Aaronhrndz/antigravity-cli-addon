@@ -363,6 +363,9 @@
       <button class="tool-btn" data-cmd="/quota" style="padding: 0;" title="/quota">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
       </button>
+      <button class="tool-btn" onclick="pasteFromClipboard()" style="width: auto; padding: 0 8px; margin-left: 8px; font-weight: bold; background: #34A853; color: white; border-radius: 4px;" title="Paste from Clipboard">
+        Paste
+      </button>
     </div>
     
     <div class="footer-right">
@@ -480,59 +483,73 @@
     }
 
     checkVersion();
-
     async function uploadImage() {
       const fileInput = document.getElementById('file');
       if (!fileInput.files.length) return;
       
       const file = fileInput.files[0];
       const btn = document.getElementById('upload-btn');
-      
-      btn.innerHTML = "Uploading...";
-      btn.disabled = true;
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '...';
       
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('session_id', currentSessionId);
       
       try {
-        const res = await fetch('upload', { method: 'POST', body: formData });
-        const data = await res.json();
-        
-        if (data.path) {
+        const res = await fetch('upload', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          const data = await res.json();
           try {
-            const dt = new DataTransfer();
-            dt.setData('text/plain', ` "${data.path}" `);
-            const iframeDoc = document.getElementById('term-frame').contentWindow.document;
-            const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
-            if (target) {
-              target.dispatchEvent(new ClipboardEvent('paste', {
-                  clipboardData: dt,
-                  bubbles: true,
-                  cancelable: true
-              }));
-              showNotification(`Image inserted: ${data.path}`);
+            const iframe = document.getElementById('term-frame');
+            if (iframe && iframe.contentWindow && iframe.contentWindow.term) {
+              iframe.contentWindow.term.paste(data.filepath);
+              showNotification(`Image inserted: ${data.filepath}`);
             } else {
               throw new Error("No terminal target found");
             }
           } catch(err) {
             try {
-              await navigator.clipboard.writeText(`"${data.path}"`);
-              showNotification(`Path copied to clipboard!\n${data.path}`);
+              await navigator.clipboard.writeText(`"${data.filepath}"`);
+              showNotification(`Path copied to clipboard!\n${data.filepath}`);
             } catch(e) {
-              showNotification(`Path: ${data.path}`);
+              showNotification(`Path: ${data.filepath}`);
             }
           }
         } else {
-          showNotification("Error: " + data.error);
+          showNotification("Error uploading");
         }
       } catch(e) {
         showNotification("Network failed during upload");
       }
       
-      btn.innerHTML = `<svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
-      btn.disabled = false;
+      btn.innerHTML = originalHtml;
       fileInput.value = '';
     }
+
+    window.pasteFromClipboard = async function() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (!text) return;
+        const iframe = document.getElementById('term-frame');
+        if (iframe && iframe.contentWindow) {
+          if (iframe.contentWindow.term) {
+             iframe.contentWindow.term.paste(text);
+          } else {
+             const textarea = iframe.contentDocument.querySelector('.xterm-helper-textarea');
+             if (textarea) {
+                 textarea.value = text;
+                 textarea.dispatchEvent(new Event('input', { bubbles: true }));
+             }
+          }
+        }
+      } catch (err) {
+        alert("El navegador ha bloqueado el acceso al portapapeles. Asegúrate de dar permiso o usa Ctrl+Shift+V.");
+      }
+    };
     
     function toggleContextMenu(e) {
       e.stopPropagation();
@@ -561,25 +578,30 @@
 
     function sendVirtualKey(key, keyCode) {
       try {
-        const iframeWindow = document.querySelector('iframe').contentWindow;
-        if (!iframeWindow) return;
+        const iframeDoc = document.querySelector('iframe').contentDocument;
+        if (!iframeDoc) return;
         
-        const terminalTerminal = iframeWindow.term;
+        const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
+        if (!target) return;
+        
+        // Define common control codes as fallback
         const seq = {
           'Enter': '\r', 'Escape': '\x1b', 'Tab': '\x09',
           'ArrowUp': '\x1b[A', 'ArrowDown': '\x1b[B', 'ArrowLeft': '\x1b[D', 'ArrowRight': '\x1b[C',
-          'Home': '\x1b[H', 'End': '\x1b[F', 'PageUp': '\x1b[5~', 'PageDown': '\x1b[6~',
-          'CtrlC': '\x03', 'CtrlD': '\x04', 'CtrlZ': '\x1a',
-          'F1': '\x1bOP', 'F2': '\x1bOQ', 'F3': '\x1bOR', 'F4': '\x1bOS',
-          'F5': '\x1b[15~', 'F6': '\x1b[17~', 'F7': '\x1b[18~', 'F8': '\x1b[19~',
-          'F9': '\x1b[20~', 'F10': '\x1b[21~', 'F11': '\x1b[23~', 'F12': '\x1b[24~'
+          'CtrlC': '\x03', 'CtrlD': '\x04', 'CtrlZ': '\x1a'
         };
 
-        if (terminalTerminal) {
-          if (seq[key]) {
-            terminalTerminal.write(seq[key]);
-          }
-          return;
+        if (seq[key]) {
+            // Best way to send raw escape sequences in ttyd is to paste them
+            const dt = new DataTransfer();
+            dt.setData('text/plain', seq[key]);
+            target.dispatchEvent(new ClipboardEvent('paste', {
+                clipboardData: dt, bubbles: true, cancelable: true
+            }));
+        } else if (keyCode) {
+            target.dispatchEvent(new KeyboardEvent('keydown', {
+                key: key, code: key, keyCode: keyCode, which: keyCode, bubbles: true
+            }));
         }
       } catch(e) {}
     }
