@@ -740,17 +740,15 @@
             screen.addEventListener('touchend', handleTouchEnd, { passive: false, capture: true });
             screen.addEventListener('touchcancel', handleTouchEnd, { passive: false, capture: true });
             
-            let wasAtBottom = true;
+            let wasAtBottom = false;
             
             viewport.addEventListener('scroll', () => {
               wasAtBottom = (viewport.scrollTop + viewport.clientHeight) >= (viewport.scrollHeight - 10);
             }, { passive: true });
             
             const scrollToBottom = () => {
-              if (viewport) viewport.scrollTop = viewport.scrollHeight;
+              if (viewport && wasAtBottom) viewport.scrollTop = viewport.scrollHeight;
             };
-            
-            [100, 300, 600, 1000].forEach(delay => setTimeout(scrollToBottom, delay));
             
             iframeWin.addEventListener('resize', () => {
               if (wasAtBottom) {
