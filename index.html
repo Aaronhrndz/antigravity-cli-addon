@@ -21,7 +21,7 @@
     }
     
     #header {
-      padding: 10px 16px;
+      padding: 8px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -39,101 +39,28 @@
       color: #e0e0e0;
       display: flex;
       align-items: center;
-      gap: 10px;
-    }
-    
-    #upload-btn {
-      background: #238636;
-      color: white;
-      border: 1px solid #2ea043;
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      transition: background 0.2s;
-    }
-    
-    #upload-btn:hover {
-      background: #2ea043;
-    }
-    
-    #upload-btn:disabled {
-      background: #1c4524;
-      border-color: #1c4524;
-      color: #8b949e;
-      cursor: not-allowed;
+      gap: 8px;
     }
 
-    #terminal-container {
-      flex: 1;
-      width: 100%;
-      position: relative;
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
+    #toolbar-keys {
+      display: flex;
+      gap: 4px;
     }
-    
-    /* Overlay that shows path to the user */
-    #notification {
-      position: absolute;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1f6feb;
+
+    .tool-btn {
+      background: #222;
+      border: 1px solid #444;
       color: white;
-      padding: 10px 20px;
+      width: 32px;
+      height: 32px;
       border-radius: 6px;
       font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-      z-index: 20;
-    }
-    
-    #notification.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    
-    #mobile-toolbar {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 6px;
-      background: rgba(30, 30, 30, 0.75);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 6px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    
-    #mobile-toolbar.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    
-    .tool-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -141,17 +68,40 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       padding: 0;
-      transition: background 0.1s, transform 0.1s;
+      transition: background 0.1s;
     }
     
     .tool-btn:active {
-      background: rgba(255, 255, 255, 0.25);
+      background: #444;
       transform: scale(0.92);
     }
     
-    /* Auto-hide on desktop screens */
+    .ctrl-c-btn {
+      color: #ff6b6b;
+      font-weight: bold;
+    }
+
+    @media (max-width: 480px) {
+      .hide-on-mobile {
+        display: none !important;
+      }
+      #header {
+        padding: 6px;
+      }
+      .tool-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+      #upload-btn {
+        padding: 0 8px;
+        height: 30px;
+      }
+    }
+    
+    /* Auto-hide keys on desktop */
     @media (min-width: 768px) {
-      #mobile-toolbar {
+      #toolbar-keys {
         display: none !important;
       }
     }
@@ -159,26 +109,27 @@
 </head>
 <body>
   <div id="header">
-    <h1>
+    <h1 class="hide-on-mobile">
       <img src="logo.png" width="20" height="20" alt="Logo">
-      Antigravity CLI
+      Antigravity
     </h1>
-    <div>
-      <input type="file" id="file" style="display: none;" onchange="uploadImage()">
-      <button id="upload-btn" onclick="document.getElementById('file').click()">Upload Image</button>
+    <div class="header-actions">
+      <div id="toolbar-keys">
+        <button class="tool-btn" data-key="Tab" data-code="9">⇥</button>
+        <button class="tool-btn" data-key="ArrowLeft" data-code="37">←</button>
+        <button class="tool-btn" data-key="ArrowUp" data-code="38">↑</button>
+        <button class="tool-btn" data-key="ArrowDown" data-code="40">↓</button>
+        <button class="tool-btn" data-key="ArrowRight" data-code="39">→</button>
+        <button class="tool-btn ctrl-c-btn" data-key="c" data-code="67" data-ctrl="true">C</button>
+      </div>
+      <div>
+        <input type="file" id="file" style="display: none;" onchange="uploadImage()">
+        <button id="upload-btn" onclick="document.getElementById('file').click()">Upload</button>
+      </div>
     </div>
   </div>
   
   <div id="notification"></div>
-  
-  <div id="mobile-toolbar">
-    <button class="tool-btn" data-key="Tab" data-code="9">⇥</button>
-    <button class="tool-btn" data-key="ArrowLeft" data-code="37">←</button>
-    <button class="tool-btn" data-key="ArrowUp" data-code="38">↑</button>
-    <button class="tool-btn" data-key="ArrowDown" data-code="40">↓</button>
-    <button class="tool-btn" data-key="ArrowRight" data-code="39">→</button>
-    <button class="tool-btn" data-key="c" data-code="67" data-ctrl="true">C</button>
-  </div>
   
   <div id="terminal-container">
     <iframe src="ttyd/" id="term-frame"></iframe>
@@ -240,11 +191,6 @@
       try {
         const iframeWin = iframe.contentWindow;
         const iframeDoc = iframeWin.document;
-        
-        const toolbar = document.getElementById('mobile-toolbar');
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-           toolbar.classList.add('show');
-        }
         
         document.querySelectorAll('.tool-btn').forEach(btn => {
           const handler = (e) => {
