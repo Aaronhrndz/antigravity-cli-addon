@@ -17,7 +17,9 @@ What makes this add-on special is its **zero-friction mobile experience**. You c
 ## ✨ Key Features
 
 - 📱 **Built for Mobile Vibecoding**: A distraction-free UI wrapper around `ttyd` completely tailored for touch screens. Say goodbye to wonky scrolling, weird keyboard overlays, or unreadable text.
-- 🔄 **Seamless Device Transitions**: Powered by `dtach` and `script`, your terminal session remains persistent. You can start a process on your PC, switch to your tablet, and open it on your phone without losing your command history or interrupting running tasks.
+- 🗂️ **Dynamic Multi-Session Tabs**: Want to work on your Python scripts and your Lovelace dashboards at the same time? Click the `+` button in the top tab bar to dynamically spawn new AI sessions. You can switch between them instantly without losing context, and close (`x`) the ones you don't need to instantly free up memory.
+- 🤖 **Telegram Bot Integration**: A completely native, highly-advanced Telegram bridge is included. Configure your Telegram bot credentials in the add-on config and you can chat with the AI from anywhere in the world. It synchronizes automatically with *Session 1*, shows real-time "Typing..." indicators when the AI is thinking, and even accepts image uploads directly from Telegram chat!
+- 🔄 **Seamless Device Transitions**: Powered by `dtach`, your terminal sessions remain persistent. You can start a process on your PC, switch to your tablet, and open it on your phone without losing your command history or interrupting running tasks.
 - ⌨️ **Mobile-Optimized Macros & Controls**: Features a built-in virtual keypad specifically designed for terminal usage on mobile:
   - **High-Precision D-Pad**: Vectorized SVG arrow keys that render perfectly centered on any iOS or Android device.
   - **Terminal Essentials**: Dedicated `Esc` and `Tab` keys.
@@ -25,6 +27,21 @@ What makes this add-on special is its **zero-friction mobile experience**. You c
 - 🖼️ **Direct Image Uploads**: Need to give the AI visual context? Tap the "Upload Image" button on your phone, select a photo, and it is instantly uploaded to an ephemeral secure container directory (`/tmp/uploads`) and the path is automatically typed into your terminal prompt.
 - 🔒 **Deep & Secure Integration**: Automatically bridges the AI with your Home Assistant Supervisor Token in a secure sandbox.
 - 🎨 **Beautiful Aesthetics**: Complete with a dynamic mesh-gradient footer that feels right at home on modern devices.
+
+---
+
+## ⚠️ Important: Multi-Session Concurrency
+
+When using the **Dynamic Multi-Session Tabs**, you will have multiple AI agents running simultaneously. 
+**Avoid catastrophic file conflicts** by following this golden rule: **Do not ask two different sessions to edit the exact same file (e.g., `automations.yaml`) at the same time.** 
+
+The AI does not natively use file locks. If Session 1 and Session 2 write to the same file simultaneously, they will create a race condition and overwrite each other's work. 
+**Best Practice**: Use different tabs for entirely different files or projects (e.g., Tab 1 for `configuration.yaml`, Tab 2 for `python_scripts/`).
+
+*Tip: If you absolutely need concurrency safety, you can instruct the agent in your prompt to "check if `.filename.lock` exists before editing, and create it while working", acting as a human-enforced semaphore.*
+
+### ⚠️ Disclaimer
+**Use at your own risk.** The authors of this add-on are not responsible for any damage, data loss, or system instability caused by the AI agents. Vibecoding with multiple autonomous agents concurrently is inherently dangerous if they are not properly isolated. It can lead to catastrophic file corruption or system misconfigurations if multiple agents attempt to modify the same configurations simultaneously without locking. **You are fully responsible for the actions the AI takes on your system.**
 
 ---
 
@@ -44,10 +61,11 @@ Since this is a custom Home Assistant Add-on, you need to add this repository to
 3. Click on the **Antigravity CLI** add-on and click **Install**.
 
 ### Step 3: Configuration & Start
-1. Once installed, toggle on **Show in sidebar** for easy access.
-2. Click **Start**.
-3. *Optional*: Check the **Log** tab to ensure the add-on started correctly.
-4. Click on the **Antigravity** icon in your sidebar to open the terminal.
+1. *(Optional)* Go to the **Configuration** tab to enter your `telegram_bot_token` and `telegram_chat_id` if you want to use the Telegram integration.
+2. Once installed, toggle on **Show in sidebar** for easy access.
+3. Click **Start**.
+4. Check the **Log** tab to ensure the add-on started correctly.
+5. Click on the **Antigravity** icon in your sidebar to open the terminal.
 
 ---
 
