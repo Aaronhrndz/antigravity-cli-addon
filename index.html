@@ -574,6 +574,11 @@
       }
     });
 
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      toggleContextMenu(e);
+    });
+
     let notifTimeout;
     function showNotification(text) {
       const notif = document.getElementById('notification');
