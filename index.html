@@ -188,6 +188,17 @@
           if (viewport && screen) {
             clearInterval(interval);
             
+            // Hide any ttyd resize banners via CSS just to be absolutely sure
+            const style = iframeDoc.createElement('style');
+            style.textContent = `
+              #overlay, .ttyd-overlay, .xterm-overlay, div[class*="overlay"] { 
+                display: none !important; 
+                opacity: 0 !important;
+                visibility: hidden !important;
+              }
+            `;
+            iframeDoc.head.appendChild(style);
+            
             const FRICTION = 0.97;
             const MIN_VELOCITY = 0.1;
             
