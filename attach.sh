@@ -1,11 +1,7 @@
 #!/bin/bash
 SESSION_ID=${1:-1}
-echo "[DEBUG] attach.sh called with args: '$@' => SESSION_ID=$SESSION_ID"
 
-# If session log exists, print it so xterm.js gets the scrollback history
-if [ -f /data/session_${SESSION_ID}.log ]; then
-    cat /data/session_${SESSION_ID}.log
-fi
-
-# Attach to the running dtach session, or create it if it doesn't exist
-exec dtach -A /tmp/agy_${SESSION_ID}.socket script -q -f -a /data/session_${SESSION_ID}.log -c "/usr/local/bin/agy"
+# Attach to existing session or create a new one with agy
+# dtach -A: attach if socket exists, create if not
+# dtach -r winch: force terminal redraw on re-attach
+exec dtach -A /tmp/agy_${SESSION_ID}.socket -r winch /usr/local/bin/agy

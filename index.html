@@ -750,9 +750,12 @@
               if (viewport && wasAtBottom) viewport.scrollTop = viewport.scrollHeight;
             };
             
+            // Only enable auto-scroll after initial render settles (for mobile keyboard close)
+            setTimeout(() => { wasAtBottom = true; }, 2000);
+            
             iframeWin.addEventListener('resize', () => {
               if (wasAtBottom) {
-                [10, 50, 150, 300, 500].forEach(delay => setTimeout(scrollToBottom, delay));
+                [10, 50, 150].forEach(delay => setTimeout(scrollToBottom, delay));
               }
             });
             
