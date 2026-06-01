@@ -21,9 +21,31 @@ if not TOKEN or not CHAT_ID:
 # We use pexpect to attach to the dtach socket
 child = None
 
-def strip_ansi(text):
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    return ansi_escape.sub('', text)
+def clean_text(text):
+    # Remove standard ANSI escape sequences
+    text = re.sub(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '', text)
+    
+    # Process \r (carriage return) and \b (backspace) to emulate basic terminal behavior
+    final_lines = []
+    for line in text.split('\n'):
+        # Carriage return overwrites the line
+        parts = line.split('\r')
+        line = parts[-1]
+        
+        # Backspace removes previous character
+        while '\b' in line:
+            new_line = re.sub(r'[^\b]\b', '', line)
+            if new_line == line:
+                # If nothing changed, just strip leading \b
+                line = line.lstrip('\b')
+                break
+            line = new_line
+            
+        line = line.strip()
+        if line and line not in ['?', '>']:
+            final_lines.append(line)
+            
+    return '\n'.join(final_lines)
 
 def send_message(text, parse_mode="Markdown"):
     url = f"{API_URL}/sendMessage"
@@ -73,48 +95,31 @@ def download_file(url, dest_path):
 def pexpect_thread():
     global child
     # Telegram gets its own dedicated and isolated CLI session
-    # We pass NO_COLOR to avoid complex ANSI stripping issues
-    child = pexpect.spawn('/usr/local/bin/agy', env={"NO_COLOR": "1", **os.environ}, encoding='utf-8', dimensions=(50, 100))
+    child = pexpect.spawn('/usr/local/bin/agy', env={"NO_COLOR": "1", "TERM": "dumb", **os.environ}, encoding='utf-8', dimensions=(50, 100))
     
     buffer = ""
     last_typing_time = 0
     
     while True:
         try:
-            char = child.read(1)
-            if not char:
-                break
+            # Read in chunks, waiting up to 0.5s for more data
+            chunk = child.read_nonblocking(size=4096, timeout=0.5)
+            buffer += chunk
             
-            buffer += char
-            
-            # Send typing action every 3 seconds if buffer is accumulating
             current_time = time.time()
             if len(buffer) > 0 and current_time - last_typing_time > 3:
                 send_typing_action()
                 last_typing_time = current_time
-            
-            # Look for prompt indicators to flush the buffer
-            # Antigravity CLI typically uses '>' or '?' or 'Select an option'
-            if char in ['>', '?', '\n']:
-                # Basic heuristic to flush output
-                # We don't want to send single characters, we want blocks
-                # We will wait for a tiny timeout to see if more data comes
-                time.sleep(0.1)
                 
-                # Check if we have pending data to read using select or just a small timeout
-                import select
-                r, w, x = select.select([child], [], [], 0.1)
-                if not r:
-                    # No more data immediately available, flush buffer
-                    text = strip_ansi(buffer).strip()
-                    if text:
-                        # Avoid sending just prompt characters
-                        if text not in ['>', '?', '']:
-                            # Very basic markdown escaping
-                            text = text.replace('_', '\\_').replace('*', '\\*').replace('[', '\\[')
-                            send_message(f"```\n{text}\n```")
-                    buffer = ""
-                    
+        except pexpect.TIMEOUT:
+            # When output pauses for 0.5s, process and send the buffer if it has content
+            if buffer.strip():
+                clean = clean_text(buffer)
+                if clean:
+                    # Markdown escaping
+                    clean = clean.replace('_', '\\_').replace('*', '\\*').replace('[', '\\[')
+                    send_message(f"```\n{clean}\n```")
+                buffer = ""
         except pexpect.EOF:
             print("Pexpect EOF")
             break
