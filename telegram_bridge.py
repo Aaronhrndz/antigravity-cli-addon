@@ -42,7 +42,8 @@ def clean_text(text):
             line = new_line
             
         line = line.strip()
-        if line and line not in ['?', '>']:
+        # Filter out CLI prompts
+        if line and line not in ['?', '>'] and "For shortcuts" not in line:
             final_lines.append(line)
             
     return '\n'.join(final_lines)
@@ -119,9 +120,8 @@ def pexpect_thread():
                     # When output pauses for 1.0s, process and send the buffer if it has content
                     if buffer.strip():
                         clean = clean_text(buffer)
-                        # Filter out the empty CLI prompts to reduce noise in Telegram
-                        if clean and not clean.endswith("For shortcuts"):
-                            # We send as plain native text (no code block, no markdown escaping needed)
+                        if clean:
+                            # We send as plain native text
                             send_message(clean)
                         buffer = ""
                 except pexpect.EOF:
