@@ -18,7 +18,7 @@ What makes this add-on special is its **zero-friction mobile experience**. You c
 
 - 📱 **Built for Mobile Vibecoding**: A distraction-free UI wrapper around `ttyd` completely tailored for touch screens. Say goodbye to wonky scrolling, weird keyboard overlays, or unreadable text.
 - 🗂️ **Dynamic Multi-Session Tabs**: Want to work on your Python scripts and your Lovelace dashboards at the same time? Click the `+` button in the top tab bar to dynamically spawn new AI sessions. You can switch between them instantly without losing context, and close (`x`) the ones you don't need to instantly free up memory.
-- 🤖 **Telegram Bot Integration**: A completely native, highly-advanced Telegram bridge is included. Configure your Telegram bot credentials in the add-on config and you can chat with the AI from anywhere in the world. It synchronizes automatically with *Session 1*, shows real-time "Typing..." indicators when the AI is thinking, and even accepts image uploads directly from Telegram chat!
+- 🤖 **MCP Domotics Integration**: Automatically connects the AI agent to your home using Model Context Protocol (MCP). It can talk directly to Home Assistant and Zigbee2MQTT to control your lights, read sensors, and execute scripts using natural language.
 - 🔄 **Seamless Device Transitions**: Powered by `dtach`, your terminal sessions remain persistent. You can start a process on your PC, switch to your tablet, and open it on your phone without losing your command history or interrupting running tasks.
 - ⌨️ **Mobile-Optimized Macros & Controls**: Features a built-in virtual keypad specifically designed for terminal usage on mobile:
   - **High-Precision D-Pad**: Vectorized SVG arrow keys that render perfectly centered on any iOS or Android device.
@@ -61,11 +61,33 @@ Since this is a custom Home Assistant Add-on, you need to add this repository to
 3. Click on the **Antigravity CLI** add-on and click **Install**.
 
 ### Step 3: Configuration & Start
-1. *(Optional)* Go to the **Configuration** tab to enter your `telegram_bot_token` and `telegram_chat_id` if you want to use the Telegram integration.
+1. Go to the **Configuration** tab to enter your integration credentials (see the Configuration Guide below).
 2. Once installed, toggle on **Show in sidebar** for easy access.
 3. Click **Start**.
 4. Check the **Log** tab to ensure the add-on started correctly.
 5. Click on the **Antigravity** icon in your sidebar to open the terminal.
+
+---
+
+## ⚙️ Configuration Guide
+
+To allow the AI to interact with your smart home, you must configure the following fields in the Add-on's **Configuration** tab before starting it:
+
+### Home Assistant Integration
+- `ha_token`: **(Required)** Your Long-Lived Access Token. 
+  - *How to get it:* Go to your Home Assistant Profile (bottom left corner) > Security > Long-Lived Access Tokens > Create Token. 
+  - *Example:* `eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp...`
+
+### Zigbee2MQTT Integration
+These fields are used to connect the AI directly to your Zigbee network.
+- `mqtt_host`: The IP address or hostname of your MQTT Broker.
+  - *Example:* `core-mosquitto` (if you use the official HA Add-on) or `192.168.1.100`.
+- `mqtt_port`: The port of your MQTT Broker.
+  - *Example:* `1883`
+- `mqtt_user`: Your MQTT username.
+  - *Example:* `homeassistant`
+- `mqtt_pass`: Your MQTT password.
+  - *Example:* `my_secure_password`
 
 ---
 
