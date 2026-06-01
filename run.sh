@@ -50,5 +50,15 @@ dtach -n /tmp/agy.socket script -q -f -a /data/session.log -c "/usr/local/bin/ag
 # Using disableResizeOverlay=true removes the annoying 100x40 banner
 ttyd -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t "theme={'background': '#000000'}" -p 8098 /opt/antigravity/attach.sh &
 
+# Check and start Telegram Bridge
+TELEGRAM_TOKEN=$(jq -r '.telegram_bot_token // empty' /data/options.json)
+TELEGRAM_CHAT_ID=$(jq -r '.telegram_chat_id // empty' /data/options.json)
+if [ -n "$TELEGRAM_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+    echo "Starting Telegram Bridge..."
+    export TELEGRAM_BOT_TOKEN="$TELEGRAM_TOKEN"
+    export TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
+    python3 /opt/antigravity/telegram_bridge.py &
+fi
+
 echo "Starting NGINX reverse proxy on port 8099..."
 exec nginx -c /etc/nginx/nginx.conf -g "daemon off;"

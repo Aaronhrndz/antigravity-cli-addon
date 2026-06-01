@@ -1,6 +1,6 @@
 name: "Antigravity CLI"
 description: "AI Agent with total control over domotics via Home Assistant Supervisor API"
-version: "1.4.0"
+version: "1.4.1"
 slug: "antigravity_cli"
 panel_icon: "mdi:triangle"
 panel_title: "Antigravity"
@@ -23,5 +23,9 @@ logo: true
 map:
   - config:rw
   - share:rw
-options: {}
-schema: {}
+options:
+  telegram_bot_token: ""
+  telegram_chat_id: ""
+schema:
+  telegram_bot_token: "str?"
+  telegram_chat_id: "str?"

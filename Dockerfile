@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl bash ttyd dtach jq git nano ca-certificates lrzsz nginx python3 && \
+    curl bash ttyd dtach jq git nano ca-certificates lrzsz nginx python3 python3-pexpect && \
     rm -rf /var/lib/apt/lists/*
 
 # Setup UI wrapper directories
@@ -14,7 +14,8 @@ COPY upload.py /opt/antigravity/upload.py
 COPY index.html /opt/antigravity/html/index.html
 COPY logo.png /opt/antigravity/html/logo.png
 COPY attach.sh /opt/antigravity/attach.sh
-RUN chmod +x /opt/antigravity/attach.sh
+COPY telegram_bridge.py /opt/antigravity/telegram_bridge.py
+RUN chmod +x /opt/antigravity/attach.sh /opt/antigravity/telegram_bridge.py
 
 # Set HOME for persistence and default directory
 ENV HOME=/data
