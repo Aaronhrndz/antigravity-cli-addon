@@ -110,11 +110,11 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
                 capturing = False
                 for line in lines:
                     line = line.strip()
-                    if "https://accounts.google.com/o/oauth2" in line:
+                    if "https://" in line and ("accounts.google.com" in line or "oauth2" in line or "google" in line) and len(line) > 20:
                         url_lines.append(line)
                         capturing = True
                     elif capturing:
-                        if line and not line.startswith("If you aren't") and not line.startswith("authorization") and ("=" in line or "&" in line or len(line) > 20):
+                        if line and not line.startswith("If you aren't") and not line.startswith("authorization") and not " " in line:
                             url_lines.append(line)
                         else:
                             break
