@@ -94,40 +94,6 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
                 'latest': latest
             }).encode())
             
-        elif parsed_path.path == '/get_login_url':
-            query = parse_qs(parsed_path.query)
-            session_id = query.get('session_id', ['1'])[0]
-            url = ""
-            try:
-                import subprocess
-                # Capture the current tmux screen
-                res = subprocess.run(["tmux", "capture-pane", "-t", f"agy_{session_id}", "-p"], capture_output=True, text=True)
-                screen_text = res.stdout
-                
-                # Search for wrapped Google login URL
-                lines = screen_text.split('\n')
-                url_lines = []
-                capturing = False
-                for line in lines:
-                    line = line.strip()
-                    if "https://" in line and ("accounts.google.com" in line or "oauth2" in line or "google" in line) and len(line) > 20:
-                        url_lines.append(line)
-                        capturing = True
-                    elif capturing:
-                        if line and not line.startswith("If you aren't") and not line.startswith("authorization") and not " " in line:
-                            url_lines.append(line)
-                        else:
-                            break
-                if url_lines:
-                    url = "".join(url_lines)
-            except Exception as e:
-                pass
-                
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({'url': url}).encode())
-            
         elif parsed_path.path == '/update_cli':
             import subprocess
             try:

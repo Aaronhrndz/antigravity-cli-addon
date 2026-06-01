@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.7
+- Reverted the Google Login URL capture and banner functionality as requested by the user.
+
 ## 1.7.6
 - Added a dedicated Login button to the bottom navigation bar to avoid text selection issues.
 
