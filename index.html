@@ -281,7 +281,7 @@
 
   <script>
     // Tab Management
-    let sessions = JSON.parse(localStorage.getItem('agy_sessions')) || [{id: 1, name: 'Sesión 1'}];
+    let sessions = JSON.parse(localStorage.getItem('agy_sessions')) || [{id: 1, name: 'Session 1'}];
     let currentSessionId = localStorage.getItem('agy_current_session') ? parseInt(localStorage.getItem('agy_current_session')) : sessions[0].id;
     if (!sessions.find(s => s.id === currentSessionId)) currentSessionId = sessions[0].id;
 
@@ -300,7 +300,7 @@
     window.createSession = function() {
       const maxId = sessions.reduce((max, s) => Math.max(max, s.id), 0);
       const newId = maxId + 1;
-      sessions.push({id: newId, name: 'Sesión ' + newId});
+      sessions.push({id: newId, name: 'Session ' + newId});
       switchSession(newId);
     };
 
