@@ -37,6 +37,37 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(b'{"error": "No file uploaded"}')
+        elif self.path == '/import_backup':
+            form = cgi.FieldStorage(
+                fp=self.rfile,
+                headers=self.headers,
+                environ={'REQUEST_METHOD': 'POST',
+                         'CONTENT_TYPE': self.headers['Content-Type'],
+                         }
+            )
+            fileitem = form['file']
+            if fileitem.filename:
+                import subprocess
+                filepath = "/tmp/import_backup.tar.gz"
+                with open(filepath, 'wb') as f:
+                    f.write(fileitem.file.read())
+                
+                # Extract to root preserving directory structure (root/.gemini and data/)
+                result = subprocess.run(["tar", "-xzf", filepath, "-C", "/"], capture_output=True)
+                if result.returncode == 0:
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(b'{"status": "success"}')
+                else:
+                    self.send_response(500)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'error': result.stderr.decode()}).encode())
+            else:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'{"error": "No file uploaded"}')
         else:
             self.send_response(404)
             self.end_headers()
@@ -107,6 +138,35 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(b'{"status": "error"}')
+        elif parsed_path.path == '/export_backup':
+            import subprocess, os
+            backup_file = "/tmp/antigravity_backup.tar.gz"
+            if os.path.exists(backup_file):
+                os.remove(backup_file)
+            
+            targets = []
+            if os.path.exists("/root/.gemini"): targets.append("root/.gemini")
+            if os.path.exists("/data"): targets.append("data")
+            if os.path.exists("/config/.gemini"): targets.append("config/.gemini")
+            
+            if targets:
+                # Create tar archive
+                subprocess.run(["tar", "-czf", backup_file, "-C", "/"] + targets, capture_output=True)
+                
+                with open(backup_file, "rb") as f:
+                    file_data = f.read()
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/gzip')
+                self.send_header('Content-Disposition', 'attachment; filename="antigravity_backup.tar.gz"')
+                self.send_header('Content-Length', str(len(file_data)))
+                self.end_headers()
+                self.wfile.write(file_data)
+            else:
+                self.send_response(404)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(b'{"error": "Nothing to backup"}')
         else:
             self.send_response(404)
             self.end_headers()
