@@ -188,12 +188,11 @@
           if (viewport && screen) {
             clearInterval(interval);
             
-            // Hide the ttyd resize banner. It doesn't have a class or ID, 
-            // but it has a specific inline style we can target.
+            // Hide the ttyd resize banner. In the Ubuntu 22.04 version of ttyd,
+            // the overlay is an unclassed div appended to the .xterm container.
             const style = iframeDoc.createElement('style');
             style.textContent = `
-              .xterm > div[style*="border-radius: 15px"],
-              .xterm > div[style*="font-size: xx-large"] { 
+              .xterm > div:not([class]) { 
                 display: none !important; 
                 opacity: 0 !important;
                 visibility: hidden !important;
