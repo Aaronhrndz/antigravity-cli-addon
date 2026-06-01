@@ -199,6 +199,8 @@
       <button class="tool-btn" data-key="ArrowRight" data-code="39" style="padding: 0;">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
       </button>
+      <button class="tool-btn" data-cmd="/new" style="width: auto; padding: 0 6px; margin-left: 16px; font-weight: bold; font-size: 13px; font-family: monospace;">/new</button>
+      <button class="tool-btn" data-cmd="/model" style="width: auto; padding: 0 6px; font-weight: bold; font-size: 13px; font-family: monospace;">/mod</button>
     </div>
     
     <div class="footer-right">
@@ -283,20 +285,33 @@
         document.querySelectorAll('.tool-btn').forEach(btn => {
           const handler = (e) => {
             e.preventDefault(); // Keep focus on iframe
+            
+            const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
+            if (!target) return;
+
+            const cmd = btn.getAttribute('data-cmd');
+            if (cmd) {
+              const dt = new DataTransfer();
+              dt.setData('text/plain', cmd + '\n');
+              target.dispatchEvent(new ClipboardEvent('paste', {
+                  clipboardData: dt,
+                  bubbles: true,
+                  cancelable: true
+              }));
+              return;
+            }
+
             const key = btn.getAttribute('data-key');
             const code = parseInt(btn.getAttribute('data-code'));
             const isCtrl = btn.getAttribute('data-ctrl') === 'true';
             
-            const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
-            if (target) {
-              target.dispatchEvent(new KeyboardEvent('keydown', {
-                key: key,
-                code: key, // For simplicity using key as code
-                keyCode: code,
-                ctrlKey: isCtrl,
-                bubbles: true
-              }));
-            }
+            target.dispatchEvent(new KeyboardEvent('keydown', {
+              key: key,
+              code: key, // For simplicity using key as code
+              keyCode: code,
+              ctrlKey: isCtrl,
+              bubbles: true
+            }));
           };
           btn.addEventListener('touchstart', handler, { passive: false });
           btn.addEventListener('mousedown', handler);
