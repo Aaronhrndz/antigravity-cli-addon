@@ -185,20 +185,38 @@
         const interval = setInterval(() => {
           const viewport = iframeDoc.querySelector('.xterm-viewport');
           const screen = iframeDoc.querySelector('.xterm-screen');
-          if (viewport && screen) {
-            clearInterval(interval);
+            // Auto-hide resize banners and auto-reconnect on disconnect.
+            // ttyd creates unclassed DIVs for overlays (resize banner, disconnect notice).
+            // We observe the DOM, hide the resize banner, and simulate 'Enter' if disconnected.
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                  if (node.nodeType === 1 && node.tagName === 'DIV' && !node.className) {
+                    const text = node.textContent || '';
+                    if (text.match(/^\d+x\d+$/)) {
+                      // It's a resize overlay (e.g. "80x24"), hide it instantly
+                      node.style.display = 'none';
+                    } else if (text.includes('Reconnect') || text.includes('Closed')) {
+                      // Connection dropped (e.g. mobile browser slept). Hide notice & reconnect.
+                      node.style.display = 'none';
+                      setTimeout(() => {
+                        const textarea = iframeDoc.querySelector('.xterm-helper-textarea');
+                        if (textarea) {
+                          textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+                        } else {
+                          screen.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+                        }
+                      }, 500);
+                    }
+                  }
+                });
+              });
+            });
             
-            // Hide the ttyd resize banner. In the Ubuntu 22.04 version of ttyd,
-            // the overlay is an unclassed div appended to the .xterm container.
-            const style = iframeDoc.createElement('style');
-            style.textContent = `
-              .xterm > div:not([class]) { 
-                display: none !important; 
-                opacity: 0 !important;
-                visibility: hidden !important;
-              }
-            `;
-            iframeDoc.head.appendChild(style);
+            const xtermContainer = iframeDoc.querySelector('.xterm');
+            if (xtermContainer) {
+              observer.observe(xtermContainer, { childList: true });
+            }
             
             const FRICTION = 0.97;
             const MIN_VELOCITY = 0.1;
