@@ -1,106 +1,49 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Aaronhrndz/antigravity-cli-addon/main/logo.png" alt="Antigravity Logo" width="120"/>
+# Antigravity CLI - Home Assistant Add-on
 
-  # Antigravity CLI Add-on for Home Assistant
-  
-  **The ultimate AI agent terminal designed for seamless vibecoding across any device.**
-</div>
+![Antigravity Logo](https://raw.githubusercontent.com/Aaronhrndz/antigravity-cli-addon/main/logo.png)
 
-<br/>
+Antigravity CLI is an advanced AI Agent environment packed into a native Home Assistant Add-on. It provides total control over your domotics, configurations, and systems through the Home Assistant Supervisor API directly from a powerful web-based terminal interface.
 
-Antigravity CLI Add-on integrates a powerful AI agent directly into your Home Assistant environment. With deep access to the Home Assistant Supervisor API and your domotics, this terminal acts as your central command for writing code, executing tasks, and managing your smart home.
+## Features
 
-What makes this add-on special is its **zero-friction mobile experience**. You can start coding a complex project on your PC, grab your phone, and seamlessly continue vibecoding on the couch with a custom mobile-first UI.
+- **Web-based Terminal**: Powered by `ttyd`, giving you a fully featured terminal directly within the Home Assistant UI via Ingress.
+- **Session Persistence**: Built on top of `tmux` to guarantee that your agent's processes, sessions, and screen layouts are preserved even if you close the browser tab.
+- **Multi-Tab Support**: Run multiple isolated AI sessions or environments concurrently with a slick, Chrome-like tabbed UI.
+- **Vibecoding Optimized UI**: A mobile-first, responsive custom interface overlaid on the terminal that includes macro buttons (`/resume`, `/new`, `/quota`) and quick keyboard shortcuts (`Ctrl+C`, `Ctrl+V`, `Ctrl+Z`) to operate flawlessly on touch screens.
+- **Native MCP Integration**: Dynamically generates `mcp.json` to expose the Home Assistant and Zigbee2MQTT ecosystems directly to the AI, giving it immediate context of your house.
+- **File Uploads**: Drag and drop images or files into the terminal window to upload them to the ephemeral storage, automatically pasting their paths into the prompt.
+- **Smooth Mobile Scrolling**: Features a custom momentum physics engine providing 120Hz-smooth scrolling on mobile devices without relying on native scrollbars that break the terminal view.
+- **One-Click Updates**: Embedded updater banner that alerts you of new versions and installs them with a single click inside the terminal overlay.
 
----
+## Installation
 
-## ✨ Key Features
+1. Navigate to **Settings > Add-ons > Add-on Store** in your Home Assistant instance.
+2. Click the 3 dots in the top right corner and select **Repositories**.
+3. Add this repository URL: `https://github.com/Aaronhrndz/antigravity-cli-addon`
+4. Find **Antigravity CLI** in the store and click **Install**.
+5. Go to the Configuration tab and verify the settings (MQTT, tokens, etc.).
+6. Click **Start**.
+7. Click **Open Web UI** or check the "Show in sidebar" option for easy access.
 
-- 📱 **Built for Mobile Vibecoding**: A distraction-free UI wrapper around `ttyd` completely tailored for touch screens. Say goodbye to wonky scrolling, weird keyboard overlays, or unreadable text.
-- 🗂️ **Dynamic Multi-Session Tabs**: Want to work on your Python scripts and your Lovelace dashboards at the same time? Click the `+` button in the top tab bar to dynamically spawn new AI sessions. You can switch between them instantly without losing context, and close (`x`) the ones you don't need to instantly free up memory.
-- 🤖 **MCP Domotics Integration**: Automatically connects the AI agent to your home using Model Context Protocol (MCP). It can talk directly to Home Assistant and Zigbee2MQTT to control your lights, read sensors, and execute scripts using natural language.
-- 🔄 **Seamless Device Transitions**: Powered by `dtach`, your terminal sessions remain persistent. You can start a process on your PC, switch to your tablet, and open it on your phone without losing your command history or interrupting running tasks.
-- ⌨️ **Mobile-Optimized Macros & Controls**: Features a built-in virtual keypad specifically designed for terminal usage on mobile:
-  - **High-Precision D-Pad**: Vectorized SVG arrow keys that render perfectly centered on any iOS or Android device.
-  - **Terminal Essentials**: Dedicated `Esc` and `Tab` keys.
-  - **Macro Actions**: Instantly execute common commands like `/new` (new chat) and `/quota` (check usage) with a single tap.
-  - **Smart Login Button**: A dedicated login button appears in the bottom navigation bar when authentication is required, bypassing the need to copy text from the terminal.
-- 🖼️ **Direct Image Uploads**: Need to give the AI visual context? Tap the "Upload Image" button on your phone, select a photo, and it is instantly uploaded to an ephemeral secure container directory (`/tmp/uploads`) and the path is automatically typed into your terminal prompt.
-- 🔒 **Deep & Secure Integration**: Automatically bridges the AI with your Home Assistant Supervisor Token in a secure sandbox.
-- 🎨 **Beautiful Aesthetics**: Complete with a dynamic mesh-gradient footer that feels right at home on modern devices.
+## Configuration
 
----
+The add-on requires minimal configuration. Most values can be left as default:
 
-## ⚠️ Important: Multi-Session Concurrency
+- `ha_token`: (Optional) Long-lived access token for Home Assistant API. If left empty, it will use the Supervisor's internal token automatically.
+- `mqtt_host`: Your MQTT broker host (defaults to `core-mosquitto`).
+- `mqtt_port`: MQTT port (defaults to `1883`).
+- `mqtt_user`: MQTT username (defaults to `addons`).
+- `mqtt_pass`: MQTT password.
 
-When using the **Dynamic Multi-Session Tabs**, you will have multiple AI agents running simultaneously. 
-**Avoid catastrophic file conflicts** by following this golden rule: **Do not ask two different sessions to edit the exact same file (e.g., `automations.yaml`) at the same time.** 
+*These variables are injected securely into the container and fed into the AI's MCP configuration.*
 
-The AI does not natively use file locks. If Session 1 and Session 2 write to the same file simultaneously, they will create a race condition and overwrite each other's work. 
-**Best Practice**: Use different tabs for entirely different files or projects (e.g., Tab 1 for `configuration.yaml`, Tab 2 for `python_scripts/`).
+## Keyboard Shortcuts & Mobile Controls
 
-*Tip: If you absolutely need concurrency safety, you can instruct the agent in your prompt to "check if `.filename.lock` exists before editing, and create it while working", acting as a human-enforced semaphore.*
+The custom web UI includes a footer designed for quick interactions:
+- **Logo Button**: Toggles the advanced keyboard shortcuts grid (Arrows, F-keys, Home, End).
+- **COPY / PASTE**: Dedicated visual badges to indicate quick copy/paste shortcuts. Note: On mobile devices, right-clicking (long press) is natively passed to the terminal to avoid interfering with the browser's context menu.
+- **Tab & Esc**: Dedicated buttons in the center of the screen to quickly send Tab completions and Escape characters to the CLI.
 
-### ⚠️ Disclaimer
-**Use at your own risk.** The authors of this add-on are not responsible for any damage, data loss, or system instability caused by the AI agents. Vibecoding with multiple autonomous agents concurrently is inherently dangerous if they are not properly isolated. It can lead to catastrophic file corruption or system misconfigurations if multiple agents attempt to modify the same configurations simultaneously without locking. **You are fully responsible for the actions the AI takes on your system.**
+## License
 
----
-
-## 🚀 Installation Guide
-
-Since this is a custom Home Assistant Add-on, you need to add this repository to your Supervisor.
-
-### Step 1: Add the Repository
-1. Open your Home Assistant web interface.
-2. Navigate to **Settings** > **Add-ons** > **Add-on Store** (bottom right button).
-3. Click the three dots (⋮) in the top right corner and select **Repositories**.
-4. Paste the URL of this GitHub repository and click **Add**.
-
-### Step 2: Install the Add-on
-1. Close the Repositories modal.
-2. Scroll down to find the newly added **Antigravity CLI** section, or search for it.
-3. Click on the **Antigravity CLI** add-on and click **Install**.
-
-### Step 3: Configuration & Start
-1. Go to the **Configuration** tab to enter your integration credentials (see the Configuration Guide below).
-2. Once installed, toggle on **Show in sidebar** for easy access.
-3. Click **Start**.
-4. Check the **Log** tab to ensure the add-on started correctly.
-5. Click on the **Antigravity** icon in your sidebar to open the terminal.
-
----
-
-## ⚙️ Configuration Guide
-
-To allow the AI to interact with your smart home, you must configure the following fields in the Add-on's **Configuration** tab before starting it:
-
-### Home Assistant Integration
-- `ha_token`: **(Required)** Your Long-Lived Access Token. 
-  - *How to get it:* Go to your Home Assistant Profile (bottom left corner) > Security > Long-Lived Access Tokens > Create Token. 
-  - *Example:* `eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp...`
-
-### Zigbee2MQTT Integration
-These fields are used to connect the AI directly to your Zigbee network.
-- `mqtt_host`: The IP address or hostname of your MQTT Broker.
-  - *Example:* `core-mosquitto` (if you use the official HA Add-on) or `192.168.1.100`.
-- `mqtt_port`: The port of your MQTT Broker.
-  - *Example:* `1883`
-- `mqtt_user`: Your MQTT username.
-  - *Example:* `homeassistant`
-- `mqtt_pass`: Your MQTT password.
-  - *Example:* `my_secure_password`
-
----
-
-## 🛡️ Security & Privacy
-
-This add-on is designed with security in mind:
-- **No Path Traversal**: Image uploads are strictly sanitized (`os.path.basename`) and securely stored in an ephemeral, non-persistent `/tmp/uploads` directory.
-- **Auto-Purging**: The upload directory is automatically wiped every time the add-on restarts to prevent storage bloat and ensure privacy.
-- **Sandboxed Execution**: Runs fully inside the Home Assistant Docker supervisor ecosystem.
-
----
-
-<div align="center">
-  <i>Supercharge your smart home with AI-driven vibecoding.</i>
-</div>
+This project is licensed under the MIT License.
