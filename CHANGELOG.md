@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.0]
+- feat: Full Backup and Restore system with blurred UI modals
+- feat: Streaming tar export and import to prevent RAM/disk exhaustion
+- feat: Add Wiki and Documentation architecture
+- fix: Correct touch physics and UI button scaling
+- fix: Remove contextMenu blocks preventing proper desktop interaction
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
 ## [1.7.8]
