@@ -940,7 +940,7 @@
     }
 
     async function exportBackup() {
-      if (contextMenuOpen) toggleContextMenu();
+      document.getElementById('extra-keys-menu').classList.remove('show');
       showLoader("Exporting Config... Please wait");
       
       try {
@@ -969,7 +969,7 @@
     async function importBackup(event) {
       const file = event.target.files[0];
       if (!file) return;
-      if (contextMenuOpen) toggleContextMenu();
+      document.getElementById('extra-keys-menu').classList.remove('show');
       
       const proceed = confirm("Are you sure? This will overwrite your current Antigravity agent memory, conversations, and Home Assistant add-on configurations.");
       if (!proceed) {
