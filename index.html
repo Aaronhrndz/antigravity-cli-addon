@@ -1007,7 +1007,7 @@
         }
         
         updateProgress(100, "Extracting and Restarting...");
-        alert('Backup Restored Successfully!\n\nPlease go to the Home Assistant Supervisor panel and RESTART the Antigravity CLI Add-on for the memory and configurations to load properly.');
+        alert('Backup Restored Successfully!\n\nThe Add-on will now restart automatically to load your memory and configurations. Please wait a few seconds and refresh the page if it does not reload by itself.');
       } catch (err) {
         alert('Import Failed: ' + err.message);
       } finally {
