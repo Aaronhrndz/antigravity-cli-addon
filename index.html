@@ -952,41 +952,16 @@
       document.getElementById('extra-keys-menu').classList.remove('show');
       showLoader("Preparing Export...", false);
       
-      try {
-        const res = await fetch('export_backup');
-        if (res.ok) {
-          const reader = res.body.getReader();
-          let receivedLength = 0;
-          let chunks = [];
-          
-          while(true) {
-            const {done, value} = await reader.read();
-            if (done) break;
-            chunks.push(value);
-            receivedLength += value.length;
-            
-            const mb = (receivedLength / 1024 / 1024).toFixed(1);
-            updateProgress(100, `Exporting Config... ${mb} MB`);
-          }
-          
-          const blob = new Blob(chunks);
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = url;
-          a.download = 'antigravity_backup.tar.gz';
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          a.remove();
-        } else {
-          alert('Export Failed: Server returned ' + res.status);
-        }
-      } catch (err) {
-        alert('Network error during export.');
-      } finally {
+      setTimeout(() => {
         hideLoader();
-      }
+      }, 3000); // Hide modal after 3 seconds, native browser download UI takes over
+      
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = 'export_backup';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
     }
 
     async function importBackup(event) {

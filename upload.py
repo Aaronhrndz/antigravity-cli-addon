@@ -27,7 +27,8 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
                 filename = os.path.basename(fileitem.filename)
                 filepath = os.path.join(UPLOAD_DIR, filename)
                 with open(filepath, 'wb') as f:
-                    f.write(fileitem.file.read())
+                    import shutil
+                    shutil.copyfileobj(fileitem.file, f)
                 
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
@@ -50,7 +51,8 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
                 import subprocess
                 filepath = "/tmp/import_backup.tar.gz"
                 with open(filepath, 'wb') as f:
-                    f.write(fileitem.file.read())
+                    import shutil
+                    shutil.copyfileobj(fileitem.file, f)
                 
                 # Extract to root preserving directory structure (root/.gemini and data/)
                 result = subprocess.run(["tar", "-xzf", filepath, "-C", "/"], capture_output=True)
