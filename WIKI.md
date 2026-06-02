@@ -21,13 +21,13 @@ This is a lightweight HTTP server (`http.server`) running alongside `ttyd`. It h
 - **Self-Updating:** Pulls the latest version from GitHub automatically via `/update_cli`.
 - **Backup & Restore System:**
   - `/export_backup`: Streams a `.tar.gz` archive of `root/.gemini`, `data/.gemini`, and `config/.gemini` directories directly to the network `stdout` to avoid RAM/disk exhaustion.
-  - `/import_backup`: Accepts an uploaded `.tar.gz` file, stops the AI agent process, wipes the current memory, extracts the backup, and reboots the agent.
+  - `/import_chunk`: Accepts chunked `.tar.gz` file uploads (10MB slices) to completely bypass Home Assistant's strict 16MB Ingress request body limit. Once the final chunk is received, it extracts the backup and uses the Supervisor API to restart the Add-on automatically.
 
 ### 3. NGINX Reverse Proxy (`nginx.conf`)
 NGINX acts as the gateway between Home Assistant Ingress and the internal services.
-- Ports: Listens on `8099`.
-- Routes `/ttyd/` to the internal `ttyd` daemon on port `7681`.
-- Routes all other traffic to the Python backend on port `8000`.
+- Ports: Listens on `62899` (a non-standard port to avoid `host_network` collisions).
+- Routes `/ttyd/` to the internal `ttyd` daemon on port `62898`.
+- Routes all other traffic to the Python backend on port `62897`.
 - **Cache-Busting:** Crucially configured with `add_header Cache-Control "no-store, no-cache...` on the root location to prevent Home Assistant Companion apps from caching `index.html` aggressively.
 
 ### 4. Startup Script (`run.sh`)
