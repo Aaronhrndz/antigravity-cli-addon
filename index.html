@@ -366,6 +366,11 @@
       </div>
     </div>
     <input type="file" id="import-file-input" accept=".tar.gz" style="display: none;" onchange="importBackup(event)">
+    <div id="loader-modal">
+      <div class="spinner"></div>
+      <div id="loader-text">Loading...</div>
+    </div>
+    
     <div class="footer-left" style="display: flex; align-items: center;">
       <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px; flex-shrink: 0;" onclick="toggleContextMenu(event)">
         <img src="logo.png" class="footer-logo" style="width: 24px; height: 24px; border-radius: 4px; pointer-events: none;" alt="Logo">
@@ -879,14 +884,47 @@
         console.error("Iframe access error:", err);
       }
     };
+    function showLoader(text) {
+      const modal = document.getElementById('loader-modal');
+      document.getElementById('loader-text').innerText = text;
+      modal.classList.add('show');
+    }
 
-    function exportBackup() {
-      window.location.href = 'export_backup';
+    function hideLoader() {
+      document.getElementById('loader-modal').classList.remove('show');
+    }
+
+    async function exportBackup() {
+      if (contextMenuOpen) toggleContextMenu();
+      showLoader("Exporting Config... Please wait");
+      
+      try {
+        const res = await fetch('export_backup');
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = 'antigravity_backup.tar.gz';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+        } else {
+          alert('Export Failed: Server returned ' + res.status);
+        }
+      } catch (err) {
+        alert('Network error during export.');
+      } finally {
+        hideLoader();
+      }
     }
 
     async function importBackup(event) {
       const file = event.target.files[0];
       if (!file) return;
+      if (contextMenuOpen) toggleContextMenu();
       
       const proceed = confirm("Are you sure? This will overwrite your current Antigravity agent memory, conversations, and Home Assistant add-on configurations.");
       if (!proceed) {
@@ -897,10 +935,7 @@
       const formData = new FormData();
       formData.append('file', file);
       
-      const notification = document.getElementById('notification');
-      notification.innerText = 'Restoring Backup... Please wait.';
-      notification.classList.add('show');
-      notification.style.background = '#856404';
+      showLoader("Restoring Config... Please wait");
       
       try {
         const res = await fetch('import_backup', {
@@ -909,25 +944,20 @@
         });
         
         if (res.ok) {
-          notification.innerText = 'Backup Restored! Add-on will reboot automatically.';
-          notification.style.background = '#155724';
-          alert('Backup Restored Successfully!\n\nThe Antigravity Add-on will now reboot automatically to apply your settings and memories. It will be back online in just a few seconds.');
+          hideLoader();
+          alert('Backup Restored Successfully!\n\nPlease go to the Home Assistant Supervisor panel and RESTART the Antigravity CLI Add-on for the memory and configurations to load properly.');
         } else {
           const err = await res.json();
-          notification.innerText = 'Import Failed: ' + (err.error || 'Unknown error');
-          notification.style.background = '#721c24';
+          alert('Import Failed: ' + (err.error || 'Unknown error'));
         }
       } catch (err) {
-        notification.innerText = 'Network error during import.';
-        notification.style.background = '#721c24';
+        alert('Network error during import.');
+      } finally {
+        hideLoader();
       }
       
       event.target.value = '';
-      setTimeout(() => { 
-        notification.classList.remove('show');
-        notification.style.background = '#333';
-      }, 10000);
-    }
+    } 
   </script>
 </body>
 </html>
