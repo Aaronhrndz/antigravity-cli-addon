@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.8.2]
+- feat: implement 100MB chunked multipart uploads to bypass Home Assistant Ingress timeout and memory limits for massive backups
+
+## [1.8.1]
+- fix: change internal proxy ports to 62897-62899 to avoid host_network conflicts
+- fix: remove nginx client_max_body_size limit for large backups
 ## [1.8.0]
 - feat: Full Backup and Restore system with blurred UI modals
 - feat: Streaming tar export and import to prevent RAM/disk exhaustion
