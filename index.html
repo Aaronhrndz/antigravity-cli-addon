@@ -371,8 +371,11 @@
 </head>
 <body>
   <div id="loader-modal">
-    <div class="spinner"></div>
+    <div class="spinner" id="loader-spinner"></div>
     <div id="loader-text">Loading...</div>
+    <div id="loader-progress-container" style="display: none; width: 250px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 15px; overflow: hidden;">
+      <div id="loader-progress-bar" style="height: 100%; width: 0%; background: #58a6ff; transition: width 0.1s linear;"></div>
+    </div>
   </div>
   <div id="tab-bar"></div>
   <div id="update-banner" style="display: none; background: #856404; color: #ffeeba; padding: 8px 12px; font-size: 13px; justify-content: space-between; align-items: center; border-bottom: 1px solid #664d03; flex-shrink: 0;">
@@ -927,10 +930,16 @@
         console.error("Iframe access error:", err);
       }
     };
-    function showLoader(text) {
-      const modal = document.getElementById('loader-modal');
+    function showLoader(text, showProgress = false) {
       document.getElementById('loader-text').innerText = text;
-      modal.classList.add('show');
+      document.getElementById('loader-progress-container').style.display = showProgress ? 'block' : 'none';
+      document.getElementById('loader-progress-bar').style.width = '0%';
+      document.getElementById('loader-modal').classList.add('show');
+    }
+
+    function updateProgress(percent, text) {
+      if (text) document.getElementById('loader-text').innerText = text;
+      document.getElementById('loader-progress-bar').style.width = percent + '%';
     }
 
     function hideLoader() {
@@ -941,12 +950,26 @@
 
     async function exportBackup() {
       document.getElementById('extra-keys-menu').classList.remove('show');
-      showLoader("Exporting Config... Please wait");
+      showLoader("Preparing Export...", true);
       
       try {
         const res = await fetch('export_backup');
         if (res.ok) {
-          const blob = await res.blob();
+          const reader = res.body.getReader();
+          let receivedLength = 0;
+          let chunks = [];
+          
+          while(true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            chunks.push(value);
+            receivedLength += value.length;
+            
+            const mb = (receivedLength / 1024 / 1024).toFixed(1);
+            updateProgress(100, `Exporting Config... ${mb} MB`);
+          }
+          
+          const blob = new Blob(chunks);
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.style.display = 'none';
@@ -980,27 +1003,39 @@
       const formData = new FormData();
       formData.append('file', file);
       
-      showLoader("Restoring Config... Please wait");
+      showLoader("Starting Restore...", true);
       
-      try {
-        const res = await fetch('import_backup', {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (res.ok) {
-          hideLoader();
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'import_backup', true);
+      
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          updateProgress(percent, `Uploading Backup... ${percent}%`);
+        }
+      };
+      
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          updateProgress(100, "Extracting and Restarting...");
           alert('Backup Restored Successfully!\n\nPlease go to the Home Assistant Supervisor panel and RESTART the Antigravity CLI Add-on for the memory and configurations to load properly.');
         } else {
-          const err = await res.json();
-          alert('Import Failed: ' + (err.error || 'Unknown error'));
+          try {
+             const err = JSON.parse(xhr.responseText);
+             alert('Import Failed: ' + (err.error || 'Unknown error'));
+          } catch(e) {
+             alert('Import Failed: Server returned ' + xhr.status);
+          }
         }
-      } catch (err) {
-        alert('Network error during import.');
-      } finally {
         hideLoader();
-      }
+      };
       
+      xhr.onerror = () => {
+        alert('Network error during import.');
+        hideLoader();
+      };
+      
+      xhr.send(formData);
       event.target.value = '';
     } 
   </script>
