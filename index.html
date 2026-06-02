@@ -181,6 +181,50 @@
       pointer-events: auto;
     }
 
+    /* Modal Overlay for loading states */
+    #loader-modal {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    #loader-modal.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #58a6ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    #loader-text {
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
     /* Tabs CSS */
     #tab-bar {
       display: flex;
@@ -327,6 +371,10 @@
   </style>
 </head>
 <body>
+  <div id="loader-modal">
+    <div class="spinner"></div>
+    <div id="loader-text">Loading...</div>
+  </div>
   <div id="tab-bar"></div>
   <div id="update-banner" style="display: none; background: #856404; color: #ffeeba; padding: 8px 12px; font-size: 13px; justify-content: space-between; align-items: center; border-bottom: 1px solid #664d03; flex-shrink: 0;">
     <span id="update-text">Update available!</span>
@@ -356,20 +404,16 @@
         <button class="tool-btn" data-key="PageUp" data-code="33">PgUp</button>
         <button class="tool-btn" data-key="PageDown" data-code="34">PgDn</button>
         <button class="tool-btn" onclick="exportBackup()" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 2;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Export</span>
-          <span>Config</span>
+          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Backup Config</span>
+          <span>Export</span>
         </button>
         <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 2;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Import</span>
-          <span>Config</span>
+          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Restore Config</span>
+          <span>Import</span>
         </button>
       </div>
     </div>
     <input type="file" id="import-file-input" accept=".tar.gz" style="display: none;" onchange="importBackup(event)">
-    <div id="loader-modal">
-      <div class="spinner"></div>
-      <div id="loader-text">Loading...</div>
-    </div>
     
     <div class="footer-left" style="display: flex; align-items: center;">
       <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px; flex-shrink: 0;" onclick="toggleContextMenu(event)">
