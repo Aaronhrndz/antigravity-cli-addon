@@ -78,7 +78,7 @@ fi
 export MCP_CONFIG_PATH=/homeassistant/mcp.json
 
 # Using disableResizeOverlay=true removes the annoying 100x40 banner
-ttyd -a -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t 'theme={"background": "#2b2b2b"}' -p 8098 /opt/antigravity/attach.sh &
+ttyd -a -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t 'theme={"background": "#2b2b2b"}' -p 62898 /opt/antigravity/attach.sh &
 
-echo "Starting NGINX reverse proxy on port 8099..."
+echo "Starting NGINX reverse proxy on port 62899..."
 exec nginx -c /etc/nginx/nginx.conf -g "daemon off;"

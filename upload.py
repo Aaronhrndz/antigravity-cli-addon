@@ -180,7 +180,7 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
 if __name__ == "__main__":
-    PORT = 8097
+    PORT = 62897
     print(f"Starting upload server on port {PORT}")
     with socketserver.TCPServer(("", PORT), UploadHandler) as httpd:
         httpd.serve_forever()
