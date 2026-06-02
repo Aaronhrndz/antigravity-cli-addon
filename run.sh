@@ -50,6 +50,7 @@ for log in /data/session_*.log; do
 done
 export COLORTERM=truecolor
 export TERM=xterm-256color
+export PAGER=cat
 
 # Run ttyd connected to the attach script
 # Generate mcp.json for Antigravity CLI

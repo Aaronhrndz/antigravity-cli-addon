@@ -923,16 +923,18 @@
               tracking = false; stop();
             }, { passive: false, capture: true });
             
-                          // Force scroll to bottom on load (as data streams in from ttyd)
+                                        const scrollToBottom = () => {
+                if (viewport) viewport.scrollTop = viewport.scrollHeight;
+              };
+
+              // Force scroll to bottom on load (as data streams in from ttyd)
               [100, 300, 600, 1000].forEach(delay => {
-                setTimeout(() => {
-                  if (viewport) viewport.scrollTop = viewport.scrollHeight;
-                }, delay);
+                setTimeout(scrollToBottom, delay);
               });
               
-              // Force scroll to bottom when window resizes (e.g., closing Android keyboard)
+              // Force scroll to bottom unconditionally when window resizes (e.g., closing Android keyboard)
               iframeWin.addEventListener('resize', () => {
-                [10, 50, 150, 300, 500].forEach(delay => { setTimeout(() => { if (viewport) viewport.scrollTop = viewport.scrollHeight; }, delay); });
+                [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
               });
           }
         }, 500);
