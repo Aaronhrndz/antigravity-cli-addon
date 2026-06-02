@@ -183,7 +183,7 @@
 
     /* Modal Overlay for loading states */
     #loader-modal {
-      position: absolute;
+      position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(8px);
@@ -195,7 +195,6 @@
       align-items: center;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
     }
     
     #loader-modal.show {
@@ -403,13 +402,13 @@
         <button class="tool-btn" data-key="End" data-code="35">End</button>
         <button class="tool-btn" data-key="PageUp" data-code="33">PgUp</button>
         <button class="tool-btn" data-key="PageDown" data-code="34">PgDn</button>
-        <button class="tool-btn" onclick="exportBackup()" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 2;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Backup Config</span>
-          <span>Export</span>
+        <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 2; padding: 6px;">
+          <span style="font-size: 14px; font-weight: bold;">Export</span>
+          <span style="font-size: 8px; color: #aaa; text-transform: uppercase;">Backup Config</span>
         </button>
-        <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 2;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Restore Config</span>
-          <span>Import</span>
+        <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 2; padding: 6px;">
+          <span style="font-size: 14px; font-weight: bold;">Import</span>
+          <span style="font-size: 8px; color: #aaa; text-transform: uppercase;">Restore Config</span>
         </button>
       </div>
     </div>
@@ -935,7 +934,9 @@
     }
 
     function hideLoader() {
-      document.getElementById('loader-modal').classList.remove('show');
+      setTimeout(() => {
+        document.getElementById('loader-modal').classList.remove('show');
+      }, 1000);
     }
 
     async function exportBackup() {
