@@ -950,7 +950,7 @@
 
     async function exportBackup() {
       document.getElementById('extra-keys-menu').classList.remove('show');
-      showLoader("Preparing Export...", true);
+      showLoader("Preparing Export...", false);
       
       try {
         const res = await fetch('export_backup');
