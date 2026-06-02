@@ -106,5 +106,5 @@ This add-on is designed with security in mind:
   <i>Supercharge your smart home with AI-driven vibecoding.</i>
 </div>
 
-## ?? Documentation
+## 📚 Documentation
 For detailed information about the internal architecture, UI design, and development workflows, please see the [Antigravity Wiki](WIKI.md).
