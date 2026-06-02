@@ -156,18 +156,18 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
             if os.path.exists("/config/.gemini"): targets.append("config/.gemini")
             
             if targets:
-                # Create tar archive
-                subprocess.run(["tar", "-czf", backup_file, "-C", "/"] + targets, capture_output=True)
-                
-                with open(backup_file, "rb") as f:
-                    file_data = f.read()
-                
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/gzip')
                 self.send_header('Content-Disposition', 'attachment; filename="antigravity_backup.tar.gz"')
-                self.send_header('Content-Length', str(len(file_data)))
                 self.end_headers()
-                self.wfile.write(file_data)
+                
+                # Stream tar directly to the network to prevent disk/RAM exhaustion
+                import subprocess
+                proc = subprocess.Popen(["tar", "-czf", "-", "-C", "/"] + targets, stdout=subprocess.PIPE)
+                import shutil
+                shutil.copyfileobj(proc.stdout, self.wfile)
+                proc.stdout.close()
+                proc.wait()
             else:
                 self.send_response(404)
                 self.send_header('Content-Type', 'application/json')
