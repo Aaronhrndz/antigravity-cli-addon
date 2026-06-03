@@ -1,0 +1,37 @@
+name: "Antigravity CLI (Lite)"
+description: "AI Agent for domotics via Home Assistant Core API"
+version: "1.8.7"
+slug: "antigravity_cli_lite"
+panel_icon: "mdi:triangle"
+panel_title: "Antigravity"
+arch:
+  - aarch64
+  - amd64
+  - armv7
+  - armhf
+  - i386
+init: false
+hassio_api: true
+homeassistant_api: true
+host_network: true
+ingress: true
+ingress_port: 62899
+panel_icon: mdi:triangle-outline
+icon: true
+logo: true
+map:
+  - config:rw
+  - share:rw
+options:
+  ha_token: ""
+  mqtt_host: "core-mosquitto"
+  mqtt_port: "1883"
+  mqtt_user: "addons"
+  mqtt_pass: ""
+schema:
+  ha_token: "str?"
+  mqtt_host: "str?"
+  mqtt_port: "str?"
+  mqtt_user: "str?"
+  mqtt_pass: "password?"
+

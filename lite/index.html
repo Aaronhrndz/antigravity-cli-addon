@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity CLI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background: #2b2b2b;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+    
+    #terminal-container {
+      flex: 1;
+      width: 100%;
+      position: relative;
+      background: #2b2b2b;
+    }
+    
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #2b2b2b;
+    }
+    
+    #footer {
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #141414;
+      border-top: none;
+      flex-shrink: 0;
+      box-shadow: none;
+      z-index: 10;
+    }
+    
+    .footer-left {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    
+    .footer-center {
+      display: flex;
+      gap: 4px;
+      flex: 0;
+      justify-content: center;
+    }
+    
+    .footer-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 1;
+    }
+
+    .tool-btn {
+      background: #2a2b2e;
+      border: none;
+      color: #9aa0a6;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      padding: 0;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    
+    .tool-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+    
+    .tool-btn:active {
+      background: rgba(255, 255, 255, 0.12);
+      transform: scale(0.92);
+    }
+    
+    #upload-btn {
+      background: #2a2b2e;
+      color: #9aa0a6;
+      border: none;
+      padding: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    
+    #upload-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+    
+    #upload-btn:active {
+      background: rgba(255, 255, 255, 0.12);
+      transform: scale(0.92);
+    }
+    
+    #upload-btn:disabled {
+      background: #1a1a1a;
+      color: #555555;
+      cursor: not-allowed;
+    }
+    
+    .context-menu {
+      position: absolute;
+      bottom: 60px;
+      left: 12px;
+      background: #141414;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.8);
+      display: none;
+      z-index: 100;
+      flex-direction: column;
+    }
+    
+    .context-menu.show {
+      display: flex;
+    }
+    
+    .context-menu-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    
+    .context-menu .tool-btn {
+      width: auto;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      background: #2a2b2e;
+      color: #e8eaed;
+    }
+    
+    /* Overlay that shows path to the user */
+    #notification {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f6feb;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 20;
+    }
+    
+    #notification.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Modal Overlay for loading states */
+    #loader-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    #loader-modal.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #58a6ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    #loader-text {
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    /* Tabs CSS */
+    #tab-bar {
+      display: flex;
+      background: #141414;
+      padding: 8px 8px 0 8px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    #tab-bar::-webkit-scrollbar { display: none; }
+    
+    .tab {
+      display: flex;
+      align-items: center;
+      background: transparent;
+      color: #9aa0a6;
+      padding: 8px 16px;
+      margin-right: 2px;
+      border-radius: 8px 8px 0 0;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .tab:hover:not(.active) {
+      background: #3c4043;
+    }
+    .tab.active {
+      background: #2b2b2b;
+      color: #ffffff;
+      z-index: 2;
+    }
+    .tab.active::before,
+    .tab.active::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+    }
+    .tab.active::before {
+      left: -12px;
+      border-bottom-right-radius: 12px;
+      box-shadow: 6px 6px 0 6px #2b2b2b;
+    }
+    .tab.active::after {
+      right: -12px;
+      border-bottom-left-radius: 12px;
+      box-shadow: -6px 6px 0 6px #2b2b2b;
+    }
+    .tab-close {
+      margin-left: 8px;
+      color: #9aa0a6;
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 50%;
+    }
+    .tab-close:hover { 
+      background: rgba(255, 255, 255, 0.1); 
+      color: #e8eaed; 
+    }
+    
+    .tab-add {
+      background: transparent;
+      color: #9aa0a6;
+      border: none;
+      font-size: 20px;
+      padding: 0 10px;
+      margin-left: 4px;
+      cursor: pointer;
+      border-radius: 50%;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: center;
+    }
+    .tab-add:hover { 
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff; 
+    }
+
+    .footer-right .tool-btn {
+      margin-left: 8px;
+    }
+
+    .shortcut-kbd {
+      background: #2a2b2e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 10px;
+      color: #9aa0a6;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 480px) {
+      .desktop-only-text {
+        display: none !important;
+      }
+      .toolbar-footer {
+        padding: 4px;
+      }
+      .footer-left .footer-logo {
+        width: 24px;
+        height: 24px;
+      }
+      .footer-center {
+        gap: 3px;
+        justify-content: center;
+      }
+      .tool-btn {
+        width: 33px;
+        height: 36px;
+        font-size: 12px;
+      }
+      .tool-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+      .tab-btn {
+        padding: 0 6px !important;
+        margin-right: 6px !important;
+      }
+      .new-btn {
+        margin-left: 6px !important;
+      }
+      #upload-btn {
+        width: 33px;
+        height: 36px;
+      }
+      #upload-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="loader-modal">
+    <div class="spinner" id="loader-spinner"></div>
+    <div id="loader-text">Loading...</div>
+    <div id="loader-progress-container" style="display: none; width: 250px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 15px; overflow: hidden;">
+      <div id="loader-progress-bar" style="height: 100%; width: 0%; background: #58a6ff; transition: width 0.1s linear;"></div>
+    </div>
+  </div>
+  <div id="tab-bar"></div>
+  <div id="update-banner" style="display: none; background: #856404; color: #ffeeba; padding: 8px 12px; font-size: 13px; justify-content: space-between; align-items: center; border-bottom: 1px solid #664d03; flex-shrink: 0;">
+    <span id="update-text">Update available!</span>
+    <button onclick="installUpdate()" style="background: #ffeeba; color: #856404; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Update Now</button>
+  </div>
+  <div id="terminal-container">
+    <iframe id="term-frame"></iframe>
+  </div>
+  
+  <div id="notification"></div>
+  
+  <div id="footer" class="toolbar-footer">
+    <div id="extra-keys-menu" class="context-menu">
+      <div class="context-menu-grid" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+        <!-- Row 1: Slash Commands -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <button class="tool-btn" data-cmd="/resume" style="font-size: 11px; font-weight: bold; width: auto; padding: 8px 4px;">/resume</button>
+          <button class="tool-btn" data-cmd="/config" style="font-size: 11px; font-weight: bold; width: auto; padding: 8px 4px;">/config</button>
+          <button class="tool-btn" data-cmd="/grill-me" style="font-size: 11px; font-weight: bold; width: auto; padding: 8px 4px;">/grill-me</button>
+          <button class="tool-btn" data-cmd="/clear" style="font-size: 11px; font-weight: bold; width: auto; padding: 8px 4px;">/clear</button>
+        </div>
+        <!-- Row 2: Ctrl Keys -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; width: auto;">
+            <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Copy/Break</span>
+            <span>Ctrl+C</span>
+          </button>
+          <button class="tool-btn paste-menu-btn" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; width: auto;">
+            <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
+            <span>Ctrl+V</span>
+          </button>
+          <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; width: auto;">
+            <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Undo</span>
+            <span>Ctrl+Z</span>
+          </button>
+        </div>
+        <!-- Row 3: Navigation -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <button class="tool-btn" data-key="Home" data-code="36" style="width: auto;">Home</button>
+          <button class="tool-btn" data-key="End" data-code="35" style="width: auto;">End</button>
+          <button class="tool-btn" data-key="PageUp" data-code="33" style="width: auto;">PgUp</button>
+          <button class="tool-btn" data-key="PageDown" data-code="34" style="width: auto;">PgDn</button>
+        </div>
+        <!-- Row 4: Config -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+          <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; padding: 6px; width: auto;">
+            <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Export</span>
+            <span style="font-size: 11px;">Config</span>
+          </button>
+          <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; padding: 6px; width: auto;">
+            <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Import</span>
+            <span style="font-size: 11px;">Config</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="import-file-input" accept=".tar.gz" style="display: none;" onchange="importBackup(event)">
+    
+    <div class="footer-left" style="display: flex; align-items: center;">
+      <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px; flex-shrink: 0;" onclick="toggleContextMenu(event)">
+        <img src="logo.png" class="footer-logo" style="width: 24px; height: 24px; border-radius: 4px; pointer-events: none;" alt="Logo">
+      </button>
+      <div class="desktop-only-text" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 16px; user-select: none;">
+        <div style="display: flex; align-items: center; gap: 6px; opacity: 0.8;">
+          <span style="font-size: 10px; color: #888; font-weight: 600; letter-spacing: 0.5px;">COPY</span>
+          <div style="display: flex; gap: 3px;">
+            <kbd class="shortcut-kbd">Ctrl</kbd>
+            <kbd class="shortcut-kbd">Shift</kbd>
+            <kbd class="shortcut-kbd">C</kbd>
+          </div>
+        </div>
+        <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.1);"></div>
+        <div style="display: flex; align-items: center; gap: 6px; opacity: 0.8;">
+          <span style="font-size: 10px; color: #888; font-weight: 600; letter-spacing: 0.5px;">PASTE</span>
+          <div style="display: flex; gap: 3px;">
+            <kbd class="shortcut-kbd">Ctrl</kbd>
+            <kbd class="shortcut-kbd">Shift</kbd>
+            <kbd class="shortcut-kbd">V</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-center">
+      <button class="tool-btn" data-key="Escape" data-code="27" style="width: auto; padding: 0 6px; font-weight: bold;">Esc</button>
+      <button class="tool-btn tab-btn" data-key="Tab" data-code="9" style="width: auto; padding: 0 8px; margin-right: 8px; font-weight: bold;">Tab</button>
+      <button class="tool-btn" data-key="ArrowLeft" data-code="37" style="padding: 0;">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      </button>
+      <button class="tool-btn" data-key="ArrowUp" data-code="38" style="padding: 0;">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+      </button>
+      <button class="tool-btn" data-key="ArrowDown" data-code="40" style="padding: 0;">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+      </button>
+      <button class="tool-btn" data-key="ArrowRight" data-code="39" style="padding: 0;">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+      <button class="tool-btn new-btn" data-cmd="/new" style="padding: 0; margin-left: 8px;" title="/new">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="12" y1="7" x2="12" y2="13"></line><line x1="9" y1="10" x2="15" y2="10"></line></svg>
+      </button>
+      <button class="tool-btn" data-cmd="/quota" style="padding: 0;" title="/quota">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+      </button>
+    </div>
+    
+    <div class="footer-right">
+      <input type="file" id="file" style="display: none;" onchange="uploadImage()">
+      <button id="upload-btn" onclick="document.getElementById('file').click()" title="Upload Image">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Tab Management
+    let sessions = JSON.parse(localStorage.getItem('agy_sessions')) || [{id: 1, name: 'Session 1'}];
+    let currentSessionId = localStorage.getItem('agy_current_session') ? parseInt(localStorage.getItem('agy_current_session')) : sessions[0].id;
+    if (!sessions.find(s => s.id === currentSessionId)) currentSessionId = sessions[0].id;
+
+    function saveSessions() {
+      localStorage.setItem('agy_sessions', JSON.stringify(sessions));
+      localStorage.setItem('agy_current_session', currentSessionId);
+    }
+
+    window.switchSession = function(id) {
+      currentSessionId = id;
+      saveSessions();
+      renderTabs();
+      document.getElementById('term-frame').src = 'ttyd/?arg=' + id;
+    };
+
+    window.createSession = function() {
+      const maxId = sessions.reduce((max, s) => Math.max(max, s.id), 0);
+      const newId = maxId + 1;
+      sessions.push({id: newId, name: 'Session ' + newId});
+      switchSession(newId);
+    };
+
+    window.closeSession = async function(e, id) {
+      e.stopPropagation();
+      if (sessions.length <= 1) return; // Cannot close the last session
+      
+      const idx = sessions.findIndex(s => s.id === id);
+      sessions.splice(idx, 1);
+      
+      if (currentSessionId === id) {
+        switchSession(sessions[Math.max(0, idx - 1)].id);
+      } else {
+        saveSessions();
+        renderTabs();
+      }
+      
+      try {
+        await fetch('kill?session_id=' + id);
+      } catch(err) { console.error('Failed to kill session', err); }
+    };
+
+    function renderTabs() {
+      const tabBar = document.getElementById('tab-bar');
+      tabBar.innerHTML = '';
+      
+      sessions.forEach(s => {
+        const tab = document.createElement('div');
+        tab.className = 'tab' + (s.id === currentSessionId ? ' active' : '');
+        let closeHtml = sessions.length > 1 ? `<span class="tab-close" onclick="closeSession(event, ${s.id})">×</span>` : '';
+        tab.innerHTML = `<span>${s.name}</span>${closeHtml}`;
+        tab.onclick = () => switchSession(s.id);
+        tabBar.appendChild(tab);
+      });
+      
+      const addBtn = document.createElement('button');
+      addBtn.className = 'tab-add';
+      addBtn.innerHTML = '+';
+      addBtn.onclick = createSession;
+      tabBar.appendChild(addBtn);
+    }
+
+    // Initialize tabs
+    renderTabs();
+    document.getElementById('term-frame').src = 'ttyd/?arg=' + currentSessionId;
+
+    async function checkVersion() {
+      try {
+        const res = await fetch('version_check');
+        const data = await res.json();
+        if (data.update_available) {
+          const banner = document.getElementById('update-banner');
+          document.getElementById('update-text').innerText = `New version available! ${data.current} -> ${data.latest}`;
+          banner.style.display = 'flex';
+        }
+      } catch(e) {}
+    }
+    
+    async function installUpdate() {
+      const banner = document.getElementById('update-banner');
+      const btn = banner.querySelector('button');
+      btn.innerText = 'Updating...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('update_cli');
+        if (res.ok) {
+          document.getElementById('update-text').innerText = 'Update installed! Please close active tabs and open new ones to use the new version.';
+          btn.style.display = 'none';
+          banner.style.background = '#155724';
+          banner.style.color = '#d4edda';
+          banner.style.borderColor = '#c3e6cb';
+        } else {
+          throw new Error('Update failed');
+        }
+      } catch(e) {
+        btn.innerText = 'Failed';
+        btn.disabled = false;
+      }
+    }
+
+    checkVersion();
+    async function uploadImage() {
+      const fileInput = document.getElementById('file');
+      if (!fileInput.files.length) return;
+      
+      const file = fileInput.files[0];
+      const btn = document.getElementById('upload-btn');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '...';
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('session_id', currentSessionId);
+      
+      try {
+        const res = await fetch('upload', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          const data = await res.json();
+          try {
+            const iframe = document.getElementById('term-frame');
+            if (iframe && iframe.contentWindow && iframe.contentWindow.term) {
+              iframe.contentWindow.term.paste(data.filepath);
+              showNotification(`Image inserted: ${data.filepath}`);
+            } else {
+              throw new Error("No terminal target found");
+            }
+          } catch(err) {
+            try {
+              await navigator.clipboard.writeText(`"${data.filepath}"`);
+              showNotification(`Path copied to clipboard!\n${data.filepath}`);
+            } catch(e) {
+              showNotification(`Path: ${data.filepath}`);
+            }
+          }
+        } else {
+          showNotification("Error uploading");
+        }
+      } catch(e) {
+        showNotification("Network failed during upload");
+      }
+      
+      btn.innerHTML = originalHtml;
+      fileInput.value = '';
+    }
+
+    window.pasteFromClipboard = async function() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (!text) return;
+        const iframe = document.getElementById('term-frame');
+        if (iframe && iframe.contentWindow) {
+          if (iframe.contentWindow.term) {
+             iframe.contentWindow.term.paste(text);
+          } else {
+             const textarea = iframe.contentDocument.querySelector('.xterm-helper-textarea');
+             if (textarea) {
+                 textarea.value = text;
+                 textarea.dispatchEvent(new Event('input', { bubbles: true }));
+             }
+          }
+        }
+      } catch (err) {
+        alert("El navegador ha bloqueado el acceso al portapapeles. Asegúrate de dar permiso o usa Ctrl+Shift+V.");
+      }
+    };
+    
+    function toggleContextMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('extra-keys-menu');
+      menu.classList.toggle('show');
+    }
+    
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('extra-keys-menu');
+      if (menu && menu.classList.contains('show') && !menu.contains(e.target)) {
+        menu.classList.remove('show');
+      }
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+
+    let notifTimeout;
+    function showNotification(text) {
+      const notif = document.getElementById('notification');
+      notif.innerText = text;
+      notif.classList.add('show');
+      
+      clearTimeout(notifTimeout);
+      notifTimeout = setTimeout(() => {
+        notif.classList.remove('show');
+      }, 5000);
+    }
+
+    function sendVirtualKey(key, keyCode) {
+      try {
+        const iframeDoc = document.querySelector('iframe').contentDocument;
+        if (!iframeDoc) return;
+        
+        const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
+        if (!target) return;
+        
+        // Define common control codes as fallback
+        const seq = {
+          'Enter': '\r', 'Escape': '\x1b', 'Tab': '\x09',
+          'ArrowUp': '\x1b[A', 'ArrowDown': '\x1b[B', 'ArrowLeft': '\x1b[D', 'ArrowRight': '\x1b[C',
+          'CtrlC': '\x03', 'CtrlD': '\x04', 'CtrlZ': '\x1a'
+        };
+
+        if (seq[key]) {
+            // Best way to send raw escape sequences in ttyd is to paste them
+            const dt = new DataTransfer();
+            dt.setData('text/plain', seq[key]);
+            target.dispatchEvent(new ClipboardEvent('paste', {
+                clipboardData: dt, bubbles: true, cancelable: true
+            }));
+        } else if (keyCode) {
+            target.dispatchEvent(new KeyboardEvent('keydown', {
+                key: key, code: key, keyCode: keyCode, which: keyCode, bubbles: true
+            }));
+        }
+      } catch(e) {}
+    }
+
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      // Touch handler: Instant response, prevents zoom/scroll, prevents double click
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Prevent native touch behaviors and subsequent click event
+          document.getElementById('extra-keys-menu').classList.remove('show');
+        
+        const key = btn.getAttribute('data-key');
+        const cmd = btn.getAttribute('data-cmd');
+        
+        if (key || cmd) {
+          // Terminal macro button
+          const code = parseInt(btn.getAttribute('data-code') || '0');
+          const isCtrl = btn.getAttribute('data-ctrl') === 'true';
+          const theIframe = document.getElementById('term-frame');
+          const iframeDoc = theIframe && theIframe.contentWindow ? theIframe.contentWindow.document : null;
+          if (!iframeDoc) return;
+          const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
+          
+          if (target) {
+            if (cmd) {
+              const dt = new DataTransfer();
+              dt.setData('text/plain', cmd + '\r');
+              target.dispatchEvent(new ClipboardEvent('paste', {
+                  clipboardData: dt,
+                  bubbles: true,
+                  cancelable: true
+              }));
+              setTimeout(() => {
+                target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+              }, 10);
+            } else {
+              target.dispatchEvent(new KeyboardEvent('keydown', {
+                key: key,
+                code: key,
+                keyCode: code,
+                ctrlKey: isCtrl,
+                bubbles: true
+              }));
+            }
+          }
+        } else if (btn.classList.contains('paste-menu-btn')) {
+          if (typeof window.pasteFromClipboard === 'function') {
+            window.pasteFromClipboard();
+          }
+        } else {
+          // Standard button (Logo, Import, Export)
+          btn.click();
+        }
+      }, { passive: false });
+      
+      // Mouse handler: Prevent focus loss for terminal buttons
+      btn.addEventListener('mousedown', (e) => {
+        const key = btn.getAttribute('data-key');
+        const cmd = btn.getAttribute('data-cmd');
+        
+        if (key || cmd || btn.classList.contains('paste-menu-btn')) {
+          e.preventDefault(); // Prevent losing focus on textarea
+            document.getElementById('extra-keys-menu').classList.remove('show');
+          
+          const code = parseInt(btn.getAttribute('data-code') || '0');
+          const isCtrl = btn.getAttribute('data-ctrl') === 'true';
+          const theIframe = document.getElementById('term-frame');
+          const iframeDoc = theIframe && theIframe.contentWindow ? theIframe.contentWindow.document : null;
+          if (!iframeDoc) return;
+          const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
+          
+          if (target) {
+            if (cmd) {
+              const dt = new DataTransfer();
+              dt.setData('text/plain', cmd + '\r');
+              target.dispatchEvent(new ClipboardEvent('paste', {
+                  clipboardData: dt,
+                  bubbles: true,
+                  cancelable: true
+              }));
+              setTimeout(() => {
+                target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+              }, 10);
+            } else {
+              target.dispatchEvent(new KeyboardEvent('keydown', {
+                key: key,
+                code: key,
+                keyCode: code,
+                ctrlKey: isCtrl,
+                bubbles: true
+              }));
+            }
+          }
+        }
+      });
+    });
+
+    const iframe = document.getElementById('term-frame');
+    iframe.onload = () => {
+      try {
+        const iframeWin = iframe.contentWindow;
+        const iframeDoc = iframeWin.document;
+        
+
+        
+        const interval = setInterval(() => { const viewport = iframeDoc.querySelector('.xterm-viewport'); const screen = iframeDoc.querySelector('.xterm-screen'); if (viewport && screen && !screen.dataset.scrollAttached) { screen.dataset.scrollAttached = 'true';
+            
+            const fixTextarea = () => {
+              const ta = iframeDoc.querySelector('.xterm-helper-textarea');
+              if (ta && !ta.dataset.fixed) {
+                ta.dataset.fixed = "true";
+                ta.setAttribute('autocomplete', 'off');
+                ta.setAttribute('autocorrect', 'off');
+                ta.setAttribute('autocapitalize', 'off');
+                ta.setAttribute('spellcheck', 'false');
+                ta.setAttribute('data-gramm', 'false');
+              }
+            };
+            fixTextarea();
+
+            iframeDoc.addEventListener('contextmenu', (e) => {
+              e.preventDefault();
+            });
+            // Auto-hide resize banners and auto-reconnect on disconnect.
+            const observer = new MutationObserver((mutations) => {
+              fixTextarea();
+              mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                  if (node.nodeType === 1 && node.tagName === 'DIV' && !node.className) {
+                    const text = node.textContent || '';
+                    if (text.match(/^\d+x\d+$/)) {
+                      node.style.display = 'none';
+                    } else if (text.includes('Reconnect') || text.includes('Closed')) {
+                      node.style.display = 'none';
+                      setTimeout(() => {
+                        const textarea = iframeDoc.querySelector('.xterm-helper-textarea');
+                        if (textarea) {
+                          textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+                        } else {
+                          screen.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+                        }
+                      }, 500);
+                    }
+                  }
+                });
+              });
+            });
+            
+            const xtermContainer = iframeDoc.querySelector('.xterm');
+            if (xtermContainer) {
+              observer.observe(xtermContainer, { childList: true });
+            }
+            
+            const FRICTION = 0.97;
+            const MIN_VELOCITY = 0.3;
+            
+            let lastY = 0, lastTime = 0, velocity = 0;
+            let animId = null, tracking = false;
+            
+            function coast() {
+              velocity *= FRICTION;
+              if (Math.abs(velocity) < MIN_VELOCITY) { animId = null; return; }
+              viewport.scrollTop += velocity;
+              animId = iframeWin.requestAnimationFrame(coast);
+            }
+            
+            function stop() {
+              if (animId) { iframeWin.cancelAnimationFrame(animId); animId = null; }
+              velocity = 0;
+            }
+            
+            screen.addEventListener('touchstart', (e) => {
+              if (e.touches.length !== 1) return;
+              stop();
+              lastY = e.touches[0].clientY;
+              lastTime = performance.now();
+              tracking = true;
+            }, { passive: false, capture: true });
+            
+            screen.addEventListener('touchmove', (e) => {
+              if (!tracking || e.touches.length !== 1) return;
+              const y = e.touches[0].clientY;
+              const now = performance.now();
+              const dt = now - lastTime;
+              const dy = lastY - y; // positive = finger up = scroll down
+              
+              // Track velocity for momentum
+              if (dt > 0) {
+                const v = (dy / dt) * 16; // normalize to ~60fps
+                velocity = velocity * 0.2 + v * 0.8;
+              }
+              
+              // Move viewport immediately
+              viewport.scrollTop += dy;
+              
+              lastY = y;
+              lastTime = now;
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            }, { passive: false, capture: true });
+            
+            screen.addEventListener('touchend', () => {
+              if (!tracking) return;
+              tracking = false;
+              if (Math.abs(velocity) > MIN_VELOCITY) {
+                animId = iframeWin.requestAnimationFrame(coast);
+              }
+            }, { passive: false, capture: true });
+            
+            screen.addEventListener('touchcancel', () => {
+              tracking = false; stop();
+            }, { passive: false, capture: true });
+            
+                                        const scrollToBottom = () => {
+                if (viewport) viewport.scrollTop = viewport.scrollHeight;
+              };
+
+              // Force scroll to bottom on load (as data streams in from ttyd)
+              [100, 300, 600, 1000].forEach(delay => {
+                setTimeout(scrollToBottom, delay);
+              });
+              
+              // Force scroll to bottom unconditionally when window resizes (e.g., closing Android keyboard)
+              iframeWin.addEventListener('resize', () => {
+                [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
+              });
+          }
+        }, 500);
+      } catch(err) {
+        console.error("Iframe access error:", err);
+      }
+    };
+    function showLoader(text, showProgress = false) {
+      document.getElementById('loader-text').innerText = text;
+      document.getElementById('loader-progress-container').style.display = showProgress ? 'block' : 'none';
+      document.getElementById('loader-progress-bar').style.width = '0%';
+      document.getElementById('loader-modal').classList.add('show');
+    }
+
+    function updateProgress(percent, text) {
+      if (text) document.getElementById('loader-text').innerText = text;
+      document.getElementById('loader-progress-bar').style.width = percent + '%';
+    }
+
+    function hideLoader() {
+      setTimeout(() => {
+        document.getElementById('loader-modal').classList.remove('show');
+      }, 1000);
+    }
+
+    async function exportBackup() {
+      document.getElementById('extra-keys-menu').classList.remove('show');
+      showLoader("Preparing Export...", false);
+      
+      setTimeout(() => {
+        hideLoader();
+      }, 3000); // Hide modal after 3 seconds, native browser download UI takes over
+      
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = 'export_backup';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    async function importBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      document.getElementById('extra-keys-menu').classList.remove('show');
+      
+      const proceed = confirm("Are you sure? This will overwrite your current Antigravity agent memory, conversations, and Home Assistant add-on configurations.");
+      if (!proceed) {
+        event.target.value = '';
+        return;
+      }
+      
+      showLoader("Starting Restore...", true);
+      
+      const chunkSize = 10 * 1024 * 1024; // 10MB chunks (Home Assistant Ingress has a strict 16MB limit)
+      const totalChunks = Math.ceil(file.size / chunkSize);
+      
+      try {
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * chunkSize;
+          const end = Math.min(start + chunkSize, file.size);
+          const chunk = file.slice(start, end);
+          
+          const formData = new FormData();
+          formData.append('file', chunk);
+          
+          const percent = Math.round((i / totalChunks) * 100);
+          updateProgress(percent, `Uploading Backup... ${percent}%`);
+          
+          const res = await fetch(`import_chunk?chunk_index=${i}&total_chunks=${totalChunks}`, {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text);
+          }
+        }
+        
+        updateProgress(100, "Extracting and Restarting...");
+        alert('Backup Restored Successfully!\n\nThe Add-on will now restart automatically to load your memory and configurations. Please wait a few seconds and refresh the page if it does not reload by itself.');
+      } catch (err) {
+        alert('Import Failed: ' + err.message);
+      } finally {
+        hideLoader();
+        event.target.value = '';
+      }
+    } 
+  </script>
+    
+</body>
+</html>

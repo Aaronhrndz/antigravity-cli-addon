@@ -1,0 +1,20 @@
+# AI Agent Development Instructions
+
+Whenever an AI Agent makes changes to this repository or Add-on, the following rules MUST be strictly followed:
+
+## 1. Documentation & Versioning
+- **Update CHANGELOG.md**: You must add a new entry documenting the changes you made. Do this every time you introduce a new feature or bug fix.
+- **Update README.md & WIKI.md**: If you introduce a new feature, add a new UI element, or change how something is configured, you must update both the `README.md` and `WIKI.md` (which share architecture docs) to reflect these changes.
+- **Increment Version**: Always remember to increment the `version` field in `config.yaml` after making changes, so the Home Assistant supervisor knows an update is available.
+- **Automatic Execution**: Do not ask the user for permission to do this, do it automatically as part of your standard workflow.
+
+## 2. Architecture Guidelines
+- **Frontend (`index.html`)**: Must remain lightweight Vanilla HTML/JS/CSS. It handles the `ttyd` iframe, the mobile-first shortcut footer, modal overlays (like backup loading), and custom kinetic scrolling fixes for touch devices. No React/Vue/etc.
+- **Backend (`upload.py`)**: A simple Python `http.server` running alongside `ttyd`. It handles file uploads, tab termination, updates, and the Backup/Restore system (streaming `tar` to prevent OOM errors).
+- **NGINX (`nginx.conf`)**: Acts as reverse proxy on port `8099`, routing to `ttyd` (7681) and Python (8000). Crucial: Ensure `Cache-Control: no-cache` is maintained so Home Assistant Companion apps don't cache stale HTML.
+- **Persistence**: Any permanent data must reside in Home Assistant's `/data` volume. `run.sh` restores this on boot. Modifying `/opt/antigravity` directly is lost on restart unless handled in `run.sh` or synced via a GitHub rebuild.
+
+## 3. Development Workflow (Hot-Swapping)
+To test frontend changes instantly without a 10-minute Docker rebuild:
+1. Copy the updated `index.html` to a shared folder (e.g. `/config/antigravity-temp/`).
+2. Ask the user to run `cp /homeassistant/config/antigravity-temp/index.html /opt/antigravity/html/index.html` in the terminal and press `Ctrl+F5`.
