@@ -1,3 +1,15 @@
+## [1.8.6]
+- fix: Make touch scroll listener robust to DOM recreation by tracking dataset instead of clearing interval
+- fix: Change dtach redraw method to 'winch' to prevent clearing of terminal scrollback buffer on reconnect
+- fix: Re-add check for session log existence before printing history on connect
+- fix: Use proper dtach syntax (dtach -A socket -r mode)
+
+## [1.8.5]
+- feat: Remove tmux completely and revert to dtach + script for perfect native scroll and session persistence without alternate screen buffer conflicts
+- chore: Remove ResizeObserver polling that interfered with scroll tracking
+
+## [1.8.4]
+- revert: Reverted to tmux implementation temporarily during diagnostic phase
 ## [1.8.6] - 2026-06-03
 ### Fixed
 - Fixed critical mobile scroll bug by completely reverting terminal core from tmux back to dtach+script while maintaining full multi-tab support.
