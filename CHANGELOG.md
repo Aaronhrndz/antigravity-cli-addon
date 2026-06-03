@@ -1,3 +1,6 @@
+## [1.8.7]
+- feat: Refactor mobile context menu layout into a visually centered 4-row grid
+- feat: Add macro buttons for slash commands (/config, /grill-me, /clear) to the context menu
 ## [1.8.6]
 - fix: Make touch scroll listener robust to DOM recreation by tracking dataset instead of clearing interval
 - fix: Change dtach redraw method to 'winch' to prevent clearing of terminal scrollback buffer on reconnect
@@ -369,3 +372,4 @@ All notable changes to the Antigravity CLI Home Assistant Add-on will be documen
 
 ## [1.0.3]
 - Initial commit: Antigravity CLI Add-on v1.0.3
+
