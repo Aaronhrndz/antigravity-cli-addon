@@ -1,6 +1,6 @@
 name: "Antigravity CLI"
-description: "AI Agent with code-level access to your domotics via Home Assistant API"
-version: "1.8.7"
+description: "AI Agent with total control over domotics via Home Assistant Supervisor API"
+version: "1.8.6"
 slug: "antigravity_cli"
 panel_icon: "mdi:triangle"
 panel_title: "Antigravity"
@@ -12,6 +12,7 @@ arch:
   - i386
 init: false
 hassio_api: true
+hassio_role: manager
 homeassistant_api: true
 host_network: true
 ingress: true
