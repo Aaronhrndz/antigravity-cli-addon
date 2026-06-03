@@ -15,8 +15,14 @@ Whenever an AI Agent makes changes to this repository or Add-on, the following r
 - **Persistence**: Any permanent data must reside in Home Assistant's `/data` volume. `run.sh` restores this on boot. Modifying `/opt/antigravity` directly is lost on restart unless handled in `run.sh` or synced via a GitHub rebuild.
 
 ## 3. Development Workflow (3-Version Architecture)
-This repository uses a 3-version deployment architecture to separate local development, the public supervisor version, and the public no-supervisor version.
+This repository uses a strict 3-version deployment architecture. **CRITICAL RULE: DO NOT change the names of these versions or mix them up unless explicitly requested by the user.**
+
+The three versions are:
+1. **GitHub Main Version**: Lives in the root folder. Name MUST be `"Antigravity CLI"`. This has full supervisor privileges (`hassio_role: manager`).
+2. **GitHub Safe Version**: Lives in the `/lite` folder. Name MUST be `"Antigravity CLI (No Supervisor)"`. This has supervisor privileges stripped out.
+3. **Local Development Version**: Lives in the local Home Assistant SMB share (`\\192.168.1.2\addons\antigravity-cli`). Name MUST be `"Antigravity CLI (Local)"`.
+
 When making changes, always follow this workflow exactly:
 1. **Develop**: Edit the source files in the repository root (`C:\Users\aaron\.gemini\antigravity\scratch\antigravity-cli-addon`).
-2. **Local Deploy**: To push changes to the local Home Assistant instance for testing, ALWAYS execute `.\deploy-local.ps1`. This script copies the files to the SMB share (`\\192.168.1.2\addons\antigravity-cli`) and dynamically renames the addon to "Antigravity CLI (Local)" in HA without dirtying the git tree. Do NOT copy files manually.
-3. **Commit & Sync**: When the user is satisfied, run `git commit`. A pre-commit hook automatically executes `sync-lite.ps1`, which generates the restricted `/lite` folder (named "Antigravity CLI (No Supervisor)"), adds it to the commit, and syncs both public versions to GitHub perfectly.
+2. **Local Deploy**: To push changes to the local Home Assistant instance for testing, ALWAYS execute `.\deploy-local.ps1`. This script copies the files to the SMB share and dynamically renames the addon to "Antigravity CLI (Local)" in HA without dirtying the git tree. Do NOT copy files manually.
+3. **Commit & Sync**: When the user is satisfied, run `git commit`. A pre-commit hook automatically executes `sync-lite.ps1`, which generates the restricted `/lite` folder, adds it to the commit, and syncs both public versions to GitHub perfectly.
