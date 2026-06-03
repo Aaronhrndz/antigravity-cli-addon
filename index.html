@@ -390,32 +390,47 @@
   
   <div id="footer" class="toolbar-footer">
     <div id="extra-keys-menu" class="context-menu">
-      <div class="context-menu-grid">
-        <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Copy/Break</span>
-          <span>Ctrl+C</span>
-        </button>
-        <button class="tool-btn paste-menu-btn" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
-          <span>Ctrl+V</span>
-        </button>
-        <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Undo</span>
-          <span>Ctrl+Z</span>
-        </button>
-        <button class="tool-btn" data-cmd="/resume" style="font-size: 13px; font-weight: bold;">/resume</button>
-        <button class="tool-btn" data-key="Home" data-code="36">Home</button>
-        <button class="tool-btn" data-key="End" data-code="35">End</button>
-        <button class="tool-btn" data-key="PageUp" data-code="33">PgUp</button>
-        <button class="tool-btn" data-key="PageDown" data-code="34">PgDn</button>
-        <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 2; padding: 6px;">
-          <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Export</span>
-          <span style="font-size: 11px;">Config</span>
-        </button>
-        <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 2; padding: 6px;">
-          <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Import</span>
-          <span style="font-size: 11px;">Config</span>
-        </button>
+      <div class="context-menu-grid" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+        <!-- Row 1: Slash Commands -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <button class="tool-btn" data-cmd="/resume" style="font-size: 11px; font-weight: bold; width: auto; padding: 8px 4px;">/resume</button>
+          <button class="tool-btn" data-cmd="/config" style="font-size: 11px; font-weight: bold; width: auto; padding: 8px 4px;">/config</button>
+          <button class="tool-btn" data-cmd="/grill-me" style="font-size: 11px; font-weight: bold; width: auto; padding: 8px 4px;">/grill-me</button>
+          <button class="tool-btn" data-cmd="/clear" style="font-size: 11px; font-weight: bold; width: auto; padding: 8px 4px;">/clear</button>
+        </div>
+        <!-- Row 2: Ctrl Keys -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; width: auto;">
+            <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Copy/Break</span>
+            <span>Ctrl+C</span>
+          </button>
+          <button class="tool-btn paste-menu-btn" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; width: auto;">
+            <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
+            <span>Ctrl+V</span>
+          </button>
+          <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; width: auto;">
+            <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Undo</span>
+            <span>Ctrl+Z</span>
+          </button>
+        </div>
+        <!-- Row 3: Navigation -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <button class="tool-btn" data-key="Home" data-code="36" style="width: auto;">Home</button>
+          <button class="tool-btn" data-key="End" data-code="35" style="width: auto;">End</button>
+          <button class="tool-btn" data-key="PageUp" data-code="33" style="width: auto;">PgUp</button>
+          <button class="tool-btn" data-key="PageDown" data-code="34" style="width: auto;">PgDn</button>
+        </div>
+        <!-- Row 4: Config -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+          <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; padding: 6px; width: auto;">
+            <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Export</span>
+            <span style="font-size: 11px;">Config</span>
+          </button>
+          <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; padding: 6px; width: auto;">
+            <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Import</span>
+            <span style="font-size: 11px;">Config</span>
+          </button>
+        </div>
       </div>
     </div>
     <input type="file" id="import-file-input" accept=".tar.gz" style="display: none;" onchange="importBackup(event)">
