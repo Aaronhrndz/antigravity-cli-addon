@@ -10,7 +10,7 @@ if (-not (Test-Path "$targetDir")) {
 Get-ChildItem -Path "$targetDir" | Remove-Item -Recurse -Force
 
 # Copy all files from root to lite, excluding specific folders/files
-$exclude = @(".git", ".history", "lite", "__pycache__", "sync-lite.ps1", "*.log", "*.txt")
+$exclude = @(".git", ".history", "lite", "__pycache__", "sync-lite.ps1", ".githooks", "*.log", "*.txt")
 Get-ChildItem -Path "$sourceDir" -Exclude $exclude | Copy-Item -Destination "$targetDir" -Recurse -Force
 
 # Modify config.yaml
@@ -35,3 +35,4 @@ if (Test-Path "$configFile") {
 } else {
     Write-Host "Error: config.yaml not found in $targetDir"
 }
+
