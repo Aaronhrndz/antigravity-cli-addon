@@ -1,4 +1,4 @@
-name: "Antigravity CLI (Lite)"
+name: "Antigravity CLI (No Supervisor)"
 description: "AI Agent for domotics via Home Assistant Core API"
 version: "1.8.7"
 slug: "antigravity_cli_lite"

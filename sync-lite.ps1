@@ -22,7 +22,7 @@ if (Test-Path "$configFile") {
     $config = $config -replace "(?m)^hassio_role:\s*manager\r?\n?", ""
     
     # Change name
-    $config = $config -replace '(?m)^name:\s*".*"', 'name: "Antigravity CLI (Lite)"'
+    $config = $config -replace '(?m)^name:\s*".*"', 'name: "Antigravity CLI (No Supervisor)"'
     
     # Change slug
     $config = $config -replace '(?m)^slug:\s*".*"', 'slug: "antigravity_cli_lite"'
@@ -35,4 +35,5 @@ if (Test-Path "$configFile") {
 } else {
     Write-Host "Error: config.yaml not found in $targetDir"
 }
+
 
