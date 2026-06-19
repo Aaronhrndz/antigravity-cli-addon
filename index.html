@@ -18,6 +18,9 @@
       height: 100dvh;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overflow: hidden;
+      width: 100vw;
+      max-width: 100vw;
+      box-sizing: border-box;
     }
     
     #terminal-container {
@@ -45,18 +48,25 @@
       flex-shrink: 0;
       box-shadow: none;
       z-index: 10;
+      overflow-x: auto;
+      scrollbar-width: none;
+      gap: 12px;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
     }
+    #footer::-webkit-scrollbar { display: none; }
     
     .footer-left {
       display: flex;
       align-items: center;
-      flex: 1;
+      flex: 1 0 auto;
     }
     
     .footer-center {
       display: flex;
       gap: 4px;
-      flex: 0;
+      flex: 0 0 auto;
       justify-content: center;
     }
     
@@ -64,7 +74,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      flex: 1;
+      flex: 1 0 auto;
     }
 
     .tool-btn {
@@ -83,6 +93,7 @@
       -webkit-tap-highlight-color: transparent;
       padding: 0;
       transition: background 0.15s, color 0.15s, transform 0.1s;
+      touch-action: manipulation;
     }
     
     .tool-btn:hover {
@@ -145,7 +156,7 @@
     
     .context-menu-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(12, 1fr);
       gap: 8px;
     }
     
@@ -232,6 +243,9 @@
       overflow-x: auto;
       flex-shrink: 0;
       scrollbar-width: none;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
     }
     #tab-bar::-webkit-scrollbar { display: none; }
     
@@ -391,34 +405,58 @@
   <div id="footer" class="toolbar-footer">
     <div id="extra-keys-menu" class="context-menu">
       <div class="context-menu-grid">
-        <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1;">
+        <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 4;">
           <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Copy/Break</span>
           <span>Ctrl+C</span>
         </button>
-        <button class="tool-btn paste-menu-btn" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1;">
+        <button class="tool-btn paste-menu-btn" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 4;">
           <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
           <span>Ctrl+V</span>
         </button>
-        <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1;">
+        <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 4;">
           <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Undo</span>
           <span>Ctrl+Z</span>
         </button>
-        <button class="tool-btn" data-cmd="/resume" style="font-size: 13px; font-weight: bold;">/resume</button>
-        <button class="tool-btn" data-key="Home" data-code="36">Home</button>
-        <button class="tool-btn" data-key="End" data-code="35">End</button>
-        <button class="tool-btn" data-key="PageUp" data-code="33">PgUp</button>
-        <button class="tool-btn" data-key="PageDown" data-code="34">PgDn</button>
-        <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 2; padding: 6px;">
+        <button class="tool-btn" data-key="Home" data-code="36" style="grid-column: span 3;">Home</button>
+        <button class="tool-btn" data-key="End" data-code="35" style="grid-column: span 3;">End</button>
+        <button class="tool-btn" data-key="PageUp" data-code="33" style="grid-column: span 3;">PgUp</button>
+        <button class="tool-btn" data-key="PageDown" data-code="34" style="grid-column: span 3;">PgDn</button>
+        <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 6; padding: 6px;">
           <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Export</span>
           <span style="font-size: 11px;">Config</span>
         </button>
-        <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 2; padding: 6px;">
+        <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 6; padding: 6px;">
           <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Import</span>
           <span style="font-size: 11px;">Config</span>
         </button>
       </div>
     </div>
     <input type="file" id="import-file-input" accept=".tar.gz" style="display: none;" onchange="importBackup(event)">
+
+    <div id="dpad-menu" class="context-menu" style="left: 50%; transform: translateX(-50%); padding: 8px;">
+      <div style="display: grid; grid-template-columns: 36px 36px 36px; gap: 4px; justify-content: center;">
+        <div style="grid-column: 2; grid-row: 1;">
+          <button class="tool-btn" data-key="ArrowUp" data-code="38" style="width: 100%; height: 36px; padding: 0;">
+            <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+          </button>
+        </div>
+        <div style="grid-column: 1; grid-row: 2;">
+          <button class="tool-btn" data-key="ArrowLeft" data-code="37" style="width: 100%; height: 36px; padding: 0;">
+            <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+        </div>
+        <div style="grid-column: 2; grid-row: 2;">
+          <button class="tool-btn" data-key="ArrowDown" data-code="40" style="width: 100%; height: 36px; padding: 0;">
+            <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+          </button>
+        </div>
+        <div style="grid-column: 3; grid-row: 2;">
+          <button class="tool-btn" data-key="ArrowRight" data-code="39" style="width: 100%; height: 36px; padding: 0;">
+            <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </div>
+      </div>
+    </div>
     
     <div class="footer-left" style="display: flex; align-items: center;">
       <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px; flex-shrink: 0;" onclick="toggleContextMenu(event)">
@@ -448,23 +486,27 @@
     <div class="footer-center">
       <button class="tool-btn" data-key="Escape" data-code="27" style="width: auto; padding: 0 6px; font-weight: bold;">Esc</button>
       <button class="tool-btn tab-btn" data-key="Tab" data-code="9" style="width: auto; padding: 0 8px; margin-right: 8px; font-weight: bold;">Tab</button>
-      <button class="tool-btn" data-key="ArrowLeft" data-code="37" style="padding: 0;">
-        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      <button id="dpad-toggle-btn" class="tool-btn" onclick="toggleDpadMenu(event)" style="padding: 0;" title="D-Pad">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="5 9 2 12 5 15"></polyline>
+          <polyline points="9 5 12 2 15 5"></polyline>
+          <polyline points="19 9 22 12 19 15"></polyline>
+          <polyline points="9 19 12 22 15 19"></polyline>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <line x1="12" y1="2" x2="12" y2="22"></line>
+        </svg>
       </button>
-      <button class="tool-btn" data-key="ArrowUp" data-code="38" style="padding: 0;">
-        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-      </button>
-      <button class="tool-btn" data-key="ArrowDown" data-code="40" style="padding: 0;">
-        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-      </button>
-      <button class="tool-btn" data-key="ArrowRight" data-code="39" style="padding: 0;">
-        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-      </button>
-      <button class="tool-btn new-btn" data-cmd="/new" style="padding: 0; margin-left: 8px;" title="/new">
+      <button class="tool-btn new-btn" data-cmd="/new" style="padding: 0; margin-left: 12px;" title="/new">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="12" y1="7" x2="12" y2="13"></line><line x1="9" y1="10" x2="15" y2="10"></line></svg>
+      </button>
+      <button class="tool-btn" data-cmd="/resume" style="padding: 0;" title="/resume">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline><polyline points="12 7 12 12 15 15"></polyline></svg>
       </button>
       <button class="tool-btn" data-cmd="/quota" style="padding: 0;" title="/quota">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+      </button>
+      <button class="tool-btn" data-cmd="/model" style="padding: 0;" title="/model">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 12 12 17 22 12"></polyline><polyline points="2 17 12 22 22 17"></polyline></svg>
       </button>
     </div>
     
@@ -655,12 +697,26 @@
       e.stopPropagation();
       const menu = document.getElementById('extra-keys-menu');
       menu.classList.toggle('show');
+      const dpad = document.getElementById('dpad-menu');
+      if (dpad) dpad.classList.remove('show');
+    }
+    
+    function toggleDpadMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('dpad-menu');
+      menu.classList.toggle('show');
+      const extraMenu = document.getElementById('extra-keys-menu');
+      if (extraMenu) extraMenu.classList.remove('show');
     }
     
     document.addEventListener('click', (e) => {
       const menu = document.getElementById('extra-keys-menu');
       if (menu && menu.classList.contains('show') && !menu.contains(e.target)) {
         menu.classList.remove('show');
+      }
+      const dpad = document.getElementById('dpad-menu');
+      if (dpad && dpad.classList.contains('show') && !dpad.contains(e.target)) {
+        dpad.classList.remove('show');
       }
     });
 
@@ -711,10 +767,24 @@
     }
 
     document.querySelectorAll('.tool-btn').forEach(btn => {
-      // Touch handler: Instant response, prevents zoom/scroll, prevents double click
-      btn.addEventListener('touchstart', (e) => {
-        e.preventDefault(); // Prevent native touch behaviors and subsequent click event
+      // Prevent focus loss for terminal buttons when clicking
+      btn.addEventListener('mousedown', (e) => {
+        const key = btn.getAttribute('data-key');
+        const cmd = btn.getAttribute('data-cmd');
+        if (key || cmd || btn.classList.contains('paste-menu-btn')) {
+          e.preventDefault(); // Prevent losing focus on textarea
+        }
+      });
+      
+      // Execute actions on native click (allows natural scrolling on mobile)
+      btn.addEventListener('click', (e) => {
+        if (btn.id !== 'main-action-btn') {
           document.getElementById('extra-keys-menu').classList.remove('show');
+        }
+        if (btn.id !== 'dpad-toggle-btn' && !btn.closest('#dpad-menu')) {
+          const dpad = document.getElementById('dpad-menu');
+          if (dpad) dpad.classList.remove('show');
+        }
         
         const key = btn.getAttribute('data-key');
         const cmd = btn.getAttribute('data-cmd');
@@ -753,50 +823,6 @@
         } else if (btn.classList.contains('paste-menu-btn')) {
           if (typeof window.pasteFromClipboard === 'function') {
             window.pasteFromClipboard();
-          }
-        } else {
-          // Standard button (Logo, Import, Export)
-          btn.click();
-        }
-      }, { passive: false });
-      
-      // Mouse handler: Prevent focus loss for terminal buttons
-      btn.addEventListener('mousedown', (e) => {
-        const key = btn.getAttribute('data-key');
-        const cmd = btn.getAttribute('data-cmd');
-        
-        if (key || cmd || btn.classList.contains('paste-menu-btn')) {
-          e.preventDefault(); // Prevent losing focus on textarea
-            document.getElementById('extra-keys-menu').classList.remove('show');
-          
-          const code = parseInt(btn.getAttribute('data-code') || '0');
-          const isCtrl = btn.getAttribute('data-ctrl') === 'true';
-          const theIframe = document.getElementById('term-frame');
-          const iframeDoc = theIframe && theIframe.contentWindow ? theIframe.contentWindow.document : null;
-          if (!iframeDoc) return;
-          const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
-          
-          if (target) {
-            if (cmd) {
-              const dt = new DataTransfer();
-              dt.setData('text/plain', cmd + '\r');
-              target.dispatchEvent(new ClipboardEvent('paste', {
-                  clipboardData: dt,
-                  bubbles: true,
-                  cancelable: true
-              }));
-              setTimeout(() => {
-                target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
-              }, 10);
-            } else {
-              target.dispatchEvent(new KeyboardEvent('keydown', {
-                key: key,
-                code: key,
-                keyCode: code,
-                ctrlKey: isCtrl,
-                bubbles: true
-              }));
-            }
           }
         }
       });

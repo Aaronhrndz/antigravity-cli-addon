@@ -41,13 +41,7 @@ echo "Ingress URL is $INGRESS_URL"
 # Start Python Upload server on port 8097
 python3 /opt/antigravity/upload.py &
 
-# Run the CLI via dtach to support session persistence natively without alternate screen (perfect mobile scrolling)
-for log in /data/session_*.log; do
-  if [ -f "$log" ]; then
-    tail -n 10000 "$log" > "${log}.tmp"
-    mv "${log}.tmp" "$log"
-  fi
-done
+
 export COLORTERM=truecolor
 export TERM=xterm-256color
 export PAGER=cat
@@ -84,7 +78,7 @@ fi
 export MCP_CONFIG_PATH=/homeassistant/mcp.json
 
 # Using disableResizeOverlay=true -t scrollback=10000 removes the annoying 100x40 banner
-ttyd -a -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t scrollback=10000 -t 'theme={"background": "#2b2b2b"}' -p 62898 /opt/antigravity/attach.sh &
+ttyd -a -P 300 -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t scrollback=10000 -t disableReconnect=false -t 'theme={"background": "#2b2b2b"}' -p 62898 /opt/antigravity/attach.sh &
 
 echo "Starting NGINX reverse proxy on port 62899..."
 exec nginx -c /etc/nginx/nginx.conf -g "daemon off;"

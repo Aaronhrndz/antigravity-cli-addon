@@ -1,9 +1,9 @@
-name: "Antigravity CLI"
+name: "Antigravity CLI (Local)"
 description: "AI Agent with total control over domotics via Home Assistant Supervisor API"
-version: "1.8.6"
+version: "1.8.8"
 slug: "antigravity_cli"
 panel_icon: "mdi:triangle"
-panel_title: "Antigravity"
+panel_title: "Antigravity Local"
 arch:
   - aarch64
   - amd64

@@ -1,15 +1,10 @@
 #!/bin/bash
-SESSION_ID=${1:-1}
-SESSION_LOG="/data/session_${SESSION_ID}.log"
-SOCKET="/tmp/agy_${SESSION_ID}.socket"
-
 export TERM=xterm-256color
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LANGUAGE=en_US:en
 
-if [ -f "$SESSION_LOG" ]; then
-    cat "$SESSION_LOG"
-fi
+chmod +x /opt/antigravity/run_agy.sh
 
-exec dtach -A "$SOCKET" /usr/bin/script -q -f -a "$SESSION_LOG" -c "/usr/local/bin/agy"
+SESSION_ID=${1:-default}
+exec tmux -f /etc/tmux.conf new-session -A -s agy_$SESSION_ID "/opt/antigravity/run_agy.sh"
