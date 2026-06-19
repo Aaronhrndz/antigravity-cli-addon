@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 SESSION_ID=${1:-1}
 SESSION_LOG="/data/session_${SESSION_ID}.log"
 SOCKET="/tmp/agy_${SESSION_ID}.socket"
