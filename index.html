@@ -984,7 +984,11 @@
             }, { passive: false, capture: true });
             
             const scrollToBottom = () => {
-                if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                if (iframeWin.term && typeof iframeWin.term.scrollToBottom === 'function') {
+                  iframeWin.term.scrollToBottom();
+                } else if (viewport) {
+                  viewport.scrollTop = viewport.scrollHeight;
+                }
             };
             iframeWin.forceScrollToBottom = scrollToBottom;
 
