@@ -544,6 +544,11 @@
           if (win.term.fit) win.term.fit();
           const display = document.getElementById('zoom-level-display');
           if (display) display.textContent = next + 'px';
+          
+          setTimeout(() => {
+            if (win.forceScrollToBottom) win.forceScrollToBottom();
+            else if (win.term.scrollToBottom) win.term.scrollToBottom();
+          }, 150);
         } else if (win) {
           // Fallback if term isn't globally exposed
           let currentScale = parseFloat(win.document.body.style.zoom) || 1.0;
@@ -978,17 +983,21 @@
               tracking = false; stop();
             }, { passive: false, capture: true });
             
-                                        const scrollToBottom = () => {
+            const scrollToBottom = () => {
                 if (viewport) viewport.scrollTop = viewport.scrollHeight;
-              };
+            };
+            iframeWin.forceScrollToBottom = scrollToBottom;
 
-              // Force scroll to bottom on load (as data streams in from ttyd)
-              [100, 300, 600, 1000].forEach(delay => {
-                setTimeout(scrollToBottom, delay);
-              });
+            // Force scroll to bottom on load (as data streams in from ttyd)
+            let scrollAttempts = 0;
+            const scrollInt = setInterval(() => {
+              scrollToBottom();
+              scrollAttempts++;
+              if (scrollAttempts > 50) clearInterval(scrollInt);
+            }, 100);
               
-              // Force scroll to bottom unconditionally when window resizes (e.g., closing Android keyboard)
-              iframeWin.addEventListener('resize', () => {
+            // Force scroll to bottom unconditionally when window resizes (e.g., closing Android keyboard)
+            iframeWin.addEventListener('resize', () => {
                 [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
               });
           }
