@@ -992,21 +992,19 @@
             };
             iframeWin.forceScrollToBottom = scrollToBottom;
 
-            // Synchronously anchor to bottom during initial data dump to avoid jitter
-            let isLoading = true;
-            let loadTimeout = setTimeout(() => { isLoading = false; }, 2000);
-            
-            const rowObserver = new MutationObserver(() => {
-              if (isLoading) {
+            // Debounce the initial data dump: wait for all text to finish streaming, then scroll to bottom EXACTLY ONCE.
+            let streamStabilizeTimer = null;
+            const stabilizeObserver = new MutationObserver(() => {
+              clearTimeout(streamStabilizeTimer);
+              streamStabilizeTimer = setTimeout(() => {
                 scrollToBottom();
-                clearTimeout(loadTimeout);
-                loadTimeout = setTimeout(() => { isLoading = false; }, 300);
-              }
+                stabilizeObserver.disconnect(); // Never interfere again after the initial load
+              }, 500);
             });
             
             const rowsContainer = iframeDoc.querySelector('.xterm-rows') || screen;
             if (rowsContainer) {
-              rowObserver.observe(rowsContainer, { childList: true, subtree: true, characterData: true });
+              stabilizeObserver.observe(rowsContainer, { childList: true, subtree: true, characterData: true });
             }
               
             // Force scroll to bottom unconditionally when window resizes (e.g., closing Android keyboard)
