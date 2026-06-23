@@ -542,7 +542,6 @@
           else if (win.term.options) win.term.options.fontSize = next;
           
           if (win.term.fit) win.term.fit();
-          if (win.term.scrollToBottom) win.term.scrollToBottom();
           const display = document.getElementById('zoom-level-display');
           if (display) display.textContent = next + 'px';
         } else if (win) {
