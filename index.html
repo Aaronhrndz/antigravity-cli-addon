@@ -532,9 +532,14 @@
     window.zoomTerminal = function(delta) {
       try {
         const win = document.getElementById('term-frame').contentWindow;
-        if (win && win.term && win.term.options) {
-          const current = win.term.options.fontSize || 14;
-          win.term.options.fontSize = current + delta;
+        if (win && win.term) {
+          // Native xterm.js font scaling
+          const current = win.term.getOption ? win.term.getOption('fontSize') : (win.term.options ? win.term.options.fontSize : 14);
+          const next = current + delta;
+          if (win.term.setOption) win.term.setOption('fontSize', next);
+          else if (win.term.options) win.term.options.fontSize = next;
+          
+          if (win.term.fit) win.term.fit();
         } else if (win) {
           // Fallback if term isn't globally exposed
           let currentScale = parseFloat(win.document.body.style.zoom) || 1.0;
