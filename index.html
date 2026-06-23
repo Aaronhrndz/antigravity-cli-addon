@@ -545,10 +545,12 @@
           const display = document.getElementById('zoom-level-display');
           if (display) display.textContent = next + 'px';
           
-          setTimeout(() => {
-            if (win.forceScrollToBottom) win.forceScrollToBottom();
-            else if (win.term.scrollToBottom) win.term.scrollToBottom();
-          }, 150);
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              if (win.forceScrollToBottom) win.forceScrollToBottom();
+              else if (win.term.scrollToBottom) win.term.scrollToBottom();
+            }, 300);
+          });
         } else if (win) {
           // Fallback if term isn't globally exposed
           let currentScale = parseFloat(win.document.body.style.zoom) || 1.0;
