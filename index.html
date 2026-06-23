@@ -398,7 +398,7 @@
     <button onclick="installUpdate()" style="background: #ffeeba; color: #856404; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Update Now</button>
   </div>
   <div id="terminal-container">
-    <iframe id="term-frame"></iframe>
+    <iframe id="term-frame" onload="try{this.contentDocument.head.insertAdjacentHTML('beforeend','<style>body,html,.xterm-viewport{overscroll-behavior:none!important;}</style>')}catch(e){}"></iframe>
   </div>
   
   <div id="notification"></div>
