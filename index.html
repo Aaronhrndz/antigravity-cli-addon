@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -21,6 +21,7 @@
       width: 100vw;
       max-width: 100vw;
       box-sizing: border-box;
+      overscroll-behavior: none; /* Prevents pull-to-refresh on mobile */
     }
     
     #terminal-container {
@@ -397,7 +398,7 @@
     <button onclick="installUpdate()" style="background: #ffeeba; color: #856404; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Update Now</button>
   </div>
   <div id="terminal-container">
-    <iframe id="term-frame"></iframe>
+    <iframe id="term-frame" onload="try{this.contentDocument.head.insertAdjacentHTML('beforeend','<style>body,html,.xterm-viewport{overscroll-behavior:none!important;}</style>')}catch(e){}"></iframe>
   </div>
   
   <div id="notification"></div>
@@ -490,6 +491,9 @@
     <div class="footer-center">
       <button class="tool-btn" data-key="Escape" data-code="27" style="width: auto; padding: 0 6px; font-weight: bold;">Esc</button>
       <button class="tool-btn tab-btn" data-key="Tab" data-code="9" style="width: auto; padding: 0 8px; margin-right: 8px; font-weight: bold;">Tab</button>
+      <button class="tool-btn" onclick="zoomTerminal(-2)" style="font-weight: bold; width: auto; padding: 0 8px; margin-right: 4px;" title="Zoom Out">A-</button>
+      <span id="zoom-level-display" style="font-size: 13px; font-weight: bold; color: #9aa0a6; margin-right: 4px; display: inline-flex; align-items: center; justify-content: center; width: 36px;">13px</span>
+      <button class="tool-btn" onclick="zoomTerminal(2)" style="font-weight: bold; width: auto; padding: 0 8px; margin-right: 8px;" title="Zoom In">A+</button>
       <button id="dpad-toggle-btn" class="tool-btn" onclick="toggleDpadMenu(event)" style="padding: 0;" title="D-Pad">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="5 9 2 12 5 15"></polyline>
@@ -527,6 +531,34 @@
   </div>
 
   <script>
+    window.zoomTerminal = function(delta) {
+      try {
+        const win = document.getElementById('term-frame').contentWindow;
+        if (win && win.term) {
+          // Native xterm.js font scaling
+          const current = win.term.getOption ? win.term.getOption('fontSize') : (win.term.options ? win.term.options.fontSize : 14);
+          const next = current + delta;
+          if (win.term.setOption) win.term.setOption('fontSize', next);
+          else if (win.term.options) win.term.options.fontSize = next;
+          
+          if (win.term.fit) win.term.fit();
+          const display = document.getElementById('zoom-level-display');
+          if (display) display.textContent = next + 'px';
+          
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              if (win.forceScrollToBottom) win.forceScrollToBottom();
+              else if (win.term.scrollToBottom) win.term.scrollToBottom();
+            }, 300);
+          });
+        } else if (win) {
+          // Fallback if term isn't globally exposed
+          let currentScale = parseFloat(win.document.body.style.zoom) || 1.0;
+          win.document.body.style.zoom = currentScale + (delta > 0 ? 0.1 : -0.1);
+        }
+      } catch (e) { console.error('Zoom error', e); }
+    };
+    
     // Tab Management
     let sessions = JSON.parse(localStorage.getItem('agy_sessions')) || [{id: 1, name: 'Session 1'}];
     let currentSessionId = localStorage.getItem('agy_current_session') ? parseInt(localStorage.getItem('agy_current_session')) : sessions[0].id;
@@ -953,17 +985,32 @@
               tracking = false; stop();
             }, { passive: false, capture: true });
             
-                                        const scrollToBottom = () => {
-                if (viewport) viewport.scrollTop = viewport.scrollHeight;
-              };
+            const scrollToBottom = () => {
+                if (iframeWin.term && typeof iframeWin.term.scrollToBottom === 'function') {
+                  iframeWin.term.scrollToBottom();
+                } else if (viewport) {
+                  viewport.scrollTop = viewport.scrollHeight;
+                }
+            };
+            iframeWin.forceScrollToBottom = scrollToBottom;
 
-              // Force scroll to bottom on load (as data streams in from ttyd)
-              [100, 300, 600, 1000].forEach(delay => {
-                setTimeout(scrollToBottom, delay);
-              });
+            // Debounce the initial data dump: wait for all text to finish streaming, then scroll to bottom EXACTLY ONCE.
+            let streamStabilizeTimer = null;
+            const stabilizeObserver = new MutationObserver(() => {
+              clearTimeout(streamStabilizeTimer);
+              streamStabilizeTimer = setTimeout(() => {
+                scrollToBottom();
+                stabilizeObserver.disconnect(); // Never interfere again after the initial load
+              }, 500);
+            });
+            
+            const rowsContainer = iframeDoc.querySelector('.xterm-rows') || screen;
+            if (rowsContainer) {
+              stabilizeObserver.observe(rowsContainer, { childList: true, subtree: true, characterData: true });
+            }
               
-              // Force scroll to bottom unconditionally when window resizes (e.g., closing Android keyboard)
-              iframeWin.addEventListener('resize', () => {
+            // Force scroll to bottom unconditionally when window resizes (e.g., closing Android keyboard)
+            iframeWin.addEventListener('resize', () => {
                 [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
               });
           }

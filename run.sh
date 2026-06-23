@@ -83,8 +83,8 @@ fi
 # Set the environment variable so agy picks up the MCP configuration
 export MCP_CONFIG_PATH=/homeassistant/mcp.json
 
-# Using disableResizeOverlay=true -t scrollback=10000 removes the annoying 100x40 banner
-ttyd -a -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t scrollback=10000 -t 'theme={"background": "#2b2b2b"}' -p 62898 /opt/antigravity/attach.sh &
+# Using disableResizeOverlay=true -t scrollback=100000 removes the annoying 100x40 banner
+ttyd -a -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t scrollback=100000 -t 'theme={"background": "#2b2b2b"}' -p 62898 /opt/antigravity/attach.sh &
 
 echo "Starting NGINX reverse proxy on port 62899..."
 exec nginx -c /etc/nginx/nginx.conf -g "daemon off;"
