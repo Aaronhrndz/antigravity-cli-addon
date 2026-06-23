@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -490,6 +490,8 @@
     <div class="footer-center">
       <button class="tool-btn" data-key="Escape" data-code="27" style="width: auto; padding: 0 6px; font-weight: bold;">Esc</button>
       <button class="tool-btn tab-btn" data-key="Tab" data-code="9" style="width: auto; padding: 0 8px; margin-right: 8px; font-weight: bold;">Tab</button>
+      <button class="tool-btn" onclick="zoomTerminal(1)" style="font-weight: bold; width: auto; padding: 0 8px; margin-right: 4px;" title="Zoom In">A+</button>
+      <button class="tool-btn" onclick="zoomTerminal(-1)" style="font-weight: bold; width: auto; padding: 0 8px; margin-right: 8px;" title="Zoom Out">A-</button>
       <button id="dpad-toggle-btn" class="tool-btn" onclick="toggleDpadMenu(event)" style="padding: 0;" title="D-Pad">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="5 9 2 12 5 15"></polyline>
@@ -527,6 +529,20 @@
   </div>
 
   <script>
+    window.zoomTerminal = function(delta) {
+      try {
+        const win = document.getElementById('term-frame').contentWindow;
+        if (win && win.term && win.term.options) {
+          const current = win.term.options.fontSize || 14;
+          win.term.options.fontSize = current + delta;
+        } else if (win) {
+          // Fallback if term isn't globally exposed
+          let currentScale = parseFloat(win.document.body.style.zoom) || 1.0;
+          win.document.body.style.zoom = currentScale + (delta > 0 ? 0.1 : -0.1);
+        }
+      } catch (e) { console.error('Zoom error', e); }
+    };
+    
     // Tab Management
     let sessions = JSON.parse(localStorage.getItem('agy_sessions')) || [{id: 1, name: 'Session 1'}];
     let currentSessionId = localStorage.getItem('agy_current_session') ? parseInt(localStorage.getItem('agy_current_session')) : sessions[0].id;
