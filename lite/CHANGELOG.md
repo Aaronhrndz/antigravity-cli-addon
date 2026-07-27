@@ -2,6 +2,10 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
+## [1.9.2]
+- fix: Fix tmux attach session loop and process code 0 exit by introducing interactive bash wrapper in attach.sh
+- fix: Set allow_reuse_address = True on upload server to prevent OSError 98 Address already in use on restart
+
 ## [1.9.1]
 - feat: Migrate session backend from dtach to native tmux for clean session persistence and history limit (50,000 lines)
 - feat: Implement persistent DOM multi-iframe tabs to prevent session reload, data loss, and screen flickering on tab switch

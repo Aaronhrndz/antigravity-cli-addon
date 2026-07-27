@@ -4,6 +4,7 @@ set -e
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LANGUAGE=en_US:en
+export GODEBUG=cpu.pclmul=off,cpu.aes=off
 
 echo "Starting Antigravity CLI Add-on..."
 

@@ -203,5 +203,6 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     PORT = 62897
     print(f"Starting upload server on port {PORT}")
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), UploadHandler) as httpd:
         httpd.serve_forever()
