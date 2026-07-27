@@ -2,6 +2,9 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
+## [1.9.7]
+- fix: Support reading canvas and xterm.js buffer API in Copy Auth Link button
+
 ## [1.9.6]
 - fix: Add repository.json for Supervisor metadata compatibility
 

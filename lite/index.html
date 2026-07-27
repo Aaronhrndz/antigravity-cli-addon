@@ -541,12 +541,43 @@
 
     window.copyAuthUrl = function() {
       const iframe = getActiveIframe();
-      if (!iframe || !iframe.contentDocument) {
+      if (!iframe) {
         showNotification("No terminal active");
         return;
       }
-      const bodyText = iframe.contentDocument.body ? iframe.contentDocument.body.innerText : '';
-      const match = bodyText.match(/(https:\/\/accounts\.google\.com\/o\/oauth2\/auth[^\s"']+)/);
+      let fullText = "";
+      try {
+        const win = iframe.contentWindow;
+        const doc = iframe.contentDocument || (win ? win.document : null);
+        
+        if (win && win.term && win.term.buffer && win.term.buffer.active) {
+          const buf = win.term.buffer.active;
+          for (let i = 0; i < buf.length; i++) {
+            const line = buf.getLine(i);
+            if (line) fullText += line.translateToString(true) + "\n";
+          }
+        }
+        
+        if (!fullText && doc) {
+          const rows = doc.querySelectorAll('.xterm-rows > div');
+          if (rows && rows.length > 0) {
+            rows.forEach(r => { fullText += r.innerText + "\n"; });
+          }
+        }
+
+        if (!fullText && doc) {
+          const acc = doc.querySelector('.xterm-accessibility');
+          if (acc) fullText = acc.innerText;
+        }
+
+        if (!fullText && doc && doc.body) {
+          fullText = doc.body.innerText;
+        }
+      } catch (e) {
+        console.error("Error reading terminal text:", e);
+      }
+
+      const match = fullText.match(/(https:\/\/accounts\.google\.com\/o\/oauth2\/auth[^\s"']+)/);
       if (match) {
         const cleanUrl = match[1].replace(/[\r\n\s]+/g, '');
         if (navigator.clipboard && navigator.clipboard.writeText) {
