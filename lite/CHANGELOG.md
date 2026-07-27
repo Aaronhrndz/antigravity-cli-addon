@@ -1,6 +1,13 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
+
+## [1.9.0]
+- feat: Migrate session backend from dtach to native tmux for clean session persistence and history limit (50,000 lines)
+- feat: Implement persistent DOM multi-iframe tabs to prevent session reload, data loss, and screen flickering on tab switch
+- feat: Add Android background recovery handler (visibilitychange) for smooth viewport auto-fitting when returning to Home Assistant
+- fix: Fix exponential log duplication bug in attach.sh by removing recursive cat session_*.log loop
+- fix: Optimize backup system in upload.py with smart tar exclude filters (session logs, duplicate backup extractions, node_modules, caches), reducing backup size from ~500MB to ~10MB while preserving 100% of agent memory, skills, and chat histories
 
 ## [1.8.9]
 - feat: Move Home and End to D-pad menu and sync lite version

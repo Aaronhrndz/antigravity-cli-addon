@@ -15,6 +15,7 @@ COPY upload.py /opt/antigravity/upload.py
 COPY index.html /opt/antigravity/html/index.html
 COPY logo.png /opt/antigravity/html/logo.png
 COPY attach.sh /opt/antigravity/attach.sh
+COPY tmux.conf /opt/antigravity/tmux.conf
 COPY tmux.conf /etc/tmux.conf
 
 RUN chmod +x /opt/antigravity/attach.sh

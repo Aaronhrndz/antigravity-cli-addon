@@ -177,8 +177,16 @@ class UploadHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 
                 # Stream tar directly to the network to prevent disk/RAM exhaustion
-                import subprocess
-                proc = subprocess.Popen(["tar", "-czf", "-", "-C", "/"] + targets, stdout=subprocess.PIPE)
+                excludes = [
+                    "--exclude=session_*.log",
+                    "--exclude=*.log",
+                    "--exclude=backup_extract",
+                    "--exclude=node_modules",
+                    "--exclude=*.zip",
+                    "--exclude=__pycache__",
+                    "--exclude=.cache"
+                ]
+                proc = subprocess.Popen(["tar", "-czf", "-"] + excludes + ["-C", "/"] + targets, stdout=subprocess.PIPE)
                 import shutil
                 shutil.copyfileobj(proc.stdout, self.wfile)
                 proc.stdout.close()

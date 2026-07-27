@@ -41,13 +41,7 @@ echo "Ingress URL is $INGRESS_URL"
 # Start Python Upload server on port 8097
 python3 /opt/antigravity/upload.py &
 
-# Run the CLI via dtach to support session persistence natively without alternate screen (perfect mobile scrolling)
-for log in /data/session_*.log; do
-  if [ -f "$log" ]; then
-    tail -n 10000 "$log" > "${log}.tmp"
-    mv "${log}.tmp" "$log"
-  fi
-done
+# Run the CLI via tmux for clean session persistence and smooth mobile touch scrollback
 export COLORTERM=truecolor
 export TERM=xterm-256color
 export PAGER=cat

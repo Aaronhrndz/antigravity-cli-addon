@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -396,9 +396,7 @@
     <span id="update-text">Update available!</span>
     <button onclick="installUpdate()" style="background: #ffeeba; color: #856404; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Update Now</button>
   </div>
-  <div id="terminal-container">
-    <iframe id="term-frame"></iframe>
-  </div>
+  <div id="terminal-container"></div>
   
   <div id="notification"></div>
   
@@ -527,7 +525,7 @@
   </div>
 
   <script>
-    // Tab Management
+    // Tab & Session Management
     let sessions = JSON.parse(localStorage.getItem('agy_sessions')) || [{id: 1, name: 'Session 1'}];
     let currentSessionId = localStorage.getItem('agy_current_session') ? parseInt(localStorage.getItem('agy_current_session')) : sessions[0].id;
     if (!sessions.find(s => s.id === currentSessionId)) currentSessionId = sessions[0].id;
@@ -537,11 +535,175 @@
       localStorage.setItem('agy_current_session', currentSessionId);
     }
 
+    function getActiveIframe() {
+      return document.querySelector(`.term-iframe[data-session-id="${currentSessionId}"]`);
+    }
+
+    function setupIframeEvents(iframe) {
+      try {
+        const iframeWin = iframe.contentWindow;
+        if (!iframeWin) return;
+        const iframeDoc = iframeWin.document;
+        
+        const interval = setInterval(() => {
+          const viewport = iframeDoc.querySelector('.xterm-viewport');
+          const screen = iframeDoc.querySelector('.xterm-screen');
+          
+          if (viewport && screen) {
+            clearInterval(interval);
+            
+            const fixTextarea = () => {
+              const ta = iframeDoc.querySelector('.xterm-helper-textarea');
+              if (ta && !ta.dataset.fixed) {
+                ta.dataset.fixed = "true";
+                ta.setAttribute('autocomplete', 'off');
+                ta.setAttribute('autocorrect', 'off');
+                ta.setAttribute('autocapitalize', 'off');
+                ta.setAttribute('spellcheck', 'false');
+                ta.setAttribute('data-gramm', 'false');
+              }
+            };
+            fixTextarea();
+
+            iframeDoc.addEventListener('contextmenu', (e) => {
+              e.preventDefault();
+            });
+
+            const observer = new MutationObserver((mutations) => {
+              fixTextarea();
+              mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                  if (node.nodeType === 1 && node.tagName === 'DIV' && !node.className) {
+                    const text = node.textContent || '';
+                    if (text.match(/^\d+x\d+$/)) {
+                      node.style.display = 'none';
+                    } else if (text.includes('Reconnect') || text.includes('Closed')) {
+                      node.style.display = 'none';
+                      setTimeout(() => {
+                        const textarea = iframeDoc.querySelector('.xterm-helper-textarea');
+                        if (textarea) {
+                          textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+                        } else {
+                          screen.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+                        }
+                      }, 500);
+                    }
+                  }
+                });
+              });
+            });
+            
+            const xtermContainer = iframeDoc.querySelector('.xterm');
+            if (xtermContainer) {
+              observer.observe(xtermContainer, { childList: true });
+            }
+            
+            const FRICTION = 0.97;
+            const MIN_VELOCITY = 0.3;
+            
+            let lastY = 0, lastTime = 0, velocity = 0;
+            let animId = null, tracking = false;
+            
+            function coast() {
+              velocity *= FRICTION;
+              if (Math.abs(velocity) < MIN_VELOCITY) { animId = null; return; }
+              viewport.scrollTop += velocity;
+              animId = iframeWin.requestAnimationFrame(coast);
+            }
+            
+            function stop() {
+              if (animId) { iframeWin.cancelAnimationFrame(animId); animId = null; }
+              velocity = 0;
+            }
+            
+            screen.addEventListener('touchstart', (e) => {
+              if (e.touches.length !== 1) return;
+              stop();
+              lastY = e.touches[0].clientY;
+              lastTime = performance.now();
+              tracking = true;
+            }, { passive: false, capture: true });
+            
+            screen.addEventListener('touchmove', (e) => {
+              if (!tracking || e.touches.length !== 1) return;
+              const y = e.touches[0].clientY;
+              const now = performance.now();
+              const dt = now - lastTime;
+              const dy = lastY - y;
+              
+              if (dt > 0) {
+                const v = (dy / dt) * 16;
+                velocity = velocity * 0.2 + v * 0.8;
+              }
+              
+              viewport.scrollTop += dy;
+              
+              lastY = y;
+              lastTime = now;
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            }, { passive: false, capture: true });
+            
+            screen.addEventListener('touchend', () => {
+              if (!tracking) return;
+              tracking = false;
+              if (Math.abs(velocity) > MIN_VELOCITY) {
+                animId = iframeWin.requestAnimationFrame(coast);
+              }
+            }, { passive: false, capture: true });
+            
+            screen.addEventListener('touchcancel', () => {
+              tracking = false; stop();
+            }, { passive: false, capture: true });
+            
+            const scrollToBottom = () => {
+              if (viewport) viewport.scrollTop = viewport.scrollHeight;
+            };
+
+            [100, 300, 600, 1000].forEach(delay => {
+              setTimeout(scrollToBottom, delay);
+            });
+            
+            iframeWin.addEventListener('resize', () => {
+              [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
+            });
+          }
+        }, 500);
+      } catch(err) {
+        console.error("Iframe access error:", err);
+      }
+    }
+
+    function ensureIframe(id) {
+      const container = document.getElementById('terminal-container');
+      let iframe = document.querySelector(`.term-iframe[data-session-id="${id}"]`);
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.className = 'term-iframe';
+        iframe.setAttribute('data-session-id', id);
+        iframe.src = 'ttyd/?arg=' + id;
+        iframe.onload = () => setupIframeEvents(iframe);
+        container.appendChild(iframe);
+      }
+      return iframe;
+    }
+
     window.switchSession = function(id) {
       currentSessionId = id;
       saveSessions();
+      ensureIframe(id);
+
+      document.querySelectorAll('.term-iframe').forEach(iframe => {
+        if (parseInt(iframe.getAttribute('data-session-id')) === id) {
+          iframe.style.display = 'block';
+          iframe.classList.add('active');
+        } else {
+          iframe.style.display = 'none';
+          iframe.classList.remove('active');
+        }
+      });
+
       renderTabs();
-      document.getElementById('term-frame').src = 'ttyd/?arg=' + id;
     };
 
     window.createSession = function() {
@@ -553,10 +715,13 @@
 
     window.closeSession = async function(e, id) {
       e.stopPropagation();
-      if (sessions.length <= 1) return; // Cannot close the last session
+      if (sessions.length <= 1) return;
       
       const idx = sessions.findIndex(s => s.id === id);
       sessions.splice(idx, 1);
+      
+      const iframe = document.querySelector(`.term-iframe[data-session-id="${id}"]`);
+      if (iframe) iframe.remove();
       
       if (currentSessionId === id) {
         switchSession(sessions[Math.max(0, idx - 1)].id);
@@ -590,9 +755,21 @@
       tabBar.appendChild(addBtn);
     }
 
-    // Initialize tabs
+    // Initialize tabs and load initial session
     renderTabs();
-    document.getElementById('term-frame').src = 'ttyd/?arg=' + currentSessionId;
+    switchSession(currentSessionId);
+
+    // Android/Browser background recovery handler
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        setTimeout(() => {
+          const activeIframe = getActiveIframe();
+          if (activeIframe && activeIframe.contentWindow) {
+            activeIframe.contentWindow.dispatchEvent(new Event('resize'));
+          }
+        }, 250);
+      }
+    });
 
     async function checkVersion() {
       try {
@@ -650,7 +827,7 @@
         if (res.ok) {
           const data = await res.json();
           try {
-            const iframe = document.getElementById('term-frame');
+            const iframe = getActiveIframe();
             if (iframe && iframe.contentWindow && iframe.contentWindow.term) {
               iframe.contentWindow.term.paste(data.filepath);
               showNotification(`Image inserted: ${data.filepath}`);
@@ -680,7 +857,7 @@
       try {
         const text = await navigator.clipboard.readText();
         if (!text) return;
-        const iframe = document.getElementById('term-frame');
+        const iframe = getActiveIframe();
         if (iframe && iframe.contentWindow) {
           if (iframe.contentWindow.term) {
              iframe.contentWindow.term.paste(text);
@@ -742,13 +919,13 @@
 
     function sendVirtualKey(key, keyCode) {
       try {
-        const iframeDoc = document.querySelector('iframe').contentDocument;
-        if (!iframeDoc) return;
+        const iframe = getActiveIframe();
+        if (!iframe || !iframe.contentDocument) return;
+        const iframeDoc = iframe.contentDocument;
         
         const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
         if (!target) return;
         
-        // Define common control codes as fallback
         const seq = {
           'Enter': '\r', 'Escape': '\x1b', 'Tab': '\x09',
           'ArrowUp': '\x1b[A', 'ArrowDown': '\x1b[B', 'ArrowLeft': '\x1b[D', 'ArrowRight': '\x1b[C',
@@ -756,7 +933,6 @@
         };
 
         if (seq[key]) {
-            // Best way to send raw escape sequences in ttyd is to paste them
             const dt = new DataTransfer();
             dt.setData('text/plain', seq[key]);
             target.dispatchEvent(new ClipboardEvent('paste', {
@@ -771,16 +947,14 @@
     }
 
     document.querySelectorAll('.tool-btn').forEach(btn => {
-      // Prevent focus loss for terminal buttons when clicking
       btn.addEventListener('mousedown', (e) => {
         const key = btn.getAttribute('data-key');
         const cmd = btn.getAttribute('data-cmd');
         if (key || cmd || btn.classList.contains('paste-menu-btn')) {
-          e.preventDefault(); // Prevent losing focus on textarea
+          e.preventDefault();
         }
       });
       
-      // Execute actions on native click (allows natural scrolling on mobile)
       btn.addEventListener('click', (e) => {
         if (btn.id !== 'main-action-btn') {
           document.getElementById('extra-keys-menu').classList.remove('show');
@@ -794,10 +968,9 @@
         const cmd = btn.getAttribute('data-cmd');
         
         if (key || cmd) {
-          // Terminal macro button
           const code = parseInt(btn.getAttribute('data-code') || '0');
           const isCtrl = btn.getAttribute('data-ctrl') === 'true';
-          const theIframe = document.getElementById('term-frame');
+          const theIframe = getActiveIframe();
           const iframeDoc = theIframe && theIframe.contentWindow ? theIframe.contentWindow.document : null;
           if (!iframeDoc) return;
           const target = iframeDoc.querySelector('.xterm-helper-textarea') || iframeDoc.querySelector('.xterm-screen');
@@ -832,146 +1005,7 @@
       });
     });
 
-    const iframe = document.getElementById('term-frame');
-    iframe.onload = () => {
-      try {
-        const iframeWin = iframe.contentWindow;
-        const iframeDoc = iframeWin.document;
-        
 
-        
-        const interval = setInterval(() => {
-          const viewport = iframeDoc.querySelector('.xterm-viewport');
-          const screen = iframeDoc.querySelector('.xterm-screen');
-          
-          if (viewport && screen) {
-            clearInterval(interval);
-            
-            const fixTextarea = () => {
-              const ta = iframeDoc.querySelector('.xterm-helper-textarea');
-              if (ta && !ta.dataset.fixed) {
-                ta.dataset.fixed = "true";
-                ta.setAttribute('autocomplete', 'off');
-                ta.setAttribute('autocorrect', 'off');
-                ta.setAttribute('autocapitalize', 'off');
-                ta.setAttribute('spellcheck', 'false');
-                ta.setAttribute('data-gramm', 'false');
-              }
-            };
-            fixTextarea();
-
-            iframeDoc.addEventListener('contextmenu', (e) => {
-              e.preventDefault();
-            });
-            // Auto-hide resize banners and auto-reconnect on disconnect.
-            const observer = new MutationObserver((mutations) => {
-              fixTextarea();
-              mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                  if (node.nodeType === 1 && node.tagName === 'DIV' && !node.className) {
-                    const text = node.textContent || '';
-                    if (text.match(/^\d+x\d+$/)) {
-                      node.style.display = 'none';
-                    } else if (text.includes('Reconnect') || text.includes('Closed')) {
-                      node.style.display = 'none';
-                      setTimeout(() => {
-                        const textarea = iframeDoc.querySelector('.xterm-helper-textarea');
-                        if (textarea) {
-                          textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
-                        } else {
-                          screen.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
-                        }
-                      }, 500);
-                    }
-                  }
-                });
-              });
-            });
-            
-            const xtermContainer = iframeDoc.querySelector('.xterm');
-            if (xtermContainer) {
-              observer.observe(xtermContainer, { childList: true });
-            }
-            
-            const FRICTION = 0.97;
-            const MIN_VELOCITY = 0.3;
-            
-            let lastY = 0, lastTime = 0, velocity = 0;
-            let animId = null, tracking = false;
-            
-            function coast() {
-              velocity *= FRICTION;
-              if (Math.abs(velocity) < MIN_VELOCITY) { animId = null; return; }
-              viewport.scrollTop += velocity;
-              animId = iframeWin.requestAnimationFrame(coast);
-            }
-            
-            function stop() {
-              if (animId) { iframeWin.cancelAnimationFrame(animId); animId = null; }
-              velocity = 0;
-            }
-            
-            screen.addEventListener('touchstart', (e) => {
-              if (e.touches.length !== 1) return;
-              stop();
-              lastY = e.touches[0].clientY;
-              lastTime = performance.now();
-              tracking = true;
-            }, { passive: false, capture: true });
-            
-            screen.addEventListener('touchmove', (e) => {
-              if (!tracking || e.touches.length !== 1) return;
-              const y = e.touches[0].clientY;
-              const now = performance.now();
-              const dt = now - lastTime;
-              const dy = lastY - y; // positive = finger up = scroll down
-              
-              // Track velocity for momentum
-              if (dt > 0) {
-                const v = (dy / dt) * 16; // normalize to ~60fps
-                velocity = velocity * 0.2 + v * 0.8;
-              }
-              
-              // Move viewport immediately
-              viewport.scrollTop += dy;
-              
-              lastY = y;
-              lastTime = now;
-              e.preventDefault();
-              e.stopImmediatePropagation();
-            }, { passive: false, capture: true });
-            
-            screen.addEventListener('touchend', () => {
-              if (!tracking) return;
-              tracking = false;
-              if (Math.abs(velocity) > MIN_VELOCITY) {
-                animId = iframeWin.requestAnimationFrame(coast);
-              }
-            }, { passive: false, capture: true });
-            
-            screen.addEventListener('touchcancel', () => {
-              tracking = false; stop();
-            }, { passive: false, capture: true });
-            
-                                        const scrollToBottom = () => {
-                if (viewport) viewport.scrollTop = viewport.scrollHeight;
-              };
-
-              // Force scroll to bottom on load (as data streams in from ttyd)
-              [100, 300, 600, 1000].forEach(delay => {
-                setTimeout(scrollToBottom, delay);
-              });
-              
-              // Force scroll to bottom unconditionally when window resizes (e.g., closing Android keyboard)
-              iframeWin.addEventListener('resize', () => {
-                [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
-              });
-          }
-        }, 500);
-      } catch(err) {
-        console.error("Iframe access error:", err);
-      }
-    };
     function showLoader(text, showProgress = false) {
       document.getElementById('loader-text').innerText = text;
       document.getElementById('loader-progress-container').style.display = showProgress ? 'block' : 'none';
