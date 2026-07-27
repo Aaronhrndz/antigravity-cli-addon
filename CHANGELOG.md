@@ -2,7 +2,7 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
-## [1.9.0]
+## [1.9.1]
 - feat: Migrate session backend from dtach to native tmux for clean session persistence and history limit (50,000 lines)
 - feat: Implement persistent DOM multi-iframe tabs to prevent session reload, data loss, and screen flickering on tab switch
 - feat: Add Android background recovery handler (visibilitychange) for smooth viewport auto-fitting when returning to Home Assistant
