@@ -2,6 +2,9 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
+## [1.9.3]
+- feat: Add Copy Auth Link auto-detection button to copy multiline Google OAuth login URLs seamlessly in 1 click
+
 ## [1.9.2]
 - fix: Fix tmux attach session loop and process code 0 exit by introducing interactive bash wrapper in attach.sh
 - fix: Set allow_reuse_address = True on upload server to prevent OSError 98 Address already in use on restart

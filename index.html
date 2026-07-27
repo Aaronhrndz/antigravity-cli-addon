@@ -417,6 +417,10 @@
         </button>
         <button class="tool-btn" data-key="PageUp" data-code="33" style="grid-column: span 6;">PgUp</button>
         <button class="tool-btn" data-key="PageDown" data-code="34" style="grid-column: span 6;">PgDn</button>
+        <button class="tool-btn" onclick="copyAuthUrl()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 12; padding: 6px; background: #1f6feb; color: white;">
+          <span style="font-size: 8px; color: #d4edda; text-transform: uppercase; margin-bottom: 2px;">Detect & Copy</span>
+          <span style="font-size: 11px; font-weight: bold;">Copy Auth Link</span>
+        </button>
         <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 6; padding: 6px;">
           <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Export</span>
           <span style="font-size: 11px;">Config</span>
@@ -534,6 +538,30 @@
       localStorage.setItem('agy_sessions', JSON.stringify(sessions));
       localStorage.setItem('agy_current_session', currentSessionId);
     }
+
+    window.copyAuthUrl = function() {
+      const iframe = getActiveIframe();
+      if (!iframe || !iframe.contentDocument) {
+        showNotification("No terminal active");
+        return;
+      }
+      const bodyText = iframe.contentDocument.body ? iframe.contentDocument.body.innerText : '';
+      const match = bodyText.match(/(https:\/\/accounts\.google\.com\/o\/oauth2\/auth[^\s"']+)/);
+      if (match) {
+        const cleanUrl = match[1].replace(/[\r\n\s]+/g, '');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(cleanUrl).then(() => {
+            showNotification("Auth Link copied to clipboard!");
+          }).catch(() => {
+            prompt("Copy Auth URL:", cleanUrl);
+          });
+        } else {
+          prompt("Copy Auth URL:", cleanUrl);
+        }
+      } else {
+        showNotification("No Auth Link detected in terminal");
+      }
+    };
 
     function getActiveIframe() {
       return document.querySelector(`.term-iframe[data-session-id="${currentSessionId}"]`);
