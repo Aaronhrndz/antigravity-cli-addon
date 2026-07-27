@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
   <img src="https://raw.githubusercontent.com/Aaronhrndz/antigravity-cli-addon/main/logo.png" alt="Antigravity Logo" width="120"/>
 
   # Antigravity CLI Add-on for Home Assistant
@@ -19,7 +19,9 @@ What makes this add-on special is its **zero-friction mobile experience**. You c
 - 📱 **Built for Mobile Vibecoding**: A distraction-free UI wrapper around `ttyd` completely tailored for touch screens. Say goodbye to wonky scrolling, weird keyboard overlays, or unreadable text.
 - 🗂️ **Dynamic Multi-Session Tabs**: Want to work on your Python scripts and your Lovelace dashboards at the same time? Click the `+` button in the top tab bar to dynamically spawn new AI sessions. You can switch between them instantly without losing context, and close (`x`) the ones you don't need to instantly free up memory.
 - 🤖 **MCP Domotics Integration**: Automatically connects the AI agent to your home using Model Context Protocol (MCP). It can talk directly to Home Assistant and Zigbee2MQTT to control your lights, read sensors, and execute scripts using natural language.
-- 🔄 **Seamless Device Transitions**: Powered by `dtach`, your terminal sessions remain persistent. You can start a process on your PC, switch to your tablet, and open it on your phone without losing your command history or interrupting running tasks.
+- 🔄 **Seamless Device Transitions & 50k History**: Powered by `tmux`, your terminal sessions remain persistent across devices with 50,000 lines of scrollback buffer and full mouse/touch scroll support.
+- 🔑 **1-Click Copy Auth Link**: Built-in smart detector in the web interface that auto-detects and extracts multiline Google OAuth authentication URLs from the terminal canvas, repairing line-break split artifacts in 1 click.
+- 📦 **Optimized Light Backups**: Instant full config exports (<15 MB) preserving 100% of agent memory, skills, and past chat histories.
 - ⌨️ **Mobile-Optimized Macros & Controls**: Features a built-in virtual keypad specifically designed for terminal usage on mobile:
   - **High-Precision D-Pad**: Vectorized SVG arrow keys that render perfectly centered on any iOS or Android device.
   - **Terminal Essentials**: Dedicated `Esc` and `Tab` keys.
