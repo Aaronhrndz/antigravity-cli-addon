@@ -2,6 +2,9 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
+## [1.9.9]
+- fix: Fix Copy Auth Link regex pattern to capture full multiline URLs across terminal line breaks
+
 ## [1.9.8]
 - fix: Repair percent-encoding split artifacts caused by terminal 80-column line wrapping in Copy Auth Link button
 

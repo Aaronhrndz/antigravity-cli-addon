@@ -577,11 +577,10 @@
         console.error("Error reading terminal text:", e);
       }
 
-      const match = fullText.match(/(https:\/\/accounts\.google\.com\/o\/oauth2\/auth[^\s"']+)/);
+      const match = fullText.match(/https:\/\/accounts\.google\.com\/o\/oauth2\/auth[\s\S]*?(?=\n\s*\n|\n\s*If you|authorization code|$)/i);
       if (match) {
-        let cleanUrl = match[1].replace(/[\r\n\s]+/g, '');
-        // Repair terminal 80-column line-wrap splits in percent-encoded characters (e.g. %2 + F -> %2F)
-        cleanUrl = cleanUrl.replace(/%([0-9A-Fa-f])2F/g, '%2F');
+        let cleanUrl = match[0].replace(/[\r\n\s]+/g, '');
+        cleanUrl = cleanUrl.replace(/%2F2F/g, '%2F');
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(cleanUrl).then(() => {
             showNotification("Auth Link copied to clipboard!");
