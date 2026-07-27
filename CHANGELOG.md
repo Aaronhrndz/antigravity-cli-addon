@@ -2,6 +2,9 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
+## [1.9.4]
+- fix: Remove UTF-8 BOM byte order mark header from repository.yaml for Supervisor compatibility
+
 ## [1.9.3]
 - feat: Add Copy Auth Link auto-detection button to copy multiline Google OAuth login URLs seamlessly in 1 click
 
