@@ -1,0 +1,4 @@
+configuration:
+  ha_token:
+    name: "Home Assistant Long-Lived Access Token"
+    description: "Optional token for HA Core API access."

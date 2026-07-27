@@ -1,0 +1,4 @@
+configuration:
+  ha_token:
+    name: "Token de Acceso de Larga Duración"
+    description: "Token opcional para acceso a la API de HA Core."

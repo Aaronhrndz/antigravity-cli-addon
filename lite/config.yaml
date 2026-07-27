@@ -1,6 +1,6 @@
 name: "Antigravity CLI (No Supervisor)"
 description: "AI Agent for domotics via Home Assistant Core API"
-version: "1.9.4"
+version: "1.9.5"
 slug: "antigravity_cli_lite"
 panel_icon: "mdi:triangle"
 panel_title: "Antigravity"

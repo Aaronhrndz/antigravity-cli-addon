@@ -2,6 +2,9 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
+## [1.9.5]
+- fix: Restore non-empty repository.yaml and translation files for Home Assistant Add-on Store repository discovery
+
 ## [1.9.4]
 - fix: Remove UTF-8 BOM byte order mark header from repository.yaml for Supervisor compatibility
 
