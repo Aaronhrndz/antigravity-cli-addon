@@ -4,12 +4,24 @@ set -e
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LANGUAGE=en_US:en
-export GODEBUG=cpu.pclmul=off,cpu.aes=off
+unset GODEBUG
 
 echo "Starting Antigravity CLI Add-on..."
 
-# Create configuration directory for MCP
-mkdir -p /data/.gemini/antigravity-cli
+# Auto-update Antigravity CLI in background on startup
+echo "Checking for Antigravity CLI updates on startup..."
+(curl -fsSL --connect-timeout 4 --max-time 20 https://antigravity.google/cli/install.sh | bash -s -- -d /usr/local/bin 2>&1 | tee /tmp/startup_update.log || true) &
+
+# Create configuration directory for MCP and agy settings
+mkdir -p /data/.gemini/antigravity-cli /root/.gemini/antigravity-cli
+
+# Set agy theme to 'terminal' so all ANSI colors adapt dynamically to xterm.js
+cat << 'JSON' > /data/.gemini/antigravity-cli/settings.json
+{
+  "theme": "terminal"
+}
+JSON
+cp /data/.gemini/antigravity-cli/settings.json /root/.gemini/antigravity-cli/settings.json 2>/dev/null || true
 
 # Configure readline for Spanish/UTF-8 character input (no meta conversion)
 cat << 'EOF' > /data/.inputrc
@@ -79,7 +91,7 @@ fi
 export MCP_CONFIG_PATH=/homeassistant/mcp.json
 
 # Using disableResizeOverlay=true -t scrollback=10000 removes the annoying 100x40 banner
-ttyd -a -b /ttyd -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t scrollback=10000 -t 'theme={"background": "#2b2b2b"}' -p 62898 /opt/antigravity/attach.sh &
+ttyd -a -b /ttyd -t copyOnSelect=true -t enableZmodem=true -t disableLeaveAlert=true -t disableResizeOverlay=true -t scrollback=10000 -p 62898 /opt/antigravity/attach.sh &
 
 echo "Starting NGINX reverse proxy on port 62899..."
 exec nginx -c /etc/nginx/nginx.conf -g "daemon off;"

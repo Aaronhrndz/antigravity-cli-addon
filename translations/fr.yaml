@@ -1,0 +1,4 @@
+configuration:
+  ha_token:
+    name: "Jeton d'accès longue durée Home Assistant"
+    description: "Jeton facultatif pour l'accès à l'API HA Core."

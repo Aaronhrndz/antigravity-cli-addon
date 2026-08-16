@@ -2,32 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
   <title>Antigravity CLI</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
     
-    body {
+    :root {
+      --bg-main: #2b2b2b;
+      --bg-bar: #141414;
+      --bg-btn: #2a2b2e;
+      --bg-btn-hover: rgba(255, 255, 255, 0.08);
+      --bg-btn-active: rgba(255, 255, 255, 0.12);
+      --text-main: #ffffff;
+      --text-secondary: #9aa0a6;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --tab-active-bg: #2b2b2b;
+      --tab-active-text: #ffffff;
+      --tab-hover-bg: #3c4043;
+      --context-menu-bg: #141414;
+      --kbd-bg: #2a2b2e;
+      --kbd-border: rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="light"] {
+      --bg-main: #ffffff;
+      --bg-bar: #f6f8fa;
+      --bg-btn: #eaeef2;
+      --bg-btn-hover: #d0d7de;
+      --bg-btn-active: #afb8c1;
+      --text-main: #1f2328;
+      --text-secondary: #656d76;
+      --border-color: #d0d7de;
+      --tab-active-bg: #ffffff;
+      --tab-active-text: #1f2328;
+      --tab-hover-bg: #e4e7eb;
+      --context-menu-bg: #f6f8fa;
+      --kbd-bg: #eaeef2;
+      --kbd-border: #d0d7de;
+    }
+
+    html, body {
       margin: 0;
       padding: 0;
-      background: #2b2b2b;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      height: 100dvh;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      overflow: hidden;
       width: 100vw;
       max-width: 100vw;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #app-root {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      max-width: 100vw;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       box-sizing: border-box;
+      background: var(--bg-main);
+      transition: background 0.2s ease, color 0.2s ease;
     }
     
     #terminal-container {
       flex: 1;
       width: 100%;
       position: relative;
-      background: #2b2b2b;
+      background: var(--bg-main);
+      transition: background 0.2s ease;
     }
     
     iframe {
@@ -35,7 +81,7 @@
       height: 100%;
       border: none;
       display: block;
-      background: #2b2b2b;
+      background: var(--bg-main);
     }
     
     #footer {
@@ -43,19 +89,19 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #141414;
+      background: var(--bg-bar);
       border-top: none;
       flex-shrink: 0;
       box-shadow: none;
-      z-index: 10;
-      overflow-x: auto;
-      scrollbar-width: none;
+      position: relative;
+      z-index: 9999;
+      overflow: visible !important;
       gap: 12px;
       width: 100%;
       max-width: 100vw;
       box-sizing: border-box;
+      transition: background 0.2s ease;
     }
-    #footer::-webkit-scrollbar { display: none; }
     
     .footer-left {
       display: flex;
@@ -78,9 +124,9 @@
     }
 
     .tool-btn {
-      background: #2a2b2e;
+      background: var(--bg-btn);
       border: none;
-      color: #9aa0a6;
+      color: var(--text-secondary);
       width: 36px;
       height: 36px;
       border-radius: 8px;
@@ -97,18 +143,18 @@
     }
     
     .tool-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
+      background: var(--bg-btn-hover);
+      color: var(--text-main);
     }
     
     .tool-btn:active {
-      background: rgba(255, 255, 255, 0.12);
+      background: var(--bg-btn-active);
       transform: scale(0.92);
     }
     
     #upload-btn {
-      background: #2a2b2e;
-      color: #9aa0a6;
+      background: var(--bg-btn);
+      color: var(--text-secondary);
       border: none;
       padding: 0;
       width: 36px;
@@ -122,12 +168,12 @@
     }
     
     #upload-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
+      background: var(--bg-btn-hover);
+      color: var(--text-main);
     }
     
     #upload-btn:active {
-      background: rgba(255, 255, 255, 0.12);
+      background: var(--bg-btn-active);
       transform: scale(0.92);
     }
     
@@ -141,10 +187,11 @@
       position: absolute;
       bottom: 60px;
       left: 12px;
-      background: #141414;
+      background: var(--context-menu-bg);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.8);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
       display: none;
       z-index: 100;
       flex-direction: column;
@@ -165,31 +212,39 @@
       padding: 8px 12px;
       font-size: 13px;
       font-weight: 500;
-      background: #2a2b2e;
-      color: #e8eaed;
+      background: var(--bg-btn);
+      color: var(--text-main);
     }
     
-    /* Overlay that shows path to the user */
+    /* Overlay that shows notifications/messages to the user */
     #notification {
       position: absolute;
-      top: 15px;
+      top: 95px;
       left: 50%;
       transform: translateX(-50%);
       background: #1f6feb;
       color: white;
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s;
-      z-index: 20;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 100000;
+      text-align: center;
+      max-width: 90vw;
+      white-space: pre-line;
     }
     
     #notification.show {
       opacity: 1;
       pointer-events: auto;
+    }
+
+    #app-root.toolbar-bottom #notification {
+      top: 50px;
     }
 
     /* Modal Overlay for loading states */
@@ -238,7 +293,8 @@
     /* Tabs CSS */
     #tab-bar {
       display: flex;
-      background: #141414;
+      background: var(--bg-bar);
+      border-bottom: none;
       padding: 8px 8px 0 8px;
       overflow-x: auto;
       flex-shrink: 0;
@@ -246,6 +302,7 @@
       width: 100%;
       max-width: 100vw;
       box-sizing: border-box;
+      transition: background 0.2s ease;
     }
     #tab-bar::-webkit-scrollbar { display: none; }
     
@@ -253,7 +310,7 @@
       display: flex;
       align-items: center;
       background: transparent;
-      color: #9aa0a6;
+      color: var(--text-secondary);
       padding: 8px 16px;
       margin-right: 2px;
       border-radius: 8px 8px 0 0;
@@ -266,11 +323,11 @@
       transition: background 0.15s;
     }
     .tab:hover:not(.active) {
-      background: #3c4043;
+      background: var(--tab-hover-bg);
     }
     .tab.active {
-      background: #2b2b2b;
-      color: #ffffff;
+      background: var(--tab-active-bg);
+      color: var(--tab-active-text);
       z-index: 2;
     }
     .tab.active::before,
@@ -285,16 +342,16 @@
     .tab.active::before {
       left: -12px;
       border-bottom-right-radius: 12px;
-      box-shadow: 6px 6px 0 6px #2b2b2b;
+      box-shadow: 6px 6px 0 6px var(--tab-active-bg);
     }
     .tab.active::after {
       right: -12px;
       border-bottom-left-radius: 12px;
-      box-shadow: -6px 6px 0 6px #2b2b2b;
+      box-shadow: -6px 6px 0 6px var(--tab-active-bg);
     }
     .tab-close {
       margin-left: 8px;
-      color: #9aa0a6;
+      color: var(--text-secondary);
       font-size: 16px;
       line-height: 1;
       padding: 2px 4px;
@@ -302,12 +359,12 @@
     }
     .tab-close:hover { 
       background: rgba(255, 255, 255, 0.1); 
-      color: #e8eaed; 
+      color: var(--text-main); 
     }
     
     .tab-add {
       background: transparent;
-      color: #9aa0a6;
+      color: var(--text-secondary);
       border: none;
       font-size: 20px;
       padding: 0 10px;
@@ -322,7 +379,7 @@
     }
     .tab-add:hover { 
       background: rgba(255, 255, 255, 0.1);
-      color: #ffffff; 
+      color: var(--text-main); 
     }
 
     .footer-right .tool-btn {
@@ -330,13 +387,13 @@
     }
 
     .shortcut-kbd {
-      background: #2a2b2e;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--kbd-bg);
+      border: 1px solid var(--kbd-border);
       border-bottom: 2px solid rgba(0, 0, 0, 0.3);
       border-radius: 4px;
       padding: 2px 5px;
       font-size: 10px;
-      color: #9aa0a6;
+      color: var(--text-secondary);
       font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
       box-shadow: 0 1px 0 rgba(0,0,0,0.2);
     }
@@ -348,86 +405,178 @@
       .toolbar-footer {
         padding: 4px;
       }
-      .footer-left .footer-logo {
-        width: 24px;
-        height: 24px;
+      .context-menu {
+        left: 4px;
+        right: 4px;
+        padding: 8px;
+        border-radius: 12px;
+      }
+      .context-menu-grid {
+        grid-template-columns: repeat(12, 1fr);
+        gap: 6px;
+      }
+      .context-menu .tool-btn {
+        padding: 8px 4px;
       }
       .footer-center {
-        gap: 3px;
-        justify-content: center;
+        gap: 2px;
       }
       .tool-btn {
-        width: 33px;
-        height: 36px;
-        font-size: 12px;
-      }
-      .tool-btn svg {
-        width: 18px;
-        height: 18px;
-      }
-      .tab-btn {
-        padding: 0 6px !important;
-        margin-right: 6px !important;
-      }
-      .new-btn {
-        margin-left: 6px !important;
+        width: 32px;
+        height: 32px;
       }
       #upload-btn {
-        width: 33px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
       }
-      #upload-btn svg {
-        width: 18px;
-        height: 18px;
+      .tab-btn {
+        margin-right: 2px !important;
       }
+      .new-btn {
+        margin-left: 2px !important;
+      }
+      #tab-bar {
+        padding: 4px 4px 0 4px;
+      }
+      .tab {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+    }
+
+    /* Flex Ordering (Default: Toolbar TOP above tabs) */
+    #footer {
+      order: 0;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 9999;
+      overflow: visible !important;
+      border-top: none;
+      border-bottom: 1px solid var(--border-color);
+    }
+    #tab-bar {
+      order: 1;
+      flex-shrink: 0;
+    }
+    #update-banner {
+      order: 2;
+      flex-shrink: 0;
+    }
+    #terminal-container {
+      order: 3;
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Context menu opens DOWNWARD when toolbar is at top */
+    .context-menu {
+      position: absolute;
+      top: calc(100% + 6px) !important;
+      bottom: auto !important;
+      left: 12px;
+      z-index: 10000 !important;
+    }
+    #dpad-menu {
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      top: calc(100% + 6px) !important;
+      bottom: auto !important;
+      z-index: 10000 !important;
+    }
+
+    /* User override: Toolbar BOTTOM */
+    #app-root.toolbar-bottom #footer {
+      order: 4 !important;
+      border-bottom: none !important;
+      border-top: 1px solid var(--border-color) !important;
+      position: relative !important;
+      z-index: 9999 !important;
+      overflow: visible !important;
+    }
+    #app-root.toolbar-bottom #tab-bar {
+      order: 1 !important;
+    }
+    #app-root.toolbar-bottom #terminal-container {
+      order: 3 !important;
+    }
+    #app-root.toolbar-bottom .context-menu {
+      top: auto !important;
+      bottom: calc(100% + 6px) !important;
+      left: 12px !important;
+      z-index: 10000 !important;
+    }
+    #app-root.toolbar-bottom #dpad-menu {
+      top: auto !important;
+      bottom: calc(100% + 6px) !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      z-index: 10000 !important;
     }
   </style>
 </head>
 <body>
+  <div id="app-root">
+    <div id="tab-bar"></div>
+  
+  <div id="update-banner" style="display: none; background: #238636; color: white; padding: 6px 12px; font-size: 12px; font-family: monospace; align-items: center; justify-content: space-between; border-bottom: 1px solid #2ea043; z-index: 100;">
+    <span id="update-text" data-i18n="update_available">New version available!</span>
+    <button onclick="installUpdate()" data-i18n="update_btn" style="background: white; color: #238636; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px;">Update Now</button>
+  </div>
+
+  <div id="terminal-container"></div>
+  
   <div id="loader-modal">
-    <div class="spinner" id="loader-spinner"></div>
+    <div class="spinner"></div>
     <div id="loader-text">Loading...</div>
-    <div id="loader-progress-container" style="display: none; width: 250px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 15px; overflow: hidden;">
-      <div id="loader-progress-bar" style="height: 100%; width: 0%; background: #58a6ff; transition: width 0.1s linear;"></div>
+    <div id="loader-progress-container" style="display:none; width: 200px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; margin-top: 15px; overflow: hidden;">
+      <div id="loader-progress-bar" style="width: 0%; height: 100%; background: #58a6ff; transition: width 0.2s;"></div>
     </div>
   </div>
-  <div id="tab-bar"></div>
-  <div id="update-banner" style="display: none; background: #856404; color: #ffeeba; padding: 8px 12px; font-size: 13px; justify-content: space-between; align-items: center; border-bottom: 1px solid #664d03; flex-shrink: 0;">
-    <span id="update-text">Update available!</span>
-    <button onclick="installUpdate()" style="background: #ffeeba; color: #856404; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Update Now</button>
-  </div>
-  <div id="terminal-container"></div>
   
   <div id="notification"></div>
   
   <div id="footer" class="toolbar-footer">
     <div id="extra-keys-menu" class="context-menu">
       <div class="context-menu-grid">
-        <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 4;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Copy/Break</span>
-          <span>Ctrl+C</span>
+        <div style="grid-column: span 12; display: flex; gap: 4px; background: rgba(0,0,0,0.15); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 2px;">
+          <button class="tool-btn theme-choice-btn" data-theme-choice="auto" onclick="setThemeMode('auto')" data-i18n="auto" style="flex: 1; font-size: 10px; padding: 4px;">🌓 Auto</button>
+          <button class="tool-btn theme-choice-btn" data-theme-choice="light" onclick="setThemeMode('light')" data-i18n="light" style="flex: 1; font-size: 10px; padding: 4px;">☀️ Light</button>
+          <button class="tool-btn theme-choice-btn" data-theme-choice="dark" onclick="setThemeMode('dark')" data-i18n="dark" style="flex: 1; font-size: 10px; padding: 4px;">🌙 Dark</button>
+        </div>
+        <button class="tool-btn copy-menu-btn" onclick="copySelection()" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
+          <span data-i18n="copy_label" style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Copy</span>
+          <span data-i18n="copy_text">Copy</span>
         </button>
-        <button class="tool-btn paste-menu-btn" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 4;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
-          <span>Ctrl+V</span>
+        <button class="tool-btn paste-menu-btn" onclick="pasteFromClipboard()" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
+          <span data-i18n="paste_label" style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
+          <span data-i18n="paste_text">Paste</span>
         </button>
-        <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 4;">
-          <span style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Undo</span>
-          <span>Ctrl+Z</span>
+        <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
+          <span data-i18n="interrupt_label" style="font-size: 8px; color: #ff7b72; margin-bottom: 2px; text-transform: uppercase;">Interrupt</span>
+          <span data-i18n="interrupt_text">Ctrl+C</span>
+        </button>
+        <button class="tool-btn" data-key="CtrlZ" data-code="90" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
+          <span data-i18n="suspend_label" style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Suspend</span>
+          <span data-i18n="suspend_text">Ctrl+Z</span>
         </button>
         <button class="tool-btn" data-key="PageUp" data-code="33" style="grid-column: span 6;">PgUp</button>
         <button class="tool-btn" data-key="PageDown" data-code="34" style="grid-column: span 6;">PgDn</button>
-        <button class="tool-btn" onclick="copyAuthUrl()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 12; padding: 6px; background: #1f6feb; color: white;">
-          <span style="font-size: 8px; color: #d4edda; text-transform: uppercase; margin-bottom: 2px;">Detect & Copy</span>
-          <span style="font-size: 11px; font-weight: bold;">Copy Auth Link</span>
+        <button class="tool-btn" onclick="copyAuthUrl()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 6; padding: 6px; background: #1f6feb; color: white;">
+          <span data-i18n="copy_auth_label" style="font-size: 8px; color: #d4edda; text-transform: uppercase; margin-bottom: 2px;">Detect & Copy</span>
+          <span data-i18n="copy_auth_text" style="font-size: 11px; font-weight: bold;">Copy Auth Link</span>
+        </button>
+        <button class="tool-btn" onclick="toggleToolbarPosition()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 6; padding: 6px;">
+          <span data-i18n="pos_label" style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Toolbar Position</span>
+          <span style="font-size: 11px; font-weight: bold;" id="toolbar-pos-text">Top / Bottom</span>
         </button>
         <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 6; padding: 6px;">
-          <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Export</span>
-          <span style="font-size: 11px;">Config</span>
+          <span data-i18n="export_label" style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Export</span>
+          <span data-i18n="export_text" style="font-size: 11px;">Config</span>
         </button>
         <button class="tool-btn" onclick="document.getElementById('import-file-input').click()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 6; padding: 6px;">
-          <span style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Import</span>
-          <span style="font-size: 11px;">Config</span>
+          <span data-i18n="import_label" style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Import</span>
+          <span data-i18n="import_text" style="font-size: 11px;">Config</span>
         </button>
       </div>
     </div>
@@ -468,25 +617,6 @@
       <button id="main-action-btn" class="tool-btn" style="color: #ffffff; padding: 4px; flex-shrink: 0;" onclick="toggleContextMenu(event)">
         <img src="logo.png" class="footer-logo" style="width: 24px; height: 24px; border-radius: 4px; pointer-events: none;" alt="Logo">
       </button>
-      <div class="desktop-only-text" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 16px; user-select: none;">
-        <div style="display: flex; align-items: center; gap: 6px; opacity: 0.8;">
-          <span style="font-size: 10px; color: #888; font-weight: 600; letter-spacing: 0.5px;">COPY</span>
-          <div style="display: flex; gap: 3px;">
-            <kbd class="shortcut-kbd">Ctrl</kbd>
-            <kbd class="shortcut-kbd">Shift</kbd>
-            <kbd class="shortcut-kbd">C</kbd>
-          </div>
-        </div>
-        <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.1);"></div>
-        <div style="display: flex; align-items: center; gap: 6px; opacity: 0.8;">
-          <span style="font-size: 10px; color: #888; font-weight: 600; letter-spacing: 0.5px;">PASTE</span>
-          <div style="display: flex; gap: 3px;">
-            <kbd class="shortcut-kbd">Ctrl</kbd>
-            <kbd class="shortcut-kbd">Shift</kbd>
-            <kbd class="shortcut-kbd">V</kbd>
-          </div>
-        </div>
-      </div>
     </div>
     
     <div class="footer-center">
@@ -517,6 +647,9 @@
     </div>
     
     <div class="footer-right">
+      <button id="theme-btn" class="tool-btn" onclick="cycleTheme(event)" title="Tema" style="margin-right: 8px;">
+        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg>
+      </button>
       <input type="file" id="file" style="display: none;" onchange="uploadImage()">
       <button id="upload-btn" onclick="document.getElementById('file').click()" title="Upload Image">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -527,8 +660,494 @@
       </button>
     </div>
   </div>
+</div>
 
   <script>
+    // Internationalization (i18n) Engine - Default English with automatic HA/Browser localization
+    const I18N = {
+      en: {
+        auto: "🌓 Auto",
+        light: "☀️ Light",
+        dark: "🌙 Dark",
+        copy_label: "Copy",
+        copy_text: "Copy",
+        paste_label: "Paste",
+        paste_text: "Paste",
+        interrupt_label: "Interrupt",
+        interrupt_text: "Ctrl+C",
+        suspend_label: "Suspend",
+        suspend_text: "Ctrl+Z",
+        copy_auth_label: "Detect & Copy",
+        copy_auth_text: "Copy Auth Link",
+        pos_label: "Toolbar Position",
+        pos_top: "⬇️ Pin Bottom",
+        pos_bottom: "⬆️ Pin Top",
+        export_label: "Export",
+        export_text: "Config",
+        import_label: "Import",
+        import_text: "Config",
+        upload_title: "Upload Image",
+        theme_title: "Theme",
+        update_available: "New version available!",
+        update_btn: "Update Now",
+        updating: "Updating...",
+        text_copied: "Text copied to clipboard",
+        no_text_selected: "Select text in terminal to copy",
+        clip_blocked: "Clipboard permission blocked by browser",
+        theme_set: "Theme set to: ",
+        bar_pinned_top: "Toolbar pinned TOP (above tabs)",
+        bar_pinned_bottom: "Toolbar pinned BOTTOM",
+        session_prefix: "Session ",
+        img_inserted: "Image inserted: ",
+        net_failed: "Network failed during upload",
+        import_confirm: "Are you sure? This will overwrite your current Antigravity agent memory, conversations, and Home Assistant add-on configurations.",
+        import_success: "Backup Restored Successfully!\n\nThe Add-on will now restart automatically. Please wait a few seconds and refresh the page if it does not reload by itself.",
+        import_failed: "Import Failed: ",
+        preparing_export: "Preparing Export...",
+        starting_restore: "Starting Restore...",
+        uploading_backup: "Uploading Backup...",
+        extracting_restarting: "Extracting and Restarting..."
+      },
+      es: {
+        auto: "🌓 Auto",
+        light: "☀️ Sol/Claro",
+        dark: "🌙 Oscuro",
+        copy_label: "Copiar",
+        copy_text: "Copy",
+        paste_label: "Pegar",
+        paste_text: "Paste",
+        interrupt_label: "Interrumpir",
+        interrupt_text: "Ctrl+C",
+        suspend_label: "Suspender",
+        suspend_text: "Ctrl+Z",
+        copy_auth_label: "Detectar y Copiar",
+        copy_auth_text: "Copiar Auth Link",
+        pos_label: "Posición Barra",
+        pos_top: "⬇️ Fijar Abajo",
+        pos_bottom: "⬆️ Fijar Arriba",
+        export_label: "Exportar",
+        export_text: "Config",
+        import_label: "Importar",
+        import_text: "Config",
+        upload_title: "Subir Imagen",
+        theme_title: "Tema",
+        update_available: "¡Nueva versión disponible!",
+        update_btn: "Actualizar Ahora",
+        updating: "Actualizando...",
+        text_copied: "Texto copiado al portapapeles",
+        no_text_selected: "Selecciona texto en la terminal para copiar",
+        clip_blocked: "Permiso de portapapeles bloqueado",
+        theme_set: "Tema configurado a: ",
+        bar_pinned_top: "Barra fijada ARRIBA (sobre las pestañas)",
+        bar_pinned_bottom: "Barra fijada ABAJO",
+        session_prefix: "Sesión ",
+        img_inserted: "Imagen insertada: ",
+        net_failed: "Fallo de red durante la subida",
+        import_confirm: "¿Estás seguro? Esto sobrescribirá la memoria actual del agente Antigravity, conversaciones y configuraciones del add-on de Home Assistant.",
+        import_success: "¡Copia restaurada con éxito!\n\nEl Add-on se reiniciará automáticamente. Por favor, espera unos segundos y recarga la página.",
+        import_failed: "Fallo al importar: ",
+        preparing_export: "Preparando exportación...",
+        starting_restore: "Iniciando restauración...",
+        uploading_backup: "Subiendo copia de seguridad...",
+        extracting_restarting: "Extrayendo y reiniciando..."
+      },
+      de: {
+        auto: "🌓 Auto",
+        light: "☀️ Hell",
+        dark: "🌙 Dunkel",
+        copy_label: "Kopieren",
+        copy_text: "Copy",
+        paste_label: "Einfügen",
+        paste_text: "Paste",
+        interrupt_label: "Abbrechen",
+        interrupt_text: "Ctrl+C",
+        suspend_label: "Anhalten",
+        suspend_text: "Ctrl+Z",
+        copy_auth_label: "Erkennen & Kopieren",
+        copy_auth_text: "Auth-Link kopieren",
+        pos_label: "Leistenposition",
+        pos_top: "⬇️ Unten fixieren",
+        pos_bottom: "⬆️ Oben fixieren",
+        export_label: "Exportieren",
+        export_text: "Konfig",
+        import_label: "Importieren",
+        import_text: "Konfig",
+        upload_title: "Bild hochladen",
+        theme_title: "Design",
+        update_available: "Neue Version verfügbar!",
+        update_btn: "Jetzt aktualisieren",
+        updating: "Wird aktualisiert...",
+        text_copied: "Text in Zwischenablage kopiert",
+        no_text_selected: "Text im Terminal zum Kopieren markieren",
+        clip_blocked: "Zugriff auf die Zwischenablage blockiert",
+        theme_set: "Design eingestellt auf: ",
+        bar_pinned_top: "Leiste OBEN fixiert (über Tabs)",
+        bar_pinned_bottom: "Leiste UNTEN fixiert",
+        session_prefix: "Sitzung ",
+        img_inserted: "Bild eingefügt: ",
+        net_failed: "Netzwerkfehler beim Hochladen",
+        import_confirm: "Sind Sie sicher? Dadurch werden der aktuelle Speicher, Konversationen und Konfigurationen überschrieben.",
+        import_success: "Sicherung erfolgreich wiederhergestellt!\n\nDas Add-on wird neu gestartet.",
+        import_failed: "Import fehlgeschlagen: ",
+        preparing_export: "Export vorbereiten...",
+        starting_restore: "Wiederherstellung starten...",
+        uploading_backup: "Backup hochladen...",
+        extracting_restarting: "Extrahieren und Neustarten..."
+      },
+      fr: {
+        auto: "🌓 Auto",
+        light: "☀️ Clair",
+        dark: "🌙 Sombre",
+        copy_label: "Copier",
+        copy_text: "Copy",
+        paste_label: "Coller",
+        paste_text: "Paste",
+        interrupt_label: "Interrompre",
+        interrupt_text: "Ctrl+C",
+        suspend_label: "Suspendre",
+        suspend_text: "Ctrl+Z",
+        copy_auth_label: "Détecter & Copier",
+        copy_auth_text: "Copier lien Auth",
+        pos_label: "Position Barre",
+        pos_top: "⬇️ Fixer en bas",
+        pos_bottom: "⬆️ Fixer en haut",
+        export_label: "Exporter",
+        export_text: "Config",
+        import_label: "Importer",
+        import_text: "Config",
+        upload_title: "Téléverser image",
+        theme_title: "Thème",
+        update_available: "Nouvelle version disponible !",
+        update_btn: "Mettre à jour",
+        updating: "Mise à jour...",
+        text_copied: "Texte copié dans le presse-papier",
+        no_text_selected: "Sélectionnez du texte à copier",
+        clip_blocked: "Accès au presse-papier bloqué",
+        theme_set: "Thème défini sur : ",
+        bar_pinned_top: "Barre fixée EN HAUT (au-dessus des onglets)",
+        bar_pinned_bottom: "Barre fixée EN BAS",
+        session_prefix: "Session ",
+        img_inserted: "Image insérée : ",
+        net_failed: "Échec réseau lors du téléversement",
+        import_confirm: "Êtes-vous sûr ? Cela écrasera la mémoire, les conversations et les configurations actuelles.",
+        import_success: "Sauvegarde restaurée avec succès !\n\nL'Add-on va redémarrer automatiquement.",
+        import_failed: "Échec de l'importation : ",
+        preparing_export: "Préparation de l'exportation...",
+        starting_restore: "Démarrage de la restauration...",
+        uploading_backup: "Téléversement de la sauvegarde...",
+        extracting_restarting: "Extraction et redémarrage..."
+      },
+      it: {
+        auto: "🌓 Auto",
+        light: "☀️ Chiaro",
+        dark: "🌙 Scuro",
+        copy_label: "Copia",
+        copy_text: "Copy",
+        paste_label: "Incolla",
+        paste_text: "Paste",
+        interrupt_label: "Interrompi",
+        interrupt_text: "Ctrl+C",
+        suspend_label: "Sospendi",
+        suspend_text: "Ctrl+Z",
+        copy_auth_label: "Rileva & Copia",
+        copy_auth_text: "Copia link Auth",
+        pos_label: "Posizione Barra",
+        pos_top: "⬇️ Fissa in basso",
+        pos_bottom: "⬆️ Fissa in alto",
+        export_label: "Esporta",
+        export_text: "Config",
+        import_label: "Importa",
+        import_text: "Config",
+        upload_title: "Carica immagine",
+        theme_title: "Tema",
+        update_available: "Nuova versione disponibile!",
+        update_btn: "Aggiorna ora",
+        updating: "Aggiornamento in corso...",
+        text_copied: "Testo copiato negli appunti",
+        no_text_selected: "Seleziona il testo da copiare",
+        clip_blocked: "Permesso appunti bloccato",
+        theme_set: "Tema impostato su: ",
+        bar_pinned_top: "Barra fissata IN ALTO (sopra le schede)",
+        bar_pinned_bottom: "Barra fissata IN BASSO",
+        session_prefix: "Sessione ",
+        img_inserted: "Immagine inserita: ",
+        net_failed: "Errore di rete durante il caricamento",
+        import_confirm: "Sei sicuro? Questo sovrascriverà la memoria corrente, le conversazioni e le configurazioni.",
+        import_success: "Backup ripristinato con successo!\n\nL'Add-on si riavvierà automaticamente.",
+        import_failed: "Importazione non riuscita: ",
+        preparing_export: "Preparazione esportazione...",
+        starting_restore: "Avvio ripristino...",
+        uploading_backup: "Caricamento backup...",
+        extracting_restarting: "Estrazione e riavvio..."
+      },
+      pt: {
+        auto: "🌓 Auto",
+        light: "☀️ Claro",
+        dark: "🌙 Escuro",
+        copy_label: "Copiar",
+        copy_text: "Copy",
+        paste_label: "Colar",
+        paste_text: "Paste",
+        interrupt_label: "Interromper",
+        interrupt_text: "Ctrl+C",
+        suspend_label: "Suspender",
+        suspend_text: "Ctrl+Z",
+        copy_auth_label: "Detetar & Copiar",
+        copy_auth_text: "Copiar link Auth",
+        pos_label: "Posição Barra",
+        pos_top: "⬇️ Fixar em baixo",
+        pos_bottom: "⬆️ Fixar em cima",
+        export_label: "Exportar",
+        export_text: "Config",
+        import_label: "Importar",
+        import_text: "Config",
+        upload_title: "Enviar imagem",
+        theme_title: "Tema",
+        update_available: "Nova versão disponível!",
+        update_btn: "Atualizar agora",
+        updating: "A atualizar...",
+        text_copied: "Texto copiado para a área de transferência",
+        no_text_selected: "Selecione texto no terminal para copiar",
+        clip_blocked: "Permissão de área de transferência bloqueada",
+        theme_set: "Tema definido para: ",
+        bar_pinned_top: "Barra fixada EM CIMA (sobre os separadores)",
+        bar_pinned_bottom: "Barra fixada EM BAIXO",
+        session_prefix: "Sessão ",
+        img_inserted: "Imagem inserida: ",
+        net_failed: "Falha de rede durante o envio",
+        import_confirm: "Tem a certeza? Isto irá substituir a memória atual, conversas e configurações.",
+        import_success: "Cópia de segurança restaurada com sucesso!\n\nO Add-on será reiniciado automaticamente.",
+        import_failed: "Falha na importação: ",
+        preparing_export: "A preparar exportação...",
+        starting_restore: "A iniciar restauro...",
+        uploading_backup: "A enviar cópia de segurança...",
+        extracting_restarting: "A extrair e a reiniciar..."
+      }
+    };
+
+    function getLang() {
+      const userLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      if (userLang.startsWith('es')) return 'es';
+      if (userLang.startsWith('de')) return 'de';
+      if (userLang.startsWith('fr')) return 'fr';
+      if (userLang.startsWith('it')) return 'it';
+      if (userLang.startsWith('pt')) return 'pt';
+      return 'en';
+    }
+
+    function t(key) {
+      const lang = getLang();
+      return (I18N[lang] && I18N[lang][key]) || I18N['en'][key] || key;
+    }
+
+    function applyI18n() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (key) {
+          const val = t(key);
+          if (val) el.innerText = val;
+        }
+      });
+      const uploadBtn = document.getElementById('upload-btn');
+      if (uploadBtn) uploadBtn.title = t('upload_title');
+    }
+
+    // Terminal Palettes
+    const DARK_THEME = {
+      background: '#2b2b2b',
+      foreground: '#f0f6fc',
+      cursor: '#58a6ff',
+      cursorAccent: '#2b2b2b',
+      selection: 'rgba(255, 255, 255, 0.3)',
+      selectionBackground: 'rgba(255, 255, 255, 0.3)',
+      selectionForeground: '#ffffff',
+      selectionInactiveBackground: 'rgba(255, 255, 255, 0.15)',
+      black: '#484f58',
+      red: '#ff7b72',
+      green: '#3fb950',
+      yellow: '#d29922',
+      blue: '#58a6ff',
+      magenta: '#bc8cff',
+      cyan: '#39c5cf',
+      white: '#b1bac4',
+      brightBlack: '#6e7681',
+      brightRed: '#ffa198',
+      brightGreen: '#56d364',
+      brightYellow: '#e3b341',
+      brightBlue: '#79c0ff',
+      brightMagenta: '#d2a8ff',
+      brightCyan: '#56d4dd',
+      brightWhite: '#f0f6fc'
+    };
+
+    const LIGHT_THEME = {
+      background: '#ffffff',
+      foreground: '#1f2328',
+      cursor: '#0969da',
+      cursorAccent: '#ffffff',
+      selection: '#2188ff',
+      selectionBackground: '#2188ff',
+      selectionForeground: '#ffffff',
+      selectionInactiveBackground: '#a5d8ff',
+      black: '#24292f',
+      red: '#cf222e',
+      green: '#1a7f37',
+      yellow: '#9a6700',
+      blue: '#0969da',
+      magenta: '#8250df',
+      cyan: '#1b7c83',
+      white: '#424a53',
+      brightBlack: '#57606a',
+      brightRed: '#a40e26',
+      brightGreen: '#116329',
+      brightYellow: '#633c01',
+      brightBlue: '#218bff',
+      brightMagenta: '#a475f9',
+      brightCyan: '#3192aa',
+      brightWhite: '#1f2328'
+    };
+
+    function getEffectiveTheme() {
+      const mode = localStorage.getItem('agy_theme_mode') || 'auto';
+      if (mode === 'dark') return 'dark';
+      if (mode === 'light') return 'light';
+      return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+    }
+
+    function applyThemeToIframe(iframe, effectiveTheme) {
+      try {
+        if (!iframe) return;
+        const termTheme = effectiveTheme === 'light' ? LIGHT_THEME : DARK_THEME;
+        const bg = termTheme.background;
+        const selBg = termTheme.selection || termTheme.selectionBackground;
+        const selFg = termTheme.selectionForeground || termTheme.foreground;
+        
+        if (iframe.contentDocument) {
+          const doc = iframe.contentDocument;
+          if (doc.body) {
+            doc.body.style.backgroundColor = bg;
+          }
+          let styleEl = doc.getElementById('dynamic-term-theme');
+          if (!styleEl) {
+            styleEl = doc.createElement('style');
+            styleEl.id = 'dynamic-term-theme';
+            if (doc.head) doc.head.appendChild(styleEl);
+            else if (doc.body) doc.body.appendChild(styleEl);
+          }
+          styleEl.textContent = `
+            html, body, #terminal, .terminal, .xterm, .xterm-viewport {
+              background-color: ${bg} !important;
+            }
+            ::selection {
+              background-color: ${selBg} !important;
+              color: ${selFg} !important;
+            }
+            .xterm-selection,
+            .xterm-selection div,
+            .xterm .xterm-selection div,
+            .xterm-screen .xterm-selection div,
+            .xterm-rows span::selection {
+              background-color: ${selBg} !important;
+              color: ${selFg} !important;
+              opacity: 0.9 !important;
+            }
+          `;
+          const vp = doc.querySelector('.xterm-viewport');
+          if (vp) vp.style.backgroundColor = bg;
+        }
+        
+        if (iframe.contentWindow) {
+          const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
+          if (term) {
+            if (term.options) {
+              term.options.theme = termTheme;
+            }
+            if (typeof term.setOption === 'function') {
+              term.setOption('theme', termTheme);
+            }
+            if (typeof term.refresh === 'function') {
+              term.refresh(0, term.rows - 1);
+            }
+          }
+        }
+      } catch(e) {}
+    }
+
+    function applyTheme(mode) {
+      if (mode) {
+        localStorage.setItem('agy_theme_mode', mode);
+      }
+      const currentMode = localStorage.getItem('agy_theme_mode') || 'auto';
+      const effective = getEffectiveTheme();
+      
+      document.documentElement.setAttribute('data-theme', effective);
+      
+      const themeBtn = document.getElementById('theme-btn');
+      if (themeBtn) {
+        if (currentMode === 'auto') {
+          themeBtn.title = `${t('theme_title')}: Auto (${effective === 'light' ? t('light') : t('dark')})`;
+          themeBtn.innerHTML = `<svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg>`;
+        } else if (currentMode === 'light') {
+          themeBtn.title = `${t('theme_title')}: ${t('light')}`;
+          themeBtn.innerHTML = `<svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        } else {
+          themeBtn.title = `${t('theme_title')}: ${t('dark')}`;
+          themeBtn.innerHTML = `<svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+        }
+      }
+      
+      document.querySelectorAll('.theme-choice-btn').forEach(btn => {
+        const choice = btn.getAttribute('data-theme-choice');
+        if (choice === currentMode) {
+          btn.style.borderColor = '#58a6ff';
+          btn.style.fontWeight = 'bold';
+        } else {
+          btn.style.borderColor = 'var(--border-color)';
+          btn.style.fontWeight = 'normal';
+        }
+      });
+
+      document.querySelectorAll('.term-iframe').forEach(iframe => {
+        applyThemeToIframe(iframe, effective);
+      });
+    }
+
+    function setThemeMode(mode) {
+      applyTheme(mode);
+      const menu = document.getElementById('extra-keys-menu');
+      if (menu) menu.classList.remove('show');
+      showNotification(`${t('theme_set')}${mode.toUpperCase()}`);
+    }
+
+    function cycleTheme(e) {
+      if (e) e.stopPropagation();
+      const current = localStorage.getItem('agy_theme_mode') || 'auto';
+      const next = current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
+      applyTheme(next);
+      showNotification(`${t('theme_set')}${next.toUpperCase()}`);
+    }
+
+    // Auto-listen to system & Home Assistant theme changes
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        const currentMode = localStorage.getItem('agy_theme_mode') || 'auto';
+        if (currentMode === 'auto') {
+          applyTheme('auto');
+        }
+      });
+    }
+
+    window.addEventListener('message', (event) => {
+      if (event.data && typeof event.data === 'object') {
+        if (event.data.type === 'ha-theme-changed' || event.data.theme) {
+          const currentMode = localStorage.getItem('agy_theme_mode') || 'auto';
+          if (currentMode === 'auto') {
+            applyTheme('auto');
+          }
+        }
+      }
+    });
+
     // Tab & Session Management
     let sessions = JSON.parse(localStorage.getItem('agy_sessions')) || [{id: 1, name: 'Session 1'}];
     let currentSessionId = localStorage.getItem('agy_current_session') ? parseInt(localStorage.getItem('agy_current_session')) : sessions[0].id;
@@ -611,6 +1230,7 @@
           
           if (viewport && screen) {
             clearInterval(interval);
+            applyThemeToIframe(iframe, getEffectiveTheme());
             
             const fixTextarea = () => {
               const ta = iframeDoc.querySelector('.xterm-helper-textarea');
@@ -724,8 +1344,54 @@
               setTimeout(scrollToBottom, delay);
             });
             
+            // Enable copyOnSelect on xterm instance
+            if (iframeWin.term) {
+              if (iframeWin.term.options) {
+                iframeWin.term.options.copyOnSelect = true;
+              }
+              if (typeof iframeWin.term.onSelectionChange === 'function') {
+                iframeWin.term.onSelectionChange(() => {
+                  const sel = iframeWin.term.getSelection();
+                  if (sel && sel.trim().length > 0) {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                      navigator.clipboard.writeText(sel).catch(() => {});
+                    }
+                  }
+                });
+              }
+            }
+
+            const handleCopyKey = (e) => {
+              const isCtrlC = (e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.keyCode === 67);
+              if (isCtrlC) {
+                let hasSel = false;
+                if (iframeWin.term && typeof iframeWin.term.hasSelection === 'function') {
+                  hasSel = iframeWin.term.hasSelection();
+                }
+                if (!hasSel && iframeDoc.getSelection) {
+                  hasSel = iframeDoc.getSelection().toString().length > 0;
+                }
+                if (e.shiftKey || hasSel) {
+                  if (hasSel) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.copySelection();
+                  }
+                }
+              }
+            };
+            iframeDoc.addEventListener('keydown', handleCopyKey, true);
+            window.addEventListener('keydown', handleCopyKey, true);
+
             iframeWin.addEventListener('resize', () => {
               [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
+            });
+
+            iframeDoc.addEventListener('focusin', () => {
+              [50, 150, 300, 500, 800].forEach(delay => setTimeout(adjustForKeyboard, delay));
+            });
+            iframeDoc.addEventListener('focusout', () => {
+              [50, 150, 300].forEach(delay => setTimeout(adjustForKeyboard, delay));
             });
           }
         }, 500);
@@ -742,7 +1408,10 @@
         iframe.className = 'term-iframe';
         iframe.setAttribute('data-session-id', id);
         iframe.src = 'ttyd/?arg=' + id;
-        iframe.onload = () => setupIframeEvents(iframe);
+        iframe.onload = () => {
+          applyThemeToIframe(iframe, getEffectiveTheme());
+          setupIframeEvents(iframe);
+        };
         container.appendChild(iframe);
       }
       return iframe;
@@ -751,15 +1420,16 @@
     window.switchSession = function(id) {
       currentSessionId = id;
       saveSessions();
-      ensureIframe(id);
+      const iframe = ensureIframe(id);
 
-      document.querySelectorAll('.term-iframe').forEach(iframe => {
-        if (parseInt(iframe.getAttribute('data-session-id')) === id) {
-          iframe.style.display = 'block';
-          iframe.classList.add('active');
+      document.querySelectorAll('.term-iframe').forEach(f => {
+        if (parseInt(f.getAttribute('data-session-id')) === id) {
+          f.style.display = 'block';
+          f.classList.add('active');
+          applyThemeToIframe(f, getEffectiveTheme());
         } else {
-          iframe.style.display = 'none';
-          iframe.classList.remove('active');
+          f.style.display = 'none';
+          f.classList.remove('active');
         }
       });
 
@@ -769,7 +1439,7 @@
     window.createSession = function() {
       const maxId = sessions.reduce((max, s) => Math.max(max, s.id), 0);
       const newId = maxId + 1;
-      sessions.push({id: newId, name: 'Session ' + newId});
+      sessions.push({id: newId, name: t('session_prefix') + newId});
       switchSession(newId);
     };
 
@@ -815,9 +1485,68 @@
       tabBar.appendChild(addBtn);
     }
 
-    // Initialize tabs and load initial session
+    // Toolbar Position (Top / Bottom) Management
+    function applyToolbarPosition(pos) {
+      if (pos) {
+        localStorage.setItem('agy_toolbar_pos', pos);
+      }
+      const current = localStorage.getItem('agy_toolbar_pos') || (window.innerWidth <= 768 ? 'top' : 'bottom');
+      const root = document.getElementById('app-root');
+      const txt = document.getElementById('toolbar-pos-text');
+      if (root) {
+        if (current === 'bottom') {
+          root.classList.add('toolbar-bottom');
+          root.classList.remove('toolbar-top');
+          if (txt) txt.innerText = t('pos_bottom');
+        } else {
+          root.classList.remove('toolbar-bottom');
+          root.classList.add('toolbar-top');
+          if (txt) txt.innerText = t('pos_top');
+        }
+      }
+    }
+
+    window.toggleToolbarPosition = function() {
+      const current = localStorage.getItem('agy_toolbar_pos') || (window.innerWidth <= 768 ? 'top' : 'bottom');
+      const next = current === 'top' ? 'bottom' : 'top';
+      applyToolbarPosition(next);
+      const menu = document.getElementById('extra-keys-menu');
+      if (menu) menu.classList.remove('show');
+      showNotification(next === 'top' ? t('bar_pinned_top') : t('bar_pinned_bottom'));
+    };
+
+    // Initialize i18n, tabs, theme & toolbar position
+    applyI18n();
     renderTabs();
+    applyTheme();
+    applyToolbarPosition();
     switchSession(currentSessionId);
+
+    // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible above keyboard)
+    function adjustForKeyboard() {
+      const vh = (window.visualViewport && window.visualViewport.height > 100) ? window.visualViewport.height : window.innerHeight;
+      const top = (window.visualViewport && window.visualViewport.offsetTop > 0) ? window.visualViewport.offsetTop : 0;
+      
+      const appRoot = document.getElementById('app-root');
+      if (appRoot) {
+        appRoot.style.height = `${vh}px`;
+        appRoot.style.top = `${top}px`;
+      }
+
+      const activeIframe = getActiveIframe();
+      if (activeIframe && activeIframe.contentWindow) {
+        activeIframe.contentWindow.dispatchEvent(new Event('resize'));
+      }
+    }
+
+    window.addEventListener('resize', adjustForKeyboard);
+    window.addEventListener('orientationchange', () => setTimeout(adjustForKeyboard, 300));
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', adjustForKeyboard);
+      window.visualViewport.addEventListener('scroll', adjustForKeyboard);
+    }
+    setInterval(adjustForKeyboard, 400);
+    adjustForKeyboard();
 
     // Android/Browser background recovery handler
     document.addEventListener('visibilitychange', () => {
@@ -837,7 +1566,7 @@
         const data = await res.json();
         if (data.update_available) {
           const banner = document.getElementById('update-banner');
-          document.getElementById('update-text').innerText = `New version available! ${data.current} -> ${data.latest}`;
+          document.getElementById('update-text').innerText = `${t('update_available')} ${data.current} -> ${data.latest}`;
           banner.style.display = 'flex';
         }
       } catch(e) {}
@@ -846,7 +1575,7 @@
     async function installUpdate() {
       const banner = document.getElementById('update-banner');
       const btn = banner.querySelector('button');
-      btn.innerText = 'Updating...';
+      btn.innerText = t('updating');
       btn.disabled = true;
       try {
         const res = await fetch('update_cli');
@@ -866,6 +1595,7 @@
     }
 
     checkVersion();
+
     async function uploadImage() {
       const fileInput = document.getElementById('file');
       if (!fileInput.files.length) return;
@@ -890,7 +1620,7 @@
             const iframe = getActiveIframe();
             if (iframe && iframe.contentWindow && iframe.contentWindow.term) {
               iframe.contentWindow.term.paste(data.filepath);
-              showNotification(`Image inserted: ${data.filepath}`);
+              showNotification(`${t('img_inserted')}${data.filepath}`);
             } else {
               throw new Error("No terminal target found");
             }
@@ -906,12 +1636,40 @@
           showNotification("Error uploading");
         }
       } catch(e) {
-        showNotification("Network failed during upload");
+        showNotification(t('net_failed'));
       }
       
       btn.innerHTML = originalHtml;
       fileInput.value = '';
     }
+
+    window.copySelection = async function() {
+      try {
+        const iframe = getActiveIframe();
+        let text = '';
+        if (iframe && iframe.contentWindow) {
+          if (iframe.contentWindow.term && typeof iframe.contentWindow.term.getSelection === 'function') {
+            text = iframe.contentWindow.term.getSelection();
+          }
+        }
+        if (!text && iframe && iframe.contentDocument) {
+          text = iframe.contentDocument.getSelection() ? iframe.contentDocument.getSelection().toString() : '';
+        }
+        if (!text && window.getSelection) {
+          text = window.getSelection().toString();
+        }
+        if (text && text.trim().length > 0) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+          }
+          showNotification(t('text_copied'));
+        } else {
+          showNotification(t('no_text_selected'));
+        }
+      } catch (err) {
+        showNotification(t('clip_blocked'));
+      }
+    };
 
     window.pasteFromClipboard = async function() {
       try {
@@ -930,7 +1688,7 @@
           }
         }
       } catch (err) {
-        alert("El navegador ha bloqueado el acceso al portapapeles. Asegúrate de dar permiso o usa Ctrl+Shift+V.");
+        alert(t('clip_blocked'));
       }
     };
     
@@ -1065,7 +1823,6 @@
       });
     });
 
-
     function showLoader(text, showProgress = false) {
       document.getElementById('loader-text').innerText = text;
       document.getElementById('loader-progress-container').style.display = showProgress ? 'block' : 'none';
@@ -1086,11 +1843,11 @@
 
     async function exportBackup() {
       document.getElementById('extra-keys-menu').classList.remove('show');
-      showLoader("Preparing Export...", false);
+      showLoader(t('preparing_export'), false);
       
       setTimeout(() => {
         hideLoader();
-      }, 3000); // Hide modal after 3 seconds, native browser download UI takes over
+      }, 3000);
       
       const a = document.createElement('a');
       a.style.display = 'none';
@@ -1105,15 +1862,15 @@
       if (!file) return;
       document.getElementById('extra-keys-menu').classList.remove('show');
       
-      const proceed = confirm("Are you sure? This will overwrite your current Antigravity agent memory, conversations, and Home Assistant add-on configurations.");
+      const proceed = confirm(t('import_confirm'));
       if (!proceed) {
         event.target.value = '';
         return;
       }
       
-      showLoader("Starting Restore...", true);
+      showLoader(t('starting_restore'), true);
       
-      const chunkSize = 10 * 1024 * 1024; // 10MB chunks (Home Assistant Ingress has a strict 16MB limit)
+      const chunkSize = 10 * 1024 * 1024;
       const totalChunks = Math.ceil(file.size / chunkSize);
       
       try {
@@ -1126,7 +1883,7 @@
           formData.append('file', chunk);
           
           const percent = Math.round((i / totalChunks) * 100);
-          updateProgress(percent, `Uploading Backup... ${percent}%`);
+          updateProgress(percent, `${t('uploading_backup')} ${percent}%`);
           
           const res = await fetch(`import_chunk?chunk_index=${i}&total_chunks=${totalChunks}`, {
             method: 'POST',
@@ -1139,10 +1896,10 @@
           }
         }
         
-        updateProgress(100, "Extracting and Restarting...");
-        alert('Backup Restored Successfully!\n\nThe Add-on will now restart automatically to load your memory and configurations. Please wait a few seconds and refresh the page if it does not reload by itself.');
+        updateProgress(100, t('extracting_restarting'));
+        alert(t('import_success'));
       } catch (err) {
-        alert('Import Failed: ' + err.message);
+        alert(t('import_failed') + err.message);
       } finally {
         hideLoader();
         event.target.value = '';

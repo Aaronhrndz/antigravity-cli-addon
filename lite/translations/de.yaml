@@ -1,0 +1,4 @@
+configuration:
+  ha_token:
+    name: "Langlebiger Home Assistant Zugriffstoken"
+    description: "Optionales Token für den Zugriff auf die HA Core API."

@@ -1,4 +1,4 @@
-﻿import subprocess
+import subprocess
 import re
 
 log = subprocess.check_output(['git', 'log', '-p', 'config.yaml']).decode('utf-8')

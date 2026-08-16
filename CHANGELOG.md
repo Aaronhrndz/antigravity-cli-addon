@@ -2,6 +2,17 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
+## [1.10.0] - 2026-08-16
+- feat: Add full Internationalization (i18n) engine with auto-detection (EN default, ES, DE, FR, IT, PT) for UI and Supervisor metadata
+- feat: Implement mobile-first adaptive toolbar docking (Top above tabs on mobile by default) to prevent virtual keyboards from covering controls
+- feat: Add Toolbar Position toggle (`Top / Bottom`) in the context menu
+- feat: Dynamic Light / Dark / Auto (HA) theme switching with high-contrast selection highlight (`#2188ff`)
+- feat: Configure fixed `theme: "terminal"` in `agy` settings for 100% consistent ANSI colors managed by xterm.js
+- fix: Fix context menu clipping and drop direction (`z-index: 10000`, `overflow: visible`) for top and bottom positions
+- fix: Fix `#notification` popup positioning (`top: 95px`, `z-index: 100000`) so toast messages are never covered by top bars
+- fix: Streamline clipboard copy interactions (`Ctrl+C` on selection, `Ctrl+Shift+C`, dedicated `Copy` button) with native mouse persistence in tmux
+
+
 ## [1.9.9]
 - fix: Fix Copy Auth Link regex pattern to capture full multiline URLs across terminal line breaks
 

@@ -16,21 +16,17 @@ What makes this add-on special is its **zero-friction mobile experience**. You c
 
 ## ✨ Key Features
 
-- 📱 **Built for Mobile Vibecoding**: A distraction-free UI wrapper around `ttyd` completely tailored for touch screens. Say goodbye to wonky scrolling, weird keyboard overlays, or unreadable text.
-- 🗂️ **Dynamic Multi-Session Tabs**: Want to work on your Python scripts and your Lovelace dashboards at the same time? Click the `+` button in the top tab bar to dynamically spawn new AI sessions. You can switch between them instantly without losing context, and close (`x`) the ones you don't need to instantly free up memory.
-- 🤖 **MCP Domotics Integration**: Automatically connects the AI agent to your home using Model Context Protocol (MCP). It can talk directly to Home Assistant and Zigbee2MQTT to control your lights, read sensors, and execute scripts using natural language.
-- 🔄 **Seamless Device Transitions & 50k History**: Powered by `tmux`, your terminal sessions remain persistent across devices with 50,000 lines of scrollback buffer and full mouse/touch scroll support.
-- 🔑 **1-Click Copy Auth Link**: Built-in smart detector in the web interface that auto-detects and extracts multiline Google OAuth authentication URLs from the terminal canvas, repairing line-break split artifacts in 1 click.
+- 📱 **Mobile-First Vibecoding with Adaptive Docking**: A distraction-free UI wrapper around `ttyd` designed for mobile screens. Features adaptive toolbar docking (positioned on TOP above session tabs on mobile by default) so virtual keyboards never obstruct terminal inputs or buttons.
+- 🌍 **Full Multi-Language Support (i18n)**: Automatically localizes the interface according to your Home Assistant or browser language (English by default, Spanish, German, French, Italian, Portuguese).
+- 🌓 **Dynamic Theme System**: Seamlessly switch between Dark, Light (sunlight high-contrast with `#2188ff` selection), and Auto (syncs automatically with Home Assistant theme changes).
+- 🗂️ **Dynamic Multi-Session Tabs**: Spawn new AI sessions with 1 click (`+`) without reloading or losing memory context. Switch instantly between active conversations.
+- 🤖 **MCP Domotics Integration**: Automatically connects the AI agent to your home using Model Context Protocol (MCP) to control lights, inspect sensors, and run automations via natural language.
+- 🔄 **Seamless Persistence & 50k History**: Powered by `tmux`, your terminal sessions stay live across reconnects with 50,000 lines of scrollback and native mouse/touch selection.
+- 🔑 **1-Click Copy Auth Link**: Auto-detects and extracts multiline Google OAuth login URLs from terminal canvas and cleans up line-break split artifacts.
 - 📦 **Optimized Light Backups**: Instant full config exports (<15 MB) preserving 100% of agent memory, skills, and past chat histories.
-- ⌨️ **Mobile-Optimized Macros & Controls**: Features a built-in virtual keypad specifically designed for terminal usage on mobile:
-  - **High-Precision D-Pad**: Vectorized SVG arrow keys that render perfectly centered on any iOS or Android device.
-  - **Terminal Essentials**: Dedicated `Esc` and `Tab` keys.
-  - **Macro Actions**: Instantly execute common commands like `/resume`, `/new` (new chat) and `/quota` (check usage) with a single tap.
-  - **Elegant Shortcut Badges**: Bottom footer includes styled virtual key badges for `Ctrl+C`, `Ctrl+V`, and `Ctrl+Z` that adapt cleanly to your screen. On mobile, the right-click menu is suppressed natively to prevent the browser's context menu from interrupting your workflow.
-  - **Smart Login Button**: A dedicated login button appears in the bottom navigation bar when authentication is required, bypassing the need to copy text from the terminal.
-- 🖼️ **Direct Image Uploads**: Need to give the AI visual context? Tap the "Upload Image" button on your phone, select a photo, and it is instantly uploaded to an ephemeral secure container directory (`/tmp/uploads`) and the path is automatically typed into your terminal prompt.
-- 🔒 **Deep & Secure Integration**: Automatically bridges the AI with your Home Assistant Supervisor Token in a secure sandbox.
-- 🎨 **Beautiful Aesthetics**: Complete with a dynamic mesh-gradient footer that feels right at home on modern devices.
+- ⌨️ **Mobile Macros & Virtual D-Pad**: High-precision SVG arrow keys, dedicated `Esc`/`Tab` keys, one-tap command macros (`/resume`, `/new`, `/quota`, `/model`), and clipboard helpers.
+- 🖼️ **Direct Image Uploads**: Upload photos directly from your phone; images are saved securely to `/tmp/uploads` and their paths are pasted into the terminal automatically.
+- 🔒 **Deep & Secure Integration**: Securely sandboxed integration with Home Assistant Supervisor Token API.
 
 ---
 
