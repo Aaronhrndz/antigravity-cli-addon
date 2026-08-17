@@ -73,7 +73,6 @@
       width: 100%;
       position: relative;
       background: var(--bg-main);
-      overflow: hidden;
       transition: background 0.2s ease;
     }
     
@@ -545,14 +544,6 @@
           <button class="tool-btn theme-choice-btn" data-theme-choice="light" onclick="setThemeMode('light')" data-i18n="light" style="flex: 1; font-size: 10px; padding: 4px;">☀️ Light</button>
           <button class="tool-btn theme-choice-btn" data-theme-choice="dark" onclick="setThemeMode('dark')" data-i18n="dark" style="flex: 1; font-size: 10px; padding: 4px;">🌙 Dark</button>
         </div>
-        <div style="grid-column: span 12; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.15); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 2px;">
-          <span data-i18n="font_size_label" style="font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Font Size</span>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <button class="tool-btn" onclick="changeFontSize(-1)" style="width: 26px; height: 26px; font-weight: bold; font-size: 11px; padding: 0;">A-</button>
-            <span id="font-size-display" style="font-size: 11px; font-weight: bold; min-width: 32px; text-align: center;">14px</span>
-            <button class="tool-btn" onclick="changeFontSize(1)" style="width: 26px; height: 26px; font-weight: bold; font-size: 11px; padding: 0;">A+</button>
-          </div>
-        </div>
         <button class="tool-btn copy-menu-btn" onclick="copySelection()" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
           <span data-i18n="copy_label" style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Copy</span>
           <span data-i18n="copy_text">Copy</span>
@@ -579,6 +570,14 @@
           <span data-i18n="pos_label" style="font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px;">Toolbar Position</span>
           <span style="font-size: 11px; font-weight: bold;" id="toolbar-pos-text">Top / Bottom</span>
         </button>
+        <div style="grid-column: span 12; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.15); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 2px; margin-bottom: 2px;">
+          <span data-i18n="font_size_label" style="font-size: 10px; font-weight: bold; color: var(--text-secondary); text-transform: uppercase;">Font Size</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button class="tool-btn" onclick="changeFontSize(-1)" style="font-size: 11px; font-weight: bold; padding: 2px 8px; min-width: 28px; height: 26px;">A-</button>
+            <span id="font-size-display" style="font-size: 11px; font-weight: bold; min-width: 32px; text-align: center;">14px</span>
+            <button class="tool-btn" onclick="changeFontSize(1)" style="font-size: 11px; font-weight: bold; padding: 2px 8px; min-width: 28px; height: 26px;">A+</button>
+          </div>
+        </div>
         <button class="tool-btn" onclick="exportBackup()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.2; grid-column: span 6; padding: 6px; background: #238636; color: white;">
           <span data-i18n="export_label" style="font-size: 8px; color: #d4edda; text-transform: uppercase; margin-bottom: 2px;">Export</span>
           <span data-i18n="export_text" style="font-size: 11px; font-weight: bold;">Config</span>
@@ -684,8 +683,6 @@
         auto: "🌓 Auto",
         light: "☀️ Light",
         dark: "🌙 Dark",
-        font_size_label: "Font Size",
-        font_size_set: "Font size set to: ",
         copy_label: "Copy",
         copy_text: "Copy",
         paste_label: "Paste",
@@ -699,6 +696,8 @@
         pos_label: "Toolbar Position",
         pos_top: "⬇️ Pin Bottom",
         pos_bottom: "⬆️ Pin Top",
+        font_size_label: "Font Size",
+        font_size_set: "Font size set to: ",
         export_label: "Export",
         export_text: "Config",
         import_label: "Import",
@@ -729,8 +728,6 @@
         auto: "🌓 Auto",
         light: "☀️ Sol/Claro",
         dark: "🌙 Oscuro",
-        font_size_label: "Tamaño Fuente",
-        font_size_set: "Tamaño de fuente: ",
         copy_label: "Copiar",
         copy_text: "Copy",
         paste_label: "Pegar",
@@ -744,6 +741,8 @@
         pos_label: "Posición Barra",
         pos_top: "⬇️ Fijar Abajo",
         pos_bottom: "⬆️ Fijar Arriba",
+        font_size_label: "Tamaño Fuente",
+        font_size_set: "Tamaño de fuente: ",
         export_label: "Exportar",
         export_text: "Config",
         import_label: "Importar",
@@ -774,8 +773,6 @@
         auto: "🌓 Auto",
         light: "☀️ Hell",
         dark: "🌙 Dunkel",
-        font_size_label: "Schriftgröße",
-        font_size_set: "Schriftgröße: ",
         copy_label: "Kopieren",
         copy_text: "Copy",
         paste_label: "Einfügen",
@@ -789,6 +786,8 @@
         pos_label: "Leistenposition",
         pos_top: "⬇️ Unten fixieren",
         pos_bottom: "⬆️ Oben fixieren",
+        font_size_label: "Schriftgröße",
+        font_size_set: "Schriftgröße eingestellt auf: ",
         export_label: "Exportieren",
         export_text: "Konfig",
         import_label: "Importieren",
@@ -819,8 +818,6 @@
         auto: "🌓 Auto",
         light: "☀️ Clair",
         dark: "🌙 Sombre",
-        font_size_label: "Taille Police",
-        font_size_set: "Taille de police: ",
         copy_label: "Copier",
         copy_text: "Copy",
         paste_label: "Coller",
@@ -834,6 +831,8 @@
         pos_label: "Position Barre",
         pos_top: "⬇️ Fixer en bas",
         pos_bottom: "⬆️ Fixer en haut",
+        font_size_label: "Taille Police",
+        font_size_set: "Taille de police : ",
         export_label: "Exporter",
         export_text: "Config",
         import_label: "Importer",
@@ -864,8 +863,6 @@
         auto: "🌓 Auto",
         light: "☀️ Chiaro",
         dark: "🌙 Scuro",
-        font_size_label: "Dimensione Font",
-        font_size_set: "Dimensione font: ",
         copy_label: "Copia",
         copy_text: "Copy",
         paste_label: "Incolla",
@@ -879,13 +876,15 @@
         pos_label: "Posizione Barra",
         pos_top: "⬇️ Fissa in basso",
         pos_bottom: "⬆️ Fissa in alto",
+        font_size_label: "Dimensione Font",
+        font_size_set: "Dimensione font: ",
         export_label: "Esporta",
         export_text: "Config",
         import_label: "Importa",
         import_text: "Config",
         upload_title: "Carica immagine",
         theme_title: "Tema",
-        update_available: "Nuova versione disponible!",
+        update_available: "Nuova versione disponibile!",
         update_btn: "Aggiorna ora",
         updating: "Aggiornamento in corso...",
         text_copied: "Testo copiato negli appunti",
@@ -909,8 +908,6 @@
         auto: "🌓 Auto",
         light: "☀️ Claro",
         dark: "🌙 Escuro",
-        font_size_label: "Tamanho Fonte",
-        font_size_set: "Tamanho da fonte: ",
         copy_label: "Copiar",
         copy_text: "Copy",
         paste_label: "Colar",
@@ -924,6 +921,8 @@
         pos_label: "Posição Barra",
         pos_top: "⬇️ Fixar em baixo",
         pos_bottom: "⬆️ Fixar em cima",
+        font_size_label: "Tamanho Fonte",
+        font_size_set: "Tamanho da fonte: ",
         export_label: "Exportar",
         export_text: "Config",
         import_label: "Importar",
@@ -977,8 +976,6 @@
       });
       const uploadBtn = document.getElementById('upload-btn');
       if (uploadBtn) uploadBtn.title = t('upload_title');
-      const fontDisplay = document.getElementById('font-size-display');
-      if (fontDisplay) fontDisplay.innerText = `${getFontSize()}px`;
     }
 
     // Terminal Palettes
@@ -1042,27 +1039,6 @@
       return stored ? parseInt(stored, 10) : 14;
     }
 
-    function getTermFromIframe(iframe) {
-      if (!iframe) return null;
-      try {
-        const win = iframe.contentWindow;
-        const doc = iframe.contentDocument;
-        if (win) {
-          if (win.term) return win.term;
-          if (win.t) return win.t;
-          if (win.terminal) return win.terminal;
-          if (win.ttyd && win.ttyd.term) return win.ttyd.term;
-        }
-        if (doc) {
-          const termEl = doc.getElementById('terminal') || doc.querySelector('.terminal') || doc.querySelector('.xterm');
-          if (termEl && termEl._xterm) return termEl._xterm;
-          const screen = doc.querySelector('.xterm-screen');
-          if (screen && screen._xterm) return screen._xterm;
-        }
-      } catch(e) {}
-      return null;
-    }
-
     function applyFontSize(size) {
       const clamped = Math.max(10, Math.min(26, size || getFontSize()));
       localStorage.setItem('agy_font_size', clamped);
@@ -1071,34 +1047,14 @@
 
       document.querySelectorAll('.term-iframe').forEach(iframe => {
         try {
-          const term = getTermFromIframe(iframe);
-          const win = iframe.contentWindow;
-          if (term) {
-            if (term.options) {
+          if (iframe && iframe.contentWindow) {
+            const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
+            if (term && term.options) {
               term.options.fontSize = clamped;
-            }
-            if (typeof term.setOption === 'function') {
-              term.setOption('fontSize', clamped);
-            }
-            if (term._core) {
-              if (term._core._charSizeService && typeof term._core._charSizeService.measure === 'function') {
-                term._core._charSizeService.measure();
-              }
-              if (term._core._renderService && typeof term._core._renderService.clear === 'function') {
-                term._core._renderService.clear();
+              if (typeof term.refresh === 'function') {
+                term.refresh(0, term.rows - 1);
               }
             }
-            if (typeof term.fit === 'function') {
-              term.fit();
-            } else if (win && typeof win.fit === 'function') {
-              win.fit();
-            }
-            if (typeof term.refresh === 'function') {
-              term.refresh(0, (term.rows || 24) - 1);
-            }
-          }
-          if (win) {
-            win.dispatchEvent(new Event('resize'));
           }
         } catch(e) {}
       });
@@ -1160,23 +1116,20 @@
           if (vp) vp.style.backgroundColor = bg;
         }
         
-        const term = getTermFromIframe(iframe);
-        if (term) {
-          if (term.options) {
-            term.options.theme = termTheme;
-            term.options.fontSize = getFontSize();
-          }
-          if (typeof term.setOption === 'function') {
-            term.setOption('theme', termTheme);
-            term.setOption('fontSize', getFontSize());
-          }
-          if (term._core) {
-            if (term._core._charSizeService && typeof term._core._charSizeService.measure === 'function') {
-              term._core._charSizeService.measure();
+        if (iframe.contentWindow) {
+          const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
+          if (term) {
+            if (term.options) {
+              term.options.theme = termTheme;
+              term.options.fontSize = getFontSize();
             }
-          }
-          if (typeof term.refresh === 'function') {
-            term.refresh(0, (term.rows || 24) - 1);
+            if (typeof term.setOption === 'function') {
+              term.setOption('theme', termTheme);
+              term.setOption('fontSize', getFontSize());
+            }
+            if (typeof term.refresh === 'function') {
+              term.refresh(0, term.rows - 1);
+            }
           }
         }
       } catch(e) {}
@@ -1453,15 +1406,6 @@
               setTimeout(scrollToBottom, delay);
             });
             
-            // Disable mobile IME predictive buffer and autocorrect on xterm helper textarea
-            const helperTextarea = iframeDoc.querySelector('.xterm-helper-textarea');
-            if (helperTextarea) {
-              helperTextarea.setAttribute('autocorrect', 'off');
-              helperTextarea.setAttribute('autocapitalize', 'off');
-              helperTextarea.setAttribute('autocomplete', 'off');
-              helperTextarea.setAttribute('spellcheck', 'false');
-            }
-
             // Enable copyOnSelect on xterm instance
             if (iframeWin.term) {
               if (iframeWin.term.options) {
@@ -1502,7 +1446,7 @@
             window.addEventListener('keydown', handleCopyKey, true);
 
             iframeWin.addEventListener('resize', () => {
-              // keep natural scroll position on resize
+              [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
             });
 
             iframeDoc.addEventListener('focusin', () => {
@@ -1633,33 +1577,28 @@
       showNotification(next === 'top' ? t('bar_pinned_top') : t('bar_pinned_bottom'));
     };
 
-    // Initialize i18n, tabs, theme & toolbar position
+    // Initialize i18n, tabs, theme, font size & toolbar position
     applyI18n();
     renderTabs();
     applyTheme();
+    applyFontSize();
     applyToolbarPosition();
     switchSession(currentSessionId);
 
     // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible above keyboard)
-    let lastVh = 0;
-    let lastTop = 0;
     function adjustForKeyboard() {
       const vh = (window.visualViewport && window.visualViewport.height > 100) ? window.visualViewport.height : window.innerHeight;
       const top = (window.visualViewport && window.visualViewport.offsetTop > 0) ? window.visualViewport.offsetTop : 0;
       
-      if (Math.abs(vh - lastVh) > 1 || Math.abs(top - lastTop) > 1) {
-        lastVh = vh;
-        lastTop = top;
-        const appRoot = document.getElementById('app-root');
-        if (appRoot) {
-          appRoot.style.height = `${vh}px`;
-          appRoot.style.top = `${top}px`;
-        }
+      const appRoot = document.getElementById('app-root');
+      if (appRoot) {
+        appRoot.style.height = `${vh}px`;
+        appRoot.style.top = `${top}px`;
+      }
 
-        const activeIframe = getActiveIframe();
-        if (activeIframe && activeIframe.contentWindow) {
-          activeIframe.contentWindow.dispatchEvent(new Event('resize'));
-        }
+      const activeIframe = getActiveIframe();
+      if (activeIframe && activeIframe.contentWindow) {
+        activeIframe.contentWindow.dispatchEvent(new Event('resize'));
       }
     }
 
@@ -1816,25 +1755,8 @@
       }
     };
     
-    function blurActiveInputs() {
-      try {
-        if (document.activeElement && typeof document.activeElement.blur === 'function') {
-          document.activeElement.blur();
-        }
-        document.querySelectorAll('.term-iframe').forEach(f => {
-          if (f.contentDocument && f.contentDocument.activeElement) {
-            f.contentDocument.activeElement.blur();
-          }
-        });
-      } catch(e) {}
-    }
-
     function toggleContextMenu(e) {
-      if (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-      blurActiveInputs();
+      e.stopPropagation();
       const menu = document.getElementById('extra-keys-menu');
       menu.classList.toggle('show');
       const dpad = document.getElementById('dpad-menu');
@@ -1842,11 +1764,7 @@
     }
     
     function toggleDpadMenu(e) {
-      if (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-      blurActiveInputs();
+      e.stopPropagation();
       const menu = document.getElementById('dpad-menu');
       menu.classList.toggle('show');
       const extraMenu = document.getElementById('extra-keys-menu');
@@ -1866,25 +1784,6 @@
 
     document.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-    });
-
-    // Prevent virtual keyboard from popping up when tapping anywhere inside the menus or toolbar buttons
-    document.querySelectorAll('.context-menu, .toolbar-footer, .tab-bar, .tool-btn').forEach(el => {
-      el.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-      }, { passive: true });
-      el.addEventListener('pointerdown', (e) => {
-        if (el.tagName === 'BUTTON' || el.classList.contains('tool-btn')) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      });
-      el.addEventListener('mousedown', (e) => {
-        if (el.tagName === 'BUTTON' || el.classList.contains('tool-btn')) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      });
     });
 
     let notifTimeout;
@@ -1929,8 +1828,16 @@
     }
 
     document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => {
+        const key = btn.getAttribute('data-key');
+        const cmd = btn.getAttribute('data-cmd');
+        if (key || cmd || btn.classList.contains('paste-menu-btn')) {
+          e.preventDefault();
+        }
+      });
+      
       btn.addEventListener('click', (e) => {
-        if (btn.id !== 'main-action-btn' && !btn.closest('#extra-keys-menu')) {
+        if (btn.id !== 'main-action-btn') {
           document.getElementById('extra-keys-menu').classList.remove('show');
         }
         if (btn.id !== 'dpad-toggle-btn' && !btn.closest('#dpad-menu')) {
