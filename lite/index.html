@@ -1504,19 +1504,11 @@
               [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
             });
 
-            iframeDoc.addEventListener('focusin', (e) => {
-              const isTextarea = e.target && (e.target.classList?.contains('xterm-helper-textarea') || e.target.tagName === 'TEXTAREA');
-              if (isTextarea) {
-                isKeyboardFocused = true;
-                [20, 100, 250, 450, 700].forEach(delay => setTimeout(adjustForKeyboard, delay));
-              }
+            iframeDoc.addEventListener('focusin', () => {
+              [20, 100, 250, 450].forEach(delay => setTimeout(adjustForKeyboard, delay));
             });
-            iframeDoc.addEventListener('focusout', (e) => {
-              const isTextarea = e.target && (e.target.classList?.contains('xterm-helper-textarea') || e.target.tagName === 'TEXTAREA');
-              if (isTextarea) {
-                isKeyboardFocused = false;
-                [20, 100, 250, 450].forEach(delay => setTimeout(adjustForKeyboard, delay));
-              }
+            iframeDoc.addEventListener('focusout', () => {
+              [20, 100, 250, 450].forEach(delay => setTimeout(adjustForKeyboard, delay));
             });
           }
         }, 500);
@@ -1647,27 +1639,14 @@
     applyToolbarPosition();
     switchSession(currentSessionId);
 
-    // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible above keyboard)
-    let isKeyboardFocused = false;
-
+    // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible and resizes terminal to full screen on close)
     function adjustForKeyboard() {
-      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
       let vh = window.innerHeight;
       let top = 0;
-      let kbHeight = 0;
 
       if (window.visualViewport && window.visualViewport.height > 100) {
         vh = window.visualViewport.height;
         top = window.visualViewport.offsetTop > 0 ? window.visualViewport.offsetTop : 0;
-        if (window.innerHeight - vh > 120) {
-          kbHeight = window.innerHeight - vh;
-        }
-      }
-
-      // If visualViewport did not shrink but keyboard is focused on mobile WebView:
-      if (isMobile && isKeyboardFocused && kbHeight === 0) {
-        kbHeight = Math.max(260, Math.min(window.innerHeight * 0.45, 340));
-        vh = Math.max(200, window.innerHeight - kbHeight);
       }
 
       const appRoot = document.getElementById('app-root');
@@ -1678,17 +1657,24 @@
 
       document.querySelectorAll('.term-iframe').forEach(iframe => {
         try {
-          if (iframe && iframe.contentWindow) {
-            const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
-            if (term) {
-              if (typeof iframe.contentWindow.fit === 'function') {
-                iframe.contentWindow.fit();
-              }
-              if (typeof term.scrollToBottom === 'function') {
-                term.scrollToBottom();
-              }
+          const win = iframe.contentWindow;
+          const term = getTermFromIframe(iframe);
+          if (win) {
+            if (typeof win.fit === 'function') {
+              win.fit();
             }
-            iframe.contentWindow.dispatchEvent(new Event('resize'));
+            if (win.fitAddon && typeof win.fitAddon.fit === 'function') {
+              win.fitAddon.fit();
+            }
+            win.dispatchEvent(new Event('resize'));
+          }
+          if (term) {
+            if (typeof term.fit === 'function') {
+              term.fit();
+            }
+            if (typeof term.scrollToBottom === 'function') {
+              term.scrollToBottom();
+            }
           }
         } catch(e) {}
       });
