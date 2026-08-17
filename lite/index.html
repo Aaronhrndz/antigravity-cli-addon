@@ -1041,6 +1041,27 @@
       return stored ? parseInt(stored, 10) : 14;
     }
 
+    function getTermFromIframe(iframe) {
+      if (!iframe) return null;
+      try {
+        const win = iframe.contentWindow;
+        const doc = iframe.contentDocument;
+        if (win) {
+          if (win.term) return win.term;
+          if (win.t) return win.t;
+          if (win.terminal) return win.terminal;
+          if (win.ttyd && win.ttyd.term) return win.ttyd.term;
+        }
+        if (doc) {
+          const termEl = doc.getElementById('terminal') || doc.querySelector('.terminal') || doc.querySelector('.xterm');
+          if (termEl && termEl._xterm) return termEl._xterm;
+          const screen = doc.querySelector('.xterm-screen');
+          if (screen && screen._xterm) return screen._xterm;
+        }
+      } catch(e) {}
+      return null;
+    }
+
     function applyFontSize(size) {
       const clamped = Math.max(10, Math.min(26, size || getFontSize()));
       localStorage.setItem('agy_font_size', clamped);
@@ -1049,18 +1070,34 @@
 
       document.querySelectorAll('.term-iframe').forEach(iframe => {
         try {
-          if (iframe && iframe.contentWindow) {
-            const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
-            if (term && term.options) {
+          const term = getTermFromIframe(iframe);
+          const win = iframe.contentWindow;
+          if (term) {
+            if (term.options) {
               term.options.fontSize = clamped;
-              if (typeof term.refresh === 'function') {
-                term.refresh(0, term.rows - 1);
+            }
+            if (typeof term.setOption === 'function') {
+              term.setOption('fontSize', clamped);
+            }
+            if (term._core) {
+              if (term._core._charSizeService && typeof term._core._charSizeService.measure === 'function') {
+                term._core._charSizeService.measure();
               }
-              if (typeof iframe.contentWindow.fit === 'function') {
-                iframe.contentWindow.fit();
+              if (term._core._renderService && typeof term._core._renderService.clear === 'function') {
+                term._core._renderService.clear();
               }
             }
-            iframe.contentWindow.dispatchEvent(new Event('resize'));
+            if (typeof term.fit === 'function') {
+              term.fit();
+            } else if (win && typeof win.fit === 'function') {
+              win.fit();
+            }
+            if (typeof term.refresh === 'function') {
+              term.refresh(0, (term.rows || 24) - 1);
+            }
+          }
+          if (win) {
+            win.dispatchEvent(new Event('resize'));
           }
         } catch(e) {}
       });
@@ -1122,20 +1159,23 @@
           if (vp) vp.style.backgroundColor = bg;
         }
         
-        if (iframe.contentWindow) {
-          const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
-          if (term) {
-            if (term.options) {
-              term.options.theme = termTheme;
-              term.options.fontSize = getFontSize();
+        const term = getTermFromIframe(iframe);
+        if (term) {
+          if (term.options) {
+            term.options.theme = termTheme;
+            term.options.fontSize = getFontSize();
+          }
+          if (typeof term.setOption === 'function') {
+            term.setOption('theme', termTheme);
+            term.setOption('fontSize', getFontSize());
+          }
+          if (term._core) {
+            if (term._core._charSizeService && typeof term._core._charSizeService.measure === 'function') {
+              term._core._charSizeService.measure();
             }
-            if (typeof term.setOption === 'function') {
-              term.setOption('theme', termTheme);
-              term.setOption('fontSize', getFontSize());
-            }
-            if (typeof term.refresh === 'function') {
-              term.refresh(0, term.rows - 1);
-            }
+          }
+          if (typeof term.refresh === 'function') {
+            term.refresh(0, (term.rows || 24) - 1);
           }
         }
       } catch(e) {}
