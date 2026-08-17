@@ -1502,7 +1502,7 @@
             window.addEventListener('keydown', handleCopyKey, true);
 
             iframeWin.addEventListener('resize', () => {
-              [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
+              // keep natural scroll position on resize
             });
 
             iframeDoc.addEventListener('focusin', () => {
@@ -1641,19 +1641,25 @@
     switchSession(currentSessionId);
 
     // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible above keyboard)
+    let lastVh = 0;
+    let lastTop = 0;
     function adjustForKeyboard() {
       const vh = (window.visualViewport && window.visualViewport.height > 100) ? window.visualViewport.height : window.innerHeight;
       const top = (window.visualViewport && window.visualViewport.offsetTop > 0) ? window.visualViewport.offsetTop : 0;
       
-      const appRoot = document.getElementById('app-root');
-      if (appRoot) {
-        appRoot.style.height = `${vh}px`;
-        appRoot.style.top = `${top}px`;
-      }
+      if (Math.abs(vh - lastVh) > 1 || Math.abs(top - lastTop) > 1) {
+        lastVh = vh;
+        lastTop = top;
+        const appRoot = document.getElementById('app-root');
+        if (appRoot) {
+          appRoot.style.height = `${vh}px`;
+          appRoot.style.top = `${top}px`;
+        }
 
-      const activeIframe = getActiveIframe();
-      if (activeIframe && activeIframe.contentWindow) {
-        activeIframe.contentWindow.dispatchEvent(new Event('resize'));
+        const activeIframe = getActiveIframe();
+        if (activeIframe && activeIframe.contentWindow) {
+          activeIframe.contentWindow.dispatchEvent(new Event('resize'));
+        }
       }
     }
 
