@@ -73,7 +73,10 @@
       width: 100%;
       position: relative;
       background: var(--bg-main);
-      transition: background 0.2s ease;
+      padding-bottom: var(--keyboard-offset, 0px);
+      box-sizing: border-box;
+      overflow: hidden;
+      transition: padding-bottom 0.15s ease, background 0.2s ease;
     }
     
     iframe {
@@ -1653,29 +1656,23 @@
       }
       
       const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
-      let vh = window.innerHeight;
-      let top = 0;
+      let kbOffset = 0;
 
       if (window.visualViewport && window.visualViewport.height > 100) {
-        if (window.innerHeight - window.visualViewport.height > 100) {
+        const diff = window.innerHeight - window.visualViewport.height;
+        if (diff > 80) {
+          kbOffset = diff;
           isKeyboardOpen = true;
-          vh = window.visualViewport.height;
-          top = window.visualViewport.offsetTop > 0 ? window.visualViewport.offsetTop : 0;
         } else if (window.visualViewport.height >= window.innerHeight - 40 && !isKeyboardOpen) {
-          vh = window.innerHeight;
+          kbOffset = 0;
         }
       }
 
-      if (isMobile && isKeyboardOpen && vh >= window.innerHeight - 50) {
-        const kbHeight = Math.max(260, Math.min(window.innerHeight * 0.44, 340));
-        vh = Math.max(180, window.innerHeight - kbHeight);
+      if (isMobile && isKeyboardOpen && kbOffset === 0) {
+        kbOffset = Math.max(260, Math.min(window.innerHeight * 0.44, 340));
       }
 
-      const appRoot = document.getElementById('app-root');
-      if (appRoot) {
-        appRoot.style.height = `${vh}px`;
-        appRoot.style.top = `${top}px`;
-      }
+      document.documentElement.style.setProperty('--keyboard-offset', `${kbOffset}px`);
 
       document.querySelectorAll('.term-iframe').forEach(iframe => {
         try {
