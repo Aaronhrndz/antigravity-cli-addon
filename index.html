@@ -1663,7 +1663,8 @@
         if (diff > 80) {
           kbOffset = diff;
           isKeyboardOpen = true;
-        } else if (window.visualViewport.height >= window.innerHeight - 40 && !isKeyboardOpen) {
+        } else if (window.visualViewport.height >= window.innerHeight - 40) {
+          isKeyboardOpen = false;
           kbOffset = 0;
         }
       }
@@ -1696,6 +1697,19 @@
             }
           }
         } catch(e) {}
+      });
+    }
+
+    // Tap on empty space / terminal container background clears keyboard offset immediately
+    const termContainer = document.getElementById('terminal-container');
+    if (termContainer) {
+      ['pointerdown', 'touchstart', 'mousedown'].forEach(evName => {
+        termContainer.addEventListener(evName, (e) => {
+          if (e.target === termContainer) {
+            blurActiveInputs();
+            adjustForKeyboard(false);
+          }
+        });
       });
     }
 
