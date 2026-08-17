@@ -1502,7 +1502,14 @@
             window.addEventListener('keydown', handleCopyKey, true);
 
             iframeWin.addEventListener('resize', () => {
-              [10, 50, 150, 300].forEach(delay => { setTimeout(scrollToBottom, delay); });
+              [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
+            });
+
+            iframeDoc.addEventListener('focusin', () => {
+              [50, 150, 300, 500, 800].forEach(delay => setTimeout(adjustForKeyboard, delay));
+            });
+            iframeDoc.addEventListener('focusout', () => {
+              [50, 150, 300].forEach(delay => setTimeout(adjustForKeyboard, delay));
             });
           }
         }, 500);
@@ -1633,8 +1640,8 @@
     applyToolbarPosition();
     switchSession(currentSessionId);
 
-    // Responsive Viewport & Terminal Auto-fit Handler
-    function adjustViewport() {
+    // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible above keyboard)
+    function adjustForKeyboard() {
       const vh = (window.visualViewport && window.visualViewport.height > 100) ? window.visualViewport.height : window.innerHeight;
       const top = (window.visualViewport && window.visualViewport.offsetTop > 0) ? window.visualViewport.offsetTop : 0;
       
@@ -1644,30 +1651,20 @@
         appRoot.style.top = `${top}px`;
       }
 
-      document.querySelectorAll('.term-iframe').forEach(iframe => {
-        try {
-          const win = iframe.contentWindow;
-          const term = getTermFromIframe(iframe);
-          if (win) {
-            if (typeof win.fit === 'function') win.fit();
-            if (win.fitAddon && typeof win.fitAddon.fit === 'function') win.fitAddon.fit();
-            win.dispatchEvent(new Event('resize'));
-          }
-          if (term) {
-            if (typeof term.fit === 'function') term.fit();
-            if (typeof term.scrollToBottom === 'function') term.scrollToBottom();
-          }
-        } catch(e) {}
-      });
+      const activeIframe = getActiveIframe();
+      if (activeIframe && activeIframe.contentWindow) {
+        activeIframe.contentWindow.dispatchEvent(new Event('resize'));
+      }
     }
 
-    window.addEventListener('resize', adjustViewport);
-    window.addEventListener('orientationchange', () => setTimeout(adjustViewport, 300));
+    window.addEventListener('resize', adjustForKeyboard);
+    window.addEventListener('orientationchange', () => setTimeout(adjustForKeyboard, 300));
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', adjustViewport);
-      window.visualViewport.addEventListener('scroll', adjustViewport);
+      window.visualViewport.addEventListener('resize', adjustForKeyboard);
+      window.visualViewport.addEventListener('scroll', adjustForKeyboard);
     }
-    adjustViewport();
+    setInterval(adjustForKeyboard, 400);
+    adjustForKeyboard();
 
     // Android/Browser background recovery handler
     document.addEventListener('visibilitychange', () => {
@@ -1815,7 +1812,6 @@
     
     function blurActiveInputs() {
       try {
-        isKeyboardOpen = false;
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
           document.activeElement.blur();
         }
@@ -1824,7 +1820,6 @@
             f.contentDocument.activeElement.blur();
           }
         });
-        adjustForKeyboard(false);
       } catch(e) {}
     }
 
