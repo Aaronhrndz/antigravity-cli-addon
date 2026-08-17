@@ -1504,11 +1504,16 @@
               [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
             });
 
-            iframeDoc.addEventListener('focusin', () => {
-              [20, 100, 250, 450].forEach(delay => setTimeout(adjustForKeyboard, delay));
+            iframeDoc.addEventListener('focusin', (e) => {
+              const isTextarea = e.target && (e.target.classList?.contains('xterm-helper-textarea') || e.target.tagName === 'TEXTAREA');
+              if (isTextarea) {
+                isKeyboardOpen = true;
+                [10, 80, 200, 400, 650].forEach(delay => setTimeout(adjustForKeyboard, delay));
+              }
             });
             iframeDoc.addEventListener('focusout', () => {
-              [20, 100, 250, 450].forEach(delay => setTimeout(adjustForKeyboard, delay));
+              isKeyboardOpen = false;
+              [10, 80, 200, 400].forEach(delay => setTimeout(adjustForKeyboard, delay));
             });
           }
         }, 500);
@@ -1640,13 +1645,30 @@
     switchSession(currentSessionId);
 
     // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible and resizes terminal to full screen on close)
-    function adjustForKeyboard() {
+    let isKeyboardOpen = false;
+
+    function adjustForKeyboard(forceState) {
+      if (typeof forceState === 'boolean') {
+        isKeyboardOpen = forceState;
+      }
+      
+      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
       let vh = window.innerHeight;
       let top = 0;
 
       if (window.visualViewport && window.visualViewport.height > 100) {
-        vh = window.visualViewport.height;
-        top = window.visualViewport.offsetTop > 0 ? window.visualViewport.offsetTop : 0;
+        if (window.innerHeight - window.visualViewport.height > 100) {
+          isKeyboardOpen = true;
+          vh = window.visualViewport.height;
+          top = window.visualViewport.offsetTop > 0 ? window.visualViewport.offsetTop : 0;
+        } else if (window.visualViewport.height >= window.innerHeight - 40 && !isKeyboardOpen) {
+          vh = window.innerHeight;
+        }
+      }
+
+      if (isMobile && isKeyboardOpen && vh >= window.innerHeight - 50) {
+        const kbHeight = Math.max(260, Math.min(window.innerHeight * 0.44, 340));
+        vh = Math.max(180, window.innerHeight - kbHeight);
       }
 
       const appRoot = document.getElementById('app-root');
@@ -1835,6 +1857,7 @@
     
     function blurActiveInputs() {
       try {
+        isKeyboardOpen = false;
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
           document.activeElement.blur();
         }
@@ -1843,6 +1866,7 @@
             f.contentDocument.activeElement.blur();
           }
         });
+        adjustForKeyboard(false);
       } catch(e) {}
     }
 
