@@ -54,15 +54,12 @@
     }
 
     #app-root {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
       width: 100vw;
       max-width: 100vw;
       height: 100%;
-      height: 100dvh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -673,7 +670,8 @@
   </div>
 </div>
 
-     // Internationalization (i18n) Engine - Default English with automatic HA/Browser localization
+  <script>
+    // Internationalization (i18n) Engine - Default English with automatic HA/Browser localization
     const I18N = {
       en: {
         auto: "🌓 Auto",
@@ -1037,54 +1035,28 @@
       return stored ? parseInt(stored, 10) : 14;
     }
 
-    function applyFontSizeToIframe(iframe, size) {
-      try {
-        if (!iframe) return;
-        const clamped = Math.max(10, Math.min(26, size || getFontSize()));
-        if (iframe.contentDocument) {
-          let fontStyle = iframe.contentDocument.getElementById('dynamic-term-font');
-          if (!fontStyle) {
-            fontStyle = iframe.contentDocument.createElement('style');
-            fontStyle.id = 'dynamic-term-font';
-            if (iframe.contentDocument.head) iframe.contentDocument.head.appendChild(fontStyle);
-            else if (iframe.contentDocument.body) iframe.contentDocument.body.appendChild(fontStyle);
-          }
-          fontStyle.textContent = `
-            .xterm, .xterm-rows, .xterm-screen, #terminal, .terminal, .xterm-viewport {
-              font-size: ${clamped}px !important;
-            }
-          `;
-        }
-
-        if (iframe.contentWindow) {
-          const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
-          if (term) {
-            if (term.options) {
-              term.options.fontSize = clamped;
-            }
-            if (typeof term.setOption === 'function') {
-              term.setOption('fontSize', clamped);
-            }
-            if (typeof iframe.contentWindow.fit === 'function') {
-              iframe.contentWindow.fit();
-            }
-            if (typeof term.refresh === 'function') {
-              term.refresh(0, term.rows - 1);
-            }
-          }
-          iframe.contentWindow.dispatchEvent(new Event('resize'));
-        }
-      } catch(e) {}
-    }
-
     function applyFontSize(size) {
       const clamped = Math.max(10, Math.min(26, size || getFontSize()));
       localStorage.setItem('agy_font_size', clamped);
-      const display = document.getElementById('font-size-display');
-      if (display) display.innerText = `${clamped}px`;
+      const fontDisplay = document.getElementById('font-size-display');
+      if (fontDisplay) fontDisplay.innerText = `${clamped}px`;
 
       document.querySelectorAll('.term-iframe').forEach(iframe => {
-        applyFontSizeToIframe(iframe, clamped);
+        try {
+          if (iframe && iframe.contentWindow) {
+            const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
+            if (term && term.options) {
+              term.options.fontSize = clamped;
+              if (typeof term.refresh === 'function') {
+                term.refresh(0, term.rows - 1);
+              }
+              if (typeof iframe.contentWindow.fit === 'function') {
+                iframe.contentWindow.fit();
+              }
+            }
+            iframe.contentWindow.dispatchEvent(new Event('resize'));
+          }
+        } catch(e) {}
       });
     }
 
@@ -1149,16 +1121,17 @@
           if (term) {
             if (term.options) {
               term.options.theme = termTheme;
+              term.options.fontSize = getFontSize();
             }
             if (typeof term.setOption === 'function') {
               term.setOption('theme', termTheme);
+              term.setOption('fontSize', getFontSize());
             }
             if (typeof term.refresh === 'function') {
               term.refresh(0, term.rows - 1);
             }
           }
         }
-        applyFontSizeToIframe(iframe, getFontSize());
       } catch(e) {}
     }
 
@@ -1622,22 +1595,10 @@
         appRoot.style.top = `${top}px`;
       }
 
-      document.querySelectorAll('.term-iframe').forEach(iframe => {
-        if (iframe && iframe.contentWindow) {
-          try {
-            const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
-            if (term) {
-              if (typeof iframe.contentWindow.fit === 'function') {
-                iframe.contentWindow.fit();
-              }
-              if (typeof term.scrollToBottom === 'function') {
-                term.scrollToBottom();
-              }
-            }
-            iframe.contentWindow.dispatchEvent(new Event('resize'));
-          } catch(e) {}
-        }
-      });
+      const activeIframe = getActiveIframe();
+      if (activeIframe && activeIframe.contentWindow) {
+        activeIframe.contentWindow.dispatchEvent(new Event('resize'));
+      }
     }
 
     window.addEventListener('resize', adjustForKeyboard);
@@ -1845,7 +1806,7 @@
       e.preventDefault();
     });
 
-    // Prevent virtual keyboard from popping up when tapping anywhere inside the menus or buttons
+    // Prevent virtual keyboard from popping up when tapping anywhere inside the menus or toolbar buttons
     document.querySelectorAll('.context-menu, .toolbar-footer, .tab-bar, .tool-btn').forEach(el => {
       el.addEventListener('touchstart', (e) => {
         e.stopPropagation();
