@@ -2,6 +2,13 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
+## [1.11.0] - 2026-08-17
+- feat: Add terminal Font Size selector (`A- / 14px / A+`) in context menu with persistent storage and i18n support
+- feat: Add dedicated vertical `Enter` button to the right of arrow keys in the D-Pad menu
+- feat: High-contrast styled Export (`#238636` green) and Import (`#8957e5` purple) configuration buttons
+- fix: Eliminate scroll-up resets by silencing `scrollToBottom` during resize events and guarding viewport adjustment handlers
+- fix: Prevent text duplication and predictive buffer interference on Android virtual keyboards by disabling autocorrect on the helper textarea
+
 ## [1.10.0] - 2026-08-16
 - feat: Add full Internationalization (i18n) engine with auto-detection (EN default, ES, DE, FR, IT, PT) for UI and Supervisor metadata
 - feat: Implement mobile-first adaptive toolbar docking (Top above tabs on mobile by default) to prevent virtual keyboards from covering controls
