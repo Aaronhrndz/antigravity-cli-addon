@@ -73,10 +73,8 @@
       width: 100%;
       position: relative;
       background: var(--bg-main);
-      padding-bottom: var(--keyboard-offset, 0px);
-      box-sizing: border-box;
       overflow: hidden;
-      transition: padding-bottom 0.15s ease, background 0.2s ease;
+      transition: background 0.2s ease;
     }
     
     iframe {
@@ -1504,19 +1502,7 @@
             window.addEventListener('keydown', handleCopyKey, true);
 
             iframeWin.addEventListener('resize', () => {
-              [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
-            });
-
-            iframeDoc.addEventListener('focusin', (e) => {
-              const isTextarea = e.target && (e.target.classList?.contains('xterm-helper-textarea') || e.target.tagName === 'TEXTAREA');
-              if (isTextarea) {
-                isKeyboardOpen = true;
-                [10, 80, 200, 400, 650].forEach(delay => setTimeout(adjustForKeyboard, delay));
-              }
-            });
-            iframeDoc.addEventListener('focusout', () => {
-              isKeyboardOpen = false;
-              [10, 80, 200, 400].forEach(delay => setTimeout(adjustForKeyboard, delay));
+              [10, 50, 150, 300].forEach(delay => { setTimeout(scrollToBottom, delay); });
             });
           }
         }, 500);
@@ -1647,80 +1633,41 @@
     applyToolbarPosition();
     switchSession(currentSessionId);
 
-    // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible and resizes terminal to full screen on close)
-    let isKeyboardOpen = false;
-
-    function adjustForKeyboard(forceState) {
-      if (typeof forceState === 'boolean') {
-        isKeyboardOpen = forceState;
-      }
+    // Responsive Viewport & Terminal Auto-fit Handler
+    function adjustViewport() {
+      const vh = (window.visualViewport && window.visualViewport.height > 100) ? window.visualViewport.height : window.innerHeight;
+      const top = (window.visualViewport && window.visualViewport.offsetTop > 0) ? window.visualViewport.offsetTop : 0;
       
-      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
-      let kbOffset = 0;
-
-      if (window.visualViewport && window.visualViewport.height > 100) {
-        const diff = window.innerHeight - window.visualViewport.height;
-        if (diff > 80) {
-          kbOffset = diff;
-          isKeyboardOpen = true;
-        } else if (window.visualViewport.height >= window.innerHeight - 40) {
-          isKeyboardOpen = false;
-          kbOffset = 0;
-        }
+      const appRoot = document.getElementById('app-root');
+      if (appRoot) {
+        appRoot.style.height = `${vh}px`;
+        appRoot.style.top = `${top}px`;
       }
-
-      if (isMobile && isKeyboardOpen && kbOffset === 0) {
-        kbOffset = Math.max(260, Math.min(window.innerHeight * 0.44, 340));
-      }
-
-      document.documentElement.style.setProperty('--keyboard-offset', `${kbOffset}px`);
 
       document.querySelectorAll('.term-iframe').forEach(iframe => {
         try {
           const win = iframe.contentWindow;
           const term = getTermFromIframe(iframe);
           if (win) {
-            if (typeof win.fit === 'function') {
-              win.fit();
-            }
-            if (win.fitAddon && typeof win.fitAddon.fit === 'function') {
-              win.fitAddon.fit();
-            }
+            if (typeof win.fit === 'function') win.fit();
+            if (win.fitAddon && typeof win.fitAddon.fit === 'function') win.fitAddon.fit();
             win.dispatchEvent(new Event('resize'));
           }
           if (term) {
-            if (typeof term.fit === 'function') {
-              term.fit();
-            }
-            if (typeof term.scrollToBottom === 'function') {
-              term.scrollToBottom();
-            }
+            if (typeof term.fit === 'function') term.fit();
+            if (typeof term.scrollToBottom === 'function') term.scrollToBottom();
           }
         } catch(e) {}
       });
     }
 
-    // Tap on empty space / terminal container background clears keyboard offset immediately
-    const termContainer = document.getElementById('terminal-container');
-    if (termContainer) {
-      ['pointerdown', 'touchstart', 'mousedown'].forEach(evName => {
-        termContainer.addEventListener(evName, (e) => {
-          if (e.target === termContainer) {
-            blurActiveInputs();
-            adjustForKeyboard(false);
-          }
-        });
-      });
-    }
-
-    window.addEventListener('resize', adjustForKeyboard);
-    window.addEventListener('orientationchange', () => setTimeout(adjustForKeyboard, 300));
+    window.addEventListener('resize', adjustViewport);
+    window.addEventListener('orientationchange', () => setTimeout(adjustViewport, 300));
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', adjustForKeyboard);
-      window.visualViewport.addEventListener('scroll', adjustForKeyboard);
+      window.visualViewport.addEventListener('resize', adjustViewport);
+      window.visualViewport.addEventListener('scroll', adjustViewport);
     }
-    setInterval(adjustForKeyboard, 400);
-    adjustForKeyboard();
+    adjustViewport();
 
     // Android/Browser background recovery handler
     document.addEventListener('visibilitychange', () => {
