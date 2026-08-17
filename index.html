@@ -591,7 +591,7 @@
     <input type="file" id="import-file-input" accept=".tar.gz" style="display: none;" onchange="importBackup(event)">
 
     <div id="dpad-menu" class="context-menu" style="left: 50%; transform: translateX(-50%); padding: 8px;">
-      <div style="display: grid; grid-template-columns: 36px 36px 36px; gap: 4px; justify-content: center;">
+      <div style="display: grid; grid-template-columns: 36px 36px 36px 44px; gap: 4px; justify-content: center; align-items: stretch;">
         <div style="grid-column: 1; grid-row: 1;">
           <button class="tool-btn" data-key="Home" data-code="36" style="width: 100%; height: 36px; font-weight: bold; font-size: 10px;">Home</button>
         </div>
@@ -602,6 +602,12 @@
         </div>
         <div style="grid-column: 3; grid-row: 1;">
           <button class="tool-btn" data-key="End" data-code="35" style="width: 100%; height: 36px; font-weight: bold; font-size: 10px;">End</button>
+        </div>
+        <div style="grid-column: 4; grid-row: 1 / span 2;">
+          <button class="tool-btn" data-key="Enter" data-code="13" style="width: 100%; height: 100%; min-height: 76px; background: #238636; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; padding: 0;">
+            <svg style="pointer-events: none; margin-bottom: 3px;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>
+            <span>Enter</span>
+          </button>
         </div>
         <div style="grid-column: 1; grid-row: 2;">
           <button class="tool-btn" data-key="ArrowLeft" data-code="37" style="width: 100%; height: 36px; padding: 0;">
@@ -1406,6 +1412,15 @@
               setTimeout(scrollToBottom, delay);
             });
             
+            // Disable mobile IME predictive buffer and autocorrect on xterm helper textarea
+            const helperTextarea = iframeDoc.querySelector('.xterm-helper-textarea');
+            if (helperTextarea) {
+              helperTextarea.setAttribute('autocorrect', 'off');
+              helperTextarea.setAttribute('autocapitalize', 'off');
+              helperTextarea.setAttribute('autocomplete', 'off');
+              helperTextarea.setAttribute('spellcheck', 'false');
+            }
+
             // Enable copyOnSelect on xterm instance
             if (iframeWin.term) {
               if (iframeWin.term.options) {
@@ -1449,11 +1464,19 @@
               [10, 50, 150, 300, 500].forEach(delay => { setTimeout(scrollToBottom, delay); });
             });
 
-            iframeDoc.addEventListener('focusin', () => {
-              [50, 150, 300, 500, 800].forEach(delay => setTimeout(adjustForKeyboard, delay));
+            iframeDoc.addEventListener('focusin', (e) => {
+              const isTextarea = e.target && (e.target.classList?.contains('xterm-helper-textarea') || e.target.tagName === 'TEXTAREA');
+              if (isTextarea) {
+                isKeyboardFocused = true;
+                [20, 100, 250, 450, 700].forEach(delay => setTimeout(adjustForKeyboard, delay));
+              }
             });
-            iframeDoc.addEventListener('focusout', () => {
-              [50, 150, 300].forEach(delay => setTimeout(adjustForKeyboard, delay));
+            iframeDoc.addEventListener('focusout', (e) => {
+              const isTextarea = e.target && (e.target.classList?.contains('xterm-helper-textarea') || e.target.tagName === 'TEXTAREA');
+              if (isTextarea) {
+                isKeyboardFocused = false;
+                [20, 100, 250, 450].forEach(delay => setTimeout(adjustForKeyboard, delay));
+              }
             });
           }
         }, 500);
@@ -1585,20 +1608,50 @@
     switchSession(currentSessionId);
 
     // Android Keyboard & Visual Viewport Handler (keeps footer permanently visible above keyboard)
+    let isKeyboardFocused = false;
+
     function adjustForKeyboard() {
-      const vh = (window.visualViewport && window.visualViewport.height > 100) ? window.visualViewport.height : window.innerHeight;
-      const top = (window.visualViewport && window.visualViewport.offsetTop > 0) ? window.visualViewport.offsetTop : 0;
-      
+      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+      let vh = window.innerHeight;
+      let top = 0;
+      let kbHeight = 0;
+
+      if (window.visualViewport && window.visualViewport.height > 100) {
+        vh = window.visualViewport.height;
+        top = window.visualViewport.offsetTop > 0 ? window.visualViewport.offsetTop : 0;
+        if (window.innerHeight - vh > 120) {
+          kbHeight = window.innerHeight - vh;
+        }
+      }
+
+      // If visualViewport did not shrink but keyboard is focused on mobile WebView:
+      if (isMobile && isKeyboardFocused && kbHeight === 0) {
+        kbHeight = Math.max(260, Math.min(window.innerHeight * 0.45, 340));
+        vh = Math.max(200, window.innerHeight - kbHeight);
+      }
+
       const appRoot = document.getElementById('app-root');
       if (appRoot) {
         appRoot.style.height = `${vh}px`;
         appRoot.style.top = `${top}px`;
       }
 
-      const activeIframe = getActiveIframe();
-      if (activeIframe && activeIframe.contentWindow) {
-        activeIframe.contentWindow.dispatchEvent(new Event('resize'));
-      }
+      document.querySelectorAll('.term-iframe').forEach(iframe => {
+        try {
+          if (iframe && iframe.contentWindow) {
+            const term = iframe.contentWindow.term || iframe.contentWindow.t || (iframe.contentWindow.ttyd && iframe.contentWindow.ttyd.term);
+            if (term) {
+              if (typeof iframe.contentWindow.fit === 'function') {
+                iframe.contentWindow.fit();
+              }
+              if (typeof term.scrollToBottom === 'function') {
+                term.scrollToBottom();
+              }
+            }
+            iframe.contentWindow.dispatchEvent(new Event('resize'));
+          }
+        } catch(e) {}
+      });
     }
 
     window.addEventListener('resize', adjustForKeyboard);
