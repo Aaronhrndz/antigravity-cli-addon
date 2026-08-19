@@ -2057,7 +2057,7 @@
       updateSpeakerBtnState(false);
     }
 
-    function playAudioFallback(text, lang) {
+    function playAudioTTS(text, lang) {
       if (!text || !text.trim()) {
         updateSpeakerBtnState(false);
         return;
@@ -2110,23 +2110,71 @@
         const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(lang || 'es')}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
         
         currentAudio = new Audio(url);
-        currentAudio.defaultPlaybackRate = 1.5;
-        currentAudio.playbackRate = 1.5;
+        currentAudio.defaultPlaybackRate = 1.6;
+        currentAudio.playbackRate = 1.6;
         currentAudio.onended = playNext;
         currentAudio.onerror = () => {
           console.warn("Audio TTS chunk failed, playing next:", chunk);
           playNext();
         };
         currentAudio.play().then(() => {
-          if (currentAudio) currentAudio.playbackRate = 1.5;
+          if (currentAudio) currentAudio.playbackRate = 1.6;
         }).catch(err => {
-          console.error("Audio playback failed:", err);
-          stopAllSpeech();
-          showNotification(t('tts_unsupported'));
+          console.warn("Google TTS stream blocked, falling back to native SpeechSynthesis:", err);
+          playNativeTTS(text, lang);
         });
       }
 
       playNext();
+    }
+
+    function playNativeTTS(text, lang) {
+      const synth = getSpeechSynthesis();
+      const UtteranceClass = getSpeechUtteranceClass();
+      if (!synth || !UtteranceClass) {
+        stopAllSpeech();
+        showNotification(t('tts_unsupported'));
+        return;
+      }
+      try {
+        synth.cancel();
+        const utterance = new UtteranceClass(text);
+        const langMap = {
+          'es': 'es-ES',
+          'en': 'en-US',
+          'de': 'de-DE',
+          'fr': 'fr-FR',
+          'it': 'it-IT',
+          'pt': 'pt-PT'
+        };
+        const targetLang = langMap[lang] || 'es-ES';
+        utterance.lang = targetLang;
+        utterance.rate = 1.25;
+        utterance.pitch = 1.0;
+
+        const bestVoice = pickBestVoice(synth, targetLang);
+        if (bestVoice) {
+          utterance.voice = bestVoice;
+        }
+
+        utterance.onstart = () => {
+          updateSpeakerBtnState(true);
+          showNotification(t('tts_reading'));
+        };
+
+        utterance.onend = () => {
+          updateSpeakerBtnState(false);
+        };
+
+        utterance.onerror = () => {
+          updateSpeakerBtnState(false);
+        };
+
+        synth.speak(utterance);
+      } catch(e) {
+        stopAllSpeech();
+        showNotification(t('tts_unsupported'));
+      }
     }
 
     window.toggleSpeakLastResponse = function(e) {
@@ -2146,57 +2194,8 @@
         return;
       }
 
-      const lang = getLang();
-      const langMap = {
-        'es': 'es-ES',
-        'en': 'en-US',
-        'de': 'de-DE',
-        'fr': 'fr-FR',
-        'it': 'it-IT',
-        'pt': 'pt-PT'
-      };
-      const targetLang = langMap[lang] || 'es-ES';
-      const shortLang = (lang || 'es').substring(0, 2);
-
-      const synth = getSpeechSynthesis();
-      const UtteranceClass = getSpeechUtteranceClass();
-
-      if (synth && UtteranceClass) {
-        try {
-          synth.cancel();
-          const utterance = new UtteranceClass(text);
-          utterance.lang = targetLang;
-          utterance.rate = 1.5;
-          utterance.pitch = 1.0;
-
-          const bestVoice = pickBestVoice(synth, targetLang);
-          if (bestVoice) {
-            utterance.voice = bestVoice;
-          }
-
-          utterance.onstart = () => {
-            updateSpeakerBtnState(true);
-            showNotification(t('tts_reading'));
-          };
-
-          utterance.onend = () => {
-            updateSpeakerBtnState(false);
-          };
-
-          utterance.onerror = (err) => {
-            console.warn("Native TTS error, using fallback audio stream:", err);
-            playAudioFallback(text, shortLang);
-          };
-
-          synth.speak(utterance);
-          return;
-        } catch(err) {
-          console.warn("Native SpeechSynthesis failed, using fallback audio stream:", err);
-        }
-      }
-
-      // Seamless fallback for Android WebView / Home Assistant Companion App
-      playAudioFallback(text, shortLang);
+      const lang = getLang() || 'es';
+      playAudioTTS(text, lang.substring(0, 2));
     };
 
     window.copySelection = async function() {
