@@ -107,32 +107,46 @@
       box-shadow: none;
       position: relative;
       z-index: 9999;
-      overflow: visible !important;
-      gap: 12px;
+      overflow-x: auto !important;
+      overflow-y: visible !important;
+      gap: 8px;
       width: 100%;
       max-width: 100vw;
       box-sizing: border-box;
       transition: background 0.2s ease;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    #footer::-webkit-scrollbar {
+      display: none;
     }
     
     .footer-left {
       display: flex;
       align-items: center;
-      flex: 1 0 auto;
+      flex: 0 0 auto;
     }
     
     .footer-center {
       display: flex;
       gap: 4px;
-      flex: 0 0 auto;
+      flex: 1 1 auto;
       justify-content: center;
+      align-items: center;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 2px;
+    }
+    .footer-center::-webkit-scrollbar {
+      display: none;
     }
     
     .footer-right {
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      flex: 1 0 auto;
+      flex: 0 0 auto;
     }
 
     .tool-btn {
@@ -427,10 +441,12 @@
         grid-template-columns: repeat(12, 1fr);
         gap: 6px;
       }
-      .context-menu .tool-btn {
-        padding: 8px 4px;
+      #footer {
+        padding: 6px 8px;
+        justify-content: flex-start;
       }
       .footer-center {
+        justify-content: flex-start;
         gap: 2px;
       }
       .tool-btn {
@@ -563,10 +579,6 @@
         <button class="tool-btn paste-menu-btn" onclick="pasteFromClipboard()" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
           <span data-i18n="paste_label" style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
           <span data-i18n="paste_text">Paste</span>
-        </button>
-        <button id="speak-menu-btn" class="tool-btn" onclick="toggleSpeakLastResponse(event)" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
-          <span data-i18n="speak_label" style="font-size: 8px; color: #58a6ff; margin-bottom: 2px; text-transform: uppercase;">TTS</span>
-          <span id="speak-menu-text" data-i18n="speak_text">Read Last</span>
         </button>
         <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
           <span data-i18n="interrupt_label" style="font-size: 8px; color: #ff7b72; margin-bottom: 2px; text-transform: uppercase;">Interrupt</span>
@@ -1852,20 +1864,84 @@
     // Text-to-Speech (TTS) - Read Last Agy Response
     let isSpeaking = false;
 
+    function getSpeechSynthesis() {
+      try {
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis) {
+          return window.speechSynthesis;
+        }
+      } catch (e) {}
+      try {
+        if (window.parent && 'speechSynthesis' in window.parent && window.parent.speechSynthesis) {
+          return window.parent.speechSynthesis;
+        }
+      } catch (e) {}
+      try {
+        if (window.top && 'speechSynthesis' in window.top && window.top.speechSynthesis) {
+          return window.top.speechSynthesis;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function getSpeechUtteranceClass() {
+      if (typeof SpeechSynthesisUtterance !== 'undefined') return SpeechSynthesisUtterance;
+      try {
+        if (window.parent && window.parent.SpeechSynthesisUtterance) return window.parent.SpeechSynthesisUtterance;
+      } catch (e) {}
+      try {
+        if (window.top && window.top.SpeechSynthesisUtterance) return window.top.SpeechSynthesisUtterance;
+      } catch (e) {}
+      return null;
+    }
+
+    let availableVoices = [];
+    function loadVoices() {
+      const synth = getSpeechSynthesis();
+      if (synth && typeof synth.getVoices === 'function') {
+        availableVoices = synth.getVoices() || [];
+      }
+    }
+    const initialSynth = getSpeechSynthesis();
+    if (initialSynth) {
+      loadVoices();
+      if (typeof initialSynth.addEventListener === 'function') {
+        initialSynth.addEventListener('voiceschanged', loadVoices);
+      } else {
+        initialSynth.onvoiceschanged = loadVoices;
+      }
+    }
+
+    function pickBestVoice(synth, langCode) {
+      if (!synth) return null;
+      let voices = availableVoices && availableVoices.length > 0 ? availableVoices : (typeof synth.getVoices === 'function' ? (synth.getVoices() || []) : []);
+      if (!voices || voices.length === 0) return null;
+
+      const prefix = (langCode || 'es').toLowerCase().substring(0, 2);
+      const matching = voices.filter(v => v.lang && v.lang.toLowerCase().replace('_', '-').startsWith(prefix));
+      const pool = matching.length > 0 ? matching : voices;
+
+      // 1. Prefer high quality Natural / Neural / Online / Premium / Google / Enhanced voices
+      const natural = pool.find(v => 
+        /natural|neural|online|premium|enhanced|google|multilingual/i.test(v.name) ||
+        /natural|neural|online|premium|enhanced|google|multilingual/i.test(v.voiceURI || '')
+      );
+      if (natural) return natural;
+
+      // 2. Non-desktop (avoids old legacy SAPI5 robotic desktop voices on Windows)
+      const modern = pool.find(v => !/desktop/i.test(v.name));
+      if (modern) return modern;
+
+      // 3. System default voice
+      return pool.find(v => v.default) || pool[0];
+    }
+
     function updateSpeakerBtnState(active) {
       isSpeaking = active;
       const ttsBtn = document.getElementById('tts-btn');
-      const speakMenuBtn = document.getElementById('speak-menu-btn');
-      const speakMenuText = document.getElementById('speak-menu-text');
-      
       if (active) {
         if (ttsBtn) ttsBtn.classList.add('speaking');
-        if (speakMenuBtn) speakMenuBtn.classList.add('speaking');
-        if (speakMenuText) speakMenuText.innerText = t('speak_stop');
       } else {
         if (ttsBtn) ttsBtn.classList.remove('speaking');
-        if (speakMenuBtn) speakMenuBtn.classList.remove('speaking');
-        if (speakMenuText) speakMenuText.innerText = t('speak_text');
       }
     }
 
@@ -1969,13 +2045,16 @@
       const menu = document.getElementById('extra-keys-menu');
       if (menu) menu.classList.remove('show');
 
-      if (!('speechSynthesis' in window)) {
+      const synth = getSpeechSynthesis();
+      const UtteranceClass = getSpeechUtteranceClass();
+
+      if (!synth || !UtteranceClass) {
         showNotification(t('tts_unsupported'));
         return;
       }
 
-      if (window.speechSynthesis.speaking || isSpeaking) {
-        window.speechSynthesis.cancel();
+      if (synth.speaking || isSpeaking) {
+        synth.cancel();
         updateSpeakerBtnState(false);
         showNotification(t('tts_stopped'));
         return;
@@ -1987,8 +2066,8 @@
         return;
       }
 
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
+      synth.cancel();
+      const utterance = new UtteranceClass(text);
       const lang = getLang();
       const langMap = {
         'es': 'es-ES',
@@ -1998,9 +2077,15 @@
         'it': 'it-IT',
         'pt': 'pt-PT'
       };
-      utterance.lang = langMap[lang] || 'en-US';
+      const targetLang = langMap[lang] || 'es-ES';
+      utterance.lang = targetLang;
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
+
+      const bestVoice = pickBestVoice(synth, targetLang);
+      if (bestVoice) {
+        utterance.voice = bestVoice;
+      }
 
       utterance.onstart = () => {
         updateSpeakerBtnState(true);
@@ -2015,7 +2100,7 @@
         updateSpeakerBtnState(false);
       };
 
-      window.speechSynthesis.speak(utterance);
+      synth.speak(utterance);
     };
 
     window.copySelection = async function() {
