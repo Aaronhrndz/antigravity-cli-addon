@@ -2110,15 +2110,15 @@
         const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(lang || 'es')}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
         
         currentAudio = new Audio(url);
-        currentAudio.defaultPlaybackRate = 1.18;
-        currentAudio.playbackRate = 1.18;
+        currentAudio.defaultPlaybackRate = 1.5;
+        currentAudio.playbackRate = 1.5;
         currentAudio.onended = playNext;
         currentAudio.onerror = () => {
           console.warn("Audio TTS chunk failed, playing next:", chunk);
           playNext();
         };
         currentAudio.play().then(() => {
-          if (currentAudio) currentAudio.playbackRate = 1.18;
+          if (currentAudio) currentAudio.playbackRate = 1.5;
         }).catch(err => {
           console.error("Audio playback failed:", err);
           stopAllSpeech();
@@ -2166,7 +2166,7 @@
           synth.cancel();
           const utterance = new UtteranceClass(text);
           utterance.lang = targetLang;
-          utterance.rate = 1.08;
+          utterance.rate = 1.5;
           utterance.pitch = 1.0;
 
           const bestVoice = pickBestVoice(synth, targetLang);
