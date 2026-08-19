@@ -1872,7 +1872,7 @@
     function extractLastAgyResponse() {
       const iframe = getActiveIframe();
       if (!iframe) return '';
-      let lines = [];
+      let rawLines = [];
       try {
         const win = iframe.contentWindow;
         const doc = iframe.contentDocument;
@@ -1882,74 +1882,83 @@
           const buf = term.buffer.active;
           for (let i = 0; i < buf.length; i++) {
             const l = buf.getLine(i);
-            if (l) lines.push(l.translateToString(true));
+            if (l) rawLines.push(l.translateToString(true));
           }
         } else if (doc) {
           const rows = doc.querySelectorAll('.xterm-rows > div');
-          rows.forEach(r => lines.push(r.textContent || ''));
+          rows.forEach(r => rawLines.push(r.textContent || ''));
         }
-      } catch(e) {}
+      } catch(e) {
+        console.error("Error reading terminal buffer:", e);
+      }
+
+      // Filter out trailing empty lines
+      let lines = rawLines.map(l => l.trimEnd());
+      while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+        lines.pop();
+      }
 
       if (lines.length === 0) return '';
 
-      function isStatusOrPromptLine(str) {
-        const s = str.trim();
-        if (!s) return true;
-        if (s.startsWith('?') || s.includes('for shortcuts') || s.includes('shortcuts')) return true;
-        if (/^(>|❯|›|\$|#|\?)\s*(\[\])?$/.test(s)) return true;
-        if (s.includes('╭─') || s.includes('╰─')) return true;
-        if (/^(Gemini|Claude|GPT|DeepSeek|Antigravity)\s+[0-9]/i.test(s)) return true;
-        return false;
-      }
-
-      function isUserPromptLine(str) {
-        const s = str.trim();
-        if (/^(>|❯|›)\s+\S+/.test(s)) return true;
-        if (s.startsWith('User:') || s.startsWith('USER:')) return true;
-        return false;
-      }
-
-      function isHeaderOrBannerLine(str) {
-        const s = str.trim();
-        if (!s) return true;
-        if (s.includes('Antigravity CLI') || s.includes('antigravity-cli')) return true;
-        if (s.includes('@gmail.com') || s.includes('@google.com')) return true;
-        if (/^[─\-_=~*#\s]{4,}$/.test(s)) return true;
-        if (/^\/config|\/homeassistant|\/share/.test(s)) return true;
-        return false;
-      }
-
-      // Scan backwards from bottom to find where assistant response ends
-      let endIdx = lines.length - 1;
-      while (endIdx >= 0 && isStatusOrPromptLine(lines[endIdx])) {
-        endIdx--;
-      }
-
-      if (endIdx < 0) return '';
-
-      // Scan backwards from endIdx to find where assistant response begins (after user prompt)
-      let startIdx = 0;
-      for (let i = endIdx; i >= 0; i--) {
-        const l = lines[i];
-        if (isUserPromptLine(l)) {
-          startIdx = i + 1;
-          break;
-        }
-        if (isHeaderOrBannerLine(l) && i < endIdx) {
-          startIdx = i + 1;
-          break;
-        }
-        if (endIdx - i > 150) {
-          startIdx = i;
-          break;
+      // Discard bottom shortcuts / model status line (e.g. "? for shortcuts ... Gemini 3.7")
+      if (lines.length > 0) {
+        const last = lines[lines.length - 1].trim();
+        if (last.includes('for shortcuts') || last.startsWith('?') || /^(Gemini|Claude|GPT|DeepSeek|Antigravity)\s+[0-9]/i.test(last)) {
+          lines.pop();
         }
       }
 
-      const raw = lines.slice(startIdx, endIdx + 1);
+      // Discard trailing blank lines
+      while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+        lines.pop();
+      }
+
+      // Discard active user input prompt line if present (e.g. ">", "> []", "❯", "$")
+      if (lines.length > 0) {
+        const last = lines[lines.length - 1].trim();
+        if (last === '>' || last === '> []' || last === '❯' || last === '$' || last === '#' || last.startsWith('> [') || last.startsWith('❯ [')) {
+          lines.pop();
+        }
+      }
+
+      // Discard trailing blank lines again
+      while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+        lines.pop();
+      }
+
+      if (lines.length === 0) return '';
+
+      // Collect backwards all assistant response lines until we hit the user prompt (starts with "> <text>" or "❯ <text>") or separator
+      const responseLines = [];
+      for (let i = lines.length - 1; i >= 0; i--) {
+        const line = lines[i];
+        const trimmed = line.trim();
+
+        // Stop if we hit a user command line (e.g. "> hola", "❯ test", "User:")
+        if (/^(>|❯|›|\$)\s+\S+/.test(trimmed) || trimmed.startsWith('User:') || trimmed.startsWith('USER:')) {
+          break;
+        }
+
+        // Stop if we hit a full horizontal divider line
+        if (/^[─\-_=~*#\s]{4,}$/.test(trimmed)) {
+          break;
+        }
+
+        // Stop if we hit welcome header
+        if (trimmed.includes('Antigravity CLI') || trimmed.includes('@gmail.com') || trimmed.includes('@google.com')) {
+          break;
+        }
+
+        // Capped at max 100 lines for a response
+        if (responseLines.length > 100) {
+          break;
+        }
+
+        responseLines.unshift(line);
+      }
 
       // Clean up box drawing characters, ANSI codes, markdown fences, symbols
-      const cleaned = raw
-        .filter(line => !isHeaderOrBannerLine(line) && !isStatusOrPromptLine(line))
+      const cleaned = responseLines
         .map(line => line
           .replace(/[\u2500-\u257F]/g, ' ')
           .replace(/\x1b\[[0-9;]*m/g, '')
