@@ -41,6 +41,18 @@
       --kbd-border: #d0d7de;
     }
 
+    .speaking {
+      background: #1f6feb !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 10px rgba(31, 111, 235, 0.6) !important;
+      animation: pulse-speaker 1.2s infinite ease-in-out;
+    }
+    @keyframes pulse-speaker {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -552,6 +564,10 @@
           <span data-i18n="paste_label" style="font-size: 8px; color: #aaa; margin-bottom: 2px; text-transform: uppercase;">Paste</span>
           <span data-i18n="paste_text">Paste</span>
         </button>
+        <button id="speak-menu-btn" class="tool-btn" onclick="toggleSpeakLastResponse(event)" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
+          <span data-i18n="speak_label" style="font-size: 8px; color: #58a6ff; margin-bottom: 2px; text-transform: uppercase;">TTS</span>
+          <span id="speak-menu-text" data-i18n="speak_text">Read Last</span>
+        </button>
         <button class="tool-btn" data-key="CtrlC" data-code="67" data-ctrl="true" style="font-size: 11px; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; grid-column: span 3;">
           <span data-i18n="interrupt_label" style="font-size: 8px; color: #ff7b72; margin-bottom: 2px; text-transform: uppercase;">Interrupt</span>
           <span data-i18n="interrupt_text">Ctrl+C</span>
@@ -661,7 +677,13 @@
     </div>
     
     <div class="footer-right">
-      <button id="theme-btn" class="tool-btn" onclick="cycleTheme(event)" title="Tema" style="margin-right: 8px;">
+      <button id="tts-btn" class="tool-btn" onclick="toggleSpeakLastResponse(event)" title="Read Response" style="margin-right: 6px;">
+        <svg id="tts-icon" style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+      </button>
+      <button id="theme-btn" class="tool-btn" onclick="cycleTheme(event)" title="Tema" style="margin-right: 6px;">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg>
       </button>
       <input type="file" id="file" style="display: none;" onchange="uploadImage()">
@@ -687,6 +709,8 @@
         copy_text: "Copy",
         paste_label: "Paste",
         paste_text: "Paste",
+        speak_label: "TTS",
+        speak_text: "Read Last",
         interrupt_label: "Interrupt",
         interrupt_text: "Ctrl+C",
         suspend_label: "Suspend",
@@ -704,6 +728,11 @@
         import_text: "Config",
         upload_title: "Upload Image",
         theme_title: "Theme",
+        tts_title: "Read Last Response",
+        tts_reading: "Reading last response...",
+        tts_stopped: "Speech stopped",
+        tts_no_text: "No response found to read",
+        tts_unsupported: "Speech synthesis not supported in this browser",
         update_available: "New version available!",
         update_btn: "Update Now",
         updating: "Updating...",
@@ -732,6 +761,8 @@
         copy_text: "Copy",
         paste_label: "Pegar",
         paste_text: "Paste",
+        speak_label: "TTS",
+        speak_text: "Leer Último",
         interrupt_label: "Interrumpir",
         interrupt_text: "Ctrl+C",
         suspend_label: "Suspender",
@@ -749,6 +780,11 @@
         import_text: "Config",
         upload_title: "Subir Imagen",
         theme_title: "Tema",
+        tts_title: "Leer última respuesta",
+        tts_reading: "Leyendo última respuesta...",
+        tts_stopped: "Lectura detenida",
+        tts_no_text: "No se encontró respuesta para leer",
+        tts_unsupported: "Síntesis de voz no compatible con este navegador",
         update_available: "¡Nueva versión disponible!",
         update_btn: "Actualizar Ahora",
         updating: "Actualizando...",
@@ -777,6 +813,8 @@
         copy_text: "Copy",
         paste_label: "Einfügen",
         paste_text: "Paste",
+        speak_label: "TTS",
+        speak_text: "Vorlesen",
         interrupt_label: "Abbrechen",
         interrupt_text: "Ctrl+C",
         suspend_label: "Anhalten",
@@ -794,6 +832,11 @@
         import_text: "Konfig",
         upload_title: "Bild hochladen",
         theme_title: "Design",
+        tts_title: "Letzte Antwort vorlesen",
+        tts_reading: "Lese letzte Antwort vor...",
+        tts_stopped: "Sprachausgabe gestoppt",
+        tts_no_text: "Keine Antwort zum Vorlesen gefunden",
+        tts_unsupported: "Sprachausgabe in diesem Browser nicht unterstützt",
         update_available: "Neue Version verfügbar!",
         update_btn: "Jetzt aktualisieren",
         updating: "Wird aktualisiert...",
@@ -822,6 +865,8 @@
         copy_text: "Copy",
         paste_label: "Coller",
         paste_text: "Paste",
+        speak_label: "TTS",
+        speak_text: "Lire dernier",
         interrupt_label: "Interrompre",
         interrupt_text: "Ctrl+C",
         suspend_label: "Suspendre",
@@ -839,6 +884,11 @@
         import_text: "Config",
         upload_title: "Téléverser image",
         theme_title: "Thème",
+        tts_title: "Lire la dernière réponse",
+        tts_reading: "Lecture de la dernière réponse...",
+        tts_stopped: "Lecture arrêtée",
+        tts_no_text: "Aucune réponse trouvée à lire",
+        tts_unsupported: "Synthèse vocale non supportée par ce navigateur",
         update_available: "Nouvelle version disponible !",
         update_btn: "Mettre à jour",
         updating: "Mise à jour...",
@@ -867,6 +917,8 @@
         copy_text: "Copy",
         paste_label: "Incolla",
         paste_text: "Paste",
+        speak_label: "TTS",
+        speak_text: "Leggi ultimo",
         interrupt_label: "Interrompi",
         interrupt_text: "Ctrl+C",
         suspend_label: "Sospendi",
@@ -884,7 +936,12 @@
         import_text: "Config",
         upload_title: "Carica immagine",
         theme_title: "Tema",
-        update_available: "Nuova versione disponibile!",
+        tts_title: "Leggi ultima risposta",
+        tts_reading: "Lettura dell'ultima risposta...",
+        tts_stopped: "Lettura interrotta",
+        tts_no_text: "Nessuna risposta trovata da leggere",
+        tts_unsupported: "Sintesi vocale non supportata da questo browser",
+        update_available: "Nuova versione disponible!",
         update_btn: "Aggiorna ora",
         updating: "Aggiornamento in corso...",
         text_copied: "Testo copiato negli appunti",
@@ -912,6 +969,8 @@
         copy_text: "Copy",
         paste_label: "Colar",
         paste_text: "Paste",
+        speak_label: "TTS",
+        speak_text: "Ler último",
         interrupt_label: "Interromper",
         interrupt_text: "Ctrl+C",
         suspend_label: "Suspender",
@@ -929,6 +988,11 @@
         import_text: "Config",
         upload_title: "Enviar imagem",
         theme_title: "Tema",
+        tts_title: "Ler última resposta",
+        tts_reading: "A ler última resposta...",
+        tts_stopped: "Leitura parada",
+        tts_no_text: "Nenhuma resposta encontrada para ler",
+        tts_unsupported: "Síntese de voz não suportada neste navegador",
         update_available: "Nova versão disponível!",
         update_btn: "Atualizar agora",
         updating: "A atualizar...",
@@ -1711,6 +1775,163 @@
       btn.innerHTML = originalHtml;
       fileInput.value = '';
     }
+
+    // Text-to-Speech (TTS) - Read Last Agy Response
+    let isSpeaking = false;
+
+    function updateSpeakerBtnState(active) {
+      isSpeaking = active;
+      const ttsBtn = document.getElementById('tts-btn');
+      const speakMenuBtn = document.getElementById('speak-menu-btn');
+      const speakMenuText = document.getElementById('speak-menu-text');
+      
+      if (active) {
+        if (ttsBtn) ttsBtn.classList.add('speaking');
+        if (speakMenuBtn) speakMenuBtn.classList.add('speaking');
+        if (speakMenuText) speakMenuText.innerText = 'Stop';
+      } else {
+        if (ttsBtn) ttsBtn.classList.remove('speaking');
+        if (speakMenuBtn) speakMenuBtn.classList.remove('speaking');
+        if (speakMenuText) speakMenuText.innerText = t('speak_text') || 'Read Last';
+      }
+    }
+
+    function extractLastAgyResponse() {
+      const iframe = getActiveIframe();
+      if (!iframe) return '';
+      let lines = [];
+      try {
+        const win = iframe.contentWindow;
+        const doc = iframe.contentDocument;
+        const term = win?.term || win?.t || (doc && doc.getElementById('terminal')?._xterm) || (doc && doc.querySelector('.xterm')?._xterm);
+        
+        if (term && term.buffer && term.buffer.active) {
+          const buf = term.buffer.active;
+          for (let i = 0; i < buf.length; i++) {
+            const l = buf.getLine(i);
+            if (l) lines.push(l.translateToString(true));
+          }
+        } else if (doc) {
+          const rows = doc.querySelectorAll('.xterm-rows > div');
+          rows.forEach(r => lines.push(r.textContent || ''));
+        }
+      } catch(e) {}
+
+      // Discard trailing blank lines
+      while (lines.length > 0 && !lines[lines.length - 1].trim()) {
+        lines.pop();
+      }
+
+      if (lines.length === 0) return '';
+
+      // Skip current active prompt at bottom
+      let endIdx = lines.length - 1;
+      while (endIdx >= 0 && (
+        lines[endIdx].includes('╰─') || 
+        lines[endIdx].includes('╭─') || 
+        lines[endIdx].startsWith('>') || 
+        lines[endIdx].startsWith('❯') ||
+        lines[endIdx].includes('antigravity>') ||
+        !lines[endIdx].trim()
+      )) {
+        endIdx--;
+      }
+
+      if (endIdx < 0) return '';
+
+      // Find start of the assistant response (search backwards up to previous prompt or max 120 lines)
+      let startIdx = 0;
+      for (let i = endIdx; i >= 0; i--) {
+        const l = lines[i];
+        if (
+          l.includes('╰─') || 
+          l.includes('╭─') || 
+          (l.startsWith('>') && i < endIdx - 1) || 
+          (l.startsWith('❯') && i < endIdx - 1) ||
+          l.includes('User:') ||
+          l.includes('USER:') ||
+          l.includes('antigravity>')
+        ) {
+          startIdx = i + 1;
+          break;
+        }
+        if (endIdx - i > 120) {
+          startIdx = i;
+          break;
+        }
+      }
+
+      const raw = lines.slice(startIdx, endIdx + 1);
+
+      // Clean up box drawing characters, ANSI codes, markdown fences, symbols
+      const cleaned = raw
+        .map(line => line
+          .replace(/[\u2500-\u257F]/g, ' ')
+          .replace(/\x1b\[[0-9;]*m/g, '')
+          .replace(/```[a-zA-Z]*/g, '')
+          .replace(/[`#*_\~]/g, '')
+        )
+        .filter(line => line.trim().length > 0)
+        .join('\n')
+        .trim();
+
+      return cleaned;
+    }
+
+    window.toggleSpeakLastResponse = function(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('extra-keys-menu');
+      if (menu) menu.classList.remove('show');
+
+      if (!('speechSynthesis' in window)) {
+        showNotification(t('tts_unsupported'));
+        return;
+      }
+
+      if (window.speechSynthesis.speaking || isSpeaking) {
+        window.speechSynthesis.cancel();
+        updateSpeakerBtnState(false);
+        showNotification(t('tts_stopped'));
+        return;
+      }
+
+      const text = extractLastAgyResponse();
+      if (!text || text.length === 0) {
+        showNotification(t('tts_no_text'));
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      const lang = getLang();
+      const langMap = {
+        'es': 'es-ES',
+        'en': 'en-US',
+        'de': 'de-DE',
+        'fr': 'fr-FR',
+        'it': 'it-IT',
+        'pt': 'pt-PT'
+      };
+      utterance.lang = langMap[lang] || 'en-US';
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+
+      utterance.onstart = () => {
+        updateSpeakerBtnState(true);
+        const preview = text.length > 50 ? text.substring(0, 47) + '...' : text;
+        showNotification(`${t('tts_reading')}\n"${preview}"`);
+      };
+
+      utterance.onend = () => {
+        updateSpeakerBtnState(false);
+      };
+
+      utterance.onerror = () => {
+        updateSpeakerBtnState(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    };
 
     window.copySelection = async function() {
       try {
