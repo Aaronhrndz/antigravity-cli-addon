@@ -2040,22 +2040,98 @@
       return cleaned;
     }
 
+    let currentAudio = null;
+
+    function stopAllSpeech() {
+      const synth = getSpeechSynthesis();
+      if (synth) {
+        try { synth.cancel(); } catch(e) {}
+      }
+      if (currentAudio) {
+        try {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          currentAudio = null;
+        } catch(e) {}
+      }
+      updateSpeakerBtnState(false);
+    }
+
+    function playAudioFallback(text, lang) {
+      if (!text || !text.trim()) {
+        updateSpeakerBtnState(false);
+        return;
+      }
+
+      // Split text into chunks under 180 chars at sentence boundaries
+      const maxLen = 180;
+      const chunks = [];
+      const sentences = text.match(/[^.!?\n]+[.!?\n]*/g) || [text];
+      
+      let currentChunk = "";
+      for (const s of sentences) {
+        if ((currentChunk + s).length <= maxLen) {
+          currentChunk += s;
+        } else {
+          if (currentChunk.trim()) chunks.push(currentChunk.trim());
+          if (s.length <= maxLen) {
+            currentChunk = s;
+          } else {
+            const words = s.split(' ');
+            currentChunk = "";
+            for (const w of words) {
+              if ((currentChunk + ' ' + w).length <= maxLen) {
+                currentChunk += (currentChunk ? ' ' : '') + w;
+              } else {
+                if (currentChunk) chunks.push(currentChunk);
+                currentChunk = w;
+              }
+            }
+          }
+        }
+      }
+      if (currentChunk.trim()) chunks.push(currentChunk.trim());
+
+      if (chunks.length === 0) {
+        updateSpeakerBtnState(false);
+        return;
+      }
+
+      let chunkIdx = 0;
+      updateSpeakerBtnState(true);
+      showNotification(t('tts_reading'));
+
+      function playNext() {
+        if (!isSpeaking || chunkIdx >= chunks.length) {
+          stopAllSpeech();
+          return;
+        }
+        const chunk = chunks[chunkIdx++];
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(lang || 'es')}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+        
+        currentAudio = new Audio(url);
+        currentAudio.onended = playNext;
+        currentAudio.onerror = () => {
+          console.warn("Audio TTS chunk failed, playing next:", chunk);
+          playNext();
+        };
+        currentAudio.play().catch(err => {
+          console.error("Audio playback failed:", err);
+          stopAllSpeech();
+          showNotification(t('tts_unsupported'));
+        });
+      }
+
+      playNext();
+    }
+
     window.toggleSpeakLastResponse = function(e) {
       if (e) e.stopPropagation();
       const menu = document.getElementById('extra-keys-menu');
       if (menu) menu.classList.remove('show');
 
-      const synth = getSpeechSynthesis();
-      const UtteranceClass = getSpeechUtteranceClass();
-
-      if (!synth || !UtteranceClass) {
-        showNotification(t('tts_unsupported'));
-        return;
-      }
-
-      if (synth.speaking || isSpeaking) {
-        synth.cancel();
-        updateSpeakerBtnState(false);
+      if (isSpeaking) {
+        stopAllSpeech();
         showNotification(t('tts_stopped'));
         return;
       }
@@ -2066,8 +2142,6 @@
         return;
       }
 
-      synth.cancel();
-      const utterance = new UtteranceClass(text);
       const lang = getLang();
       const langMap = {
         'es': 'es-ES',
@@ -2078,29 +2152,47 @@
         'pt': 'pt-PT'
       };
       const targetLang = langMap[lang] || 'es-ES';
-      utterance.lang = targetLang;
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
+      const shortLang = (lang || 'es').substring(0, 2);
 
-      const bestVoice = pickBestVoice(synth, targetLang);
-      if (bestVoice) {
-        utterance.voice = bestVoice;
+      const synth = getSpeechSynthesis();
+      const UtteranceClass = getSpeechUtteranceClass();
+
+      if (synth && UtteranceClass) {
+        try {
+          synth.cancel();
+          const utterance = new UtteranceClass(text);
+          utterance.lang = targetLang;
+          utterance.rate = 1.0;
+          utterance.pitch = 1.0;
+
+          const bestVoice = pickBestVoice(synth, targetLang);
+          if (bestVoice) {
+            utterance.voice = bestVoice;
+          }
+
+          utterance.onstart = () => {
+            updateSpeakerBtnState(true);
+            showNotification(t('tts_reading'));
+          };
+
+          utterance.onend = () => {
+            updateSpeakerBtnState(false);
+          };
+
+          utterance.onerror = (err) => {
+            console.warn("Native TTS error, using fallback audio stream:", err);
+            playAudioFallback(text, shortLang);
+          };
+
+          synth.speak(utterance);
+          return;
+        } catch(err) {
+          console.warn("Native SpeechSynthesis failed, using fallback audio stream:", err);
+        }
       }
 
-      utterance.onstart = () => {
-        updateSpeakerBtnState(true);
-        showNotification(t('tts_reading'));
-      };
-
-      utterance.onend = () => {
-        updateSpeakerBtnState(false);
-      };
-
-      utterance.onerror = () => {
-        updateSpeakerBtnState(false);
-      };
-
-      synth.speak(utterance);
+      // Seamless fallback for Android WebView / Home Assistant Companion App
+      playAudioFallback(text, shortLang);
     };
 
     window.copySelection = async function() {
