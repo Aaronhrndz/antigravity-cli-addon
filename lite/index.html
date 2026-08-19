@@ -689,17 +689,14 @@
     </div>
     
     <div class="footer-right">
-      <button id="tts-btn" class="tool-btn" onclick="toggleSpeakLastResponse(event)" title="Read Response" style="margin-right: 6px;">
+      <button id="tts-btn" class="tool-btn" onclick="toggleSpeakLastResponse(event)" data-i18n-title="tts_title" title="Read Last Response" style="margin-right: 6px;">
         <svg id="tts-icon" style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
         </svg>
       </button>
-      <button id="theme-btn" class="tool-btn" onclick="cycleTheme(event)" title="Tema" style="margin-right: 6px;">
-        <svg style="pointer-events: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path></svg>
-      </button>
       <input type="file" id="file" style="display: none;" onchange="uploadImage()">
-      <button id="upload-btn" onclick="document.getElementById('file').click()" title="Upload Image">
+      <button id="upload-btn" onclick="document.getElementById('file').click()" data-i18n-title="upload_title" title="Upload Image">
         <svg style="pointer-events: none;" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
           <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -762,6 +759,8 @@
         bar_pinned_bottom: "Toolbar pinned BOTTOM",
         session_prefix: "Session ",
         img_inserted: "Image inserted: ",
+        path_copied: "Path copied to clipboard:\n",
+        upload_error: "Error uploading image",
         net_failed: "Network failed during upload",
         import_confirm: "Are you sure? This will overwrite your current Antigravity agent memory, conversations, and Home Assistant add-on configurations.",
         import_success: "Backup Restored Successfully!\n\nThe Add-on will now restart automatically. Please wait a few seconds and refresh the page if it does not reload by itself.",
@@ -820,6 +819,8 @@
         bar_pinned_bottom: "Barra fijada ABAJO",
         session_prefix: "Sesión ",
         img_inserted: "Imagen insertada: ",
+        path_copied: "¡Ruta copiada al portapapeles!\n",
+        upload_error: "Error al subir imagen",
         net_failed: "Fallo de red durante la subida",
         import_confirm: "¿Estás seguro? Esto sobrescribirá la memoria actual del agente Antigravity, conversaciones y configuraciones del add-on de Home Assistant.",
         import_success: "¡Copia restaurada con éxito!\n\nEl Add-on se reiniciará automáticamente. Por favor, espera unos segundos y recarga la página.",
@@ -878,6 +879,8 @@
         bar_pinned_bottom: "Leiste UNTEN fixiert",
         session_prefix: "Sitzung ",
         img_inserted: "Bild eingefügt: ",
+        path_copied: "Pfad in die Zwischenablage kopiert!\n",
+        upload_error: "Fehler beim Hochladen des Bildes",
         net_failed: "Netzwerkfehler beim Hochladen",
         import_confirm: "Sind Sie sicher? Dadurch werden der aktuelle Speicher, Konversationen und Konfigurationen überschrieben.",
         import_success: "Sicherung erfolgreich wiederhergestellt!\n\nDas Add-on wird neu gestartet.",
@@ -936,6 +939,8 @@
         bar_pinned_bottom: "Barre fixée EN BAS",
         session_prefix: "Session ",
         img_inserted: "Image insérée : ",
+        path_copied: "Chemin copié dans le presse-papier !\n",
+        upload_error: "Erreur lors du téléversement de l'image",
         net_failed: "Échec réseau lors du téléversement",
         import_confirm: "Êtes-vous sûr ? Cela écrasera la mémoire, les conversations et les configurations actuelles.",
         import_success: "Sauvegarde restaurée avec succès !\n\nL'Add-on va redémarrer automatiquement.",
@@ -982,7 +987,7 @@
         auth_copied: "Link di autenticazione copiato negli appunti!",
         auth_opened: "Link di autenticazione aperto in una nuova scheda!",
         no_auth_detected: "Nessun link di autenticazione rilevato nel terminale",
-        update_available: "Nuova versione disponibile!",
+        update_available: "Nuova versione disponible!",
         update_btn: "Aggiorna ora",
         updating: "Aggiornamento in corso...",
         update_installed: "Aggiornamento installato! Chiudi le schede attive e aprine di nuove.",
@@ -994,6 +999,8 @@
         bar_pinned_bottom: "Barra fissata IN BASSO",
         session_prefix: "Sessione ",
         img_inserted: "Immagine inserita: ",
+        path_copied: "Percorso copiato negli appunti!\n",
+        upload_error: "Errore durante il caricamento dell'immagine",
         net_failed: "Errore di rete durante il caricamento",
         import_confirm: "Sei sicuro? Questo sovrascriverà la memoria corrente, le conversazioni e le configurazioni.",
         import_success: "Backup ripristinato con successo!\n\nL'Add-on si riavvierà automaticamente.",
@@ -1052,6 +1059,8 @@
         bar_pinned_bottom: "Barra fixada EM BAIXO",
         session_prefix: "Sessão ",
         img_inserted: "Imagem inserida: ",
+        path_copied: "Caminho copiado para a área de transferência!\n",
+        upload_error: "Erro ao carregar a imagem",
         net_failed: "Falha de rede durante o envio",
         import_confirm: "Tem a certeza? Isto irá substituir a memória atual, conversas e configurações.",
         import_success: "Cópia de segurança restaurada com sucesso!\n\nO Add-on será reiniciado automaticamente.",
@@ -1844,14 +1853,14 @@
             }
           } catch(err) {
             try {
-              await navigator.clipboard.writeText(`"${data.filepath}"`);
-              showNotification(`Path copied to clipboard!\n${data.filepath}`);
+              await copyToClipboard(`"${data.filepath}"`);
+              showNotification(`${t('path_copied')}${data.filepath}`);
             } catch(e) {
-              showNotification(`Path: ${data.filepath}`);
+              showNotification(data.filepath);
             }
           }
         } else {
-          showNotification("Error uploading");
+          showNotification(t('upload_error'));
         }
       } catch(e) {
         showNotification(t('net_failed'));

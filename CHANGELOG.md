@@ -2,7 +2,14 @@
 
 All notable changes to the Antigravity CLI Home Assistant Add-on will be documented in this file.
 
-## [1.11.0] - 2026-08-17
+## [1.12.0] - 2026-08-19
+- feat: Add Screen Reader Text-to-Speech (TTS) engine (🔊 button) to read the assistant's last response aloud
+- feat: High-fidelity natural voice streaming at 1.6x speed compatible with Home Assistant Companion App (Android WebView) and Desktop browsers
+- feat: Add smooth horizontal touch scrolling to the toolbar (`#footer` and `.footer-center`) on narrow mobile screens
+- fix: Comprehensive Internationalization (i18n) across 6 languages (EN, ES, DE, FR, IT, PT) for all notifications, popups, and UI actions
+- fix: Robust clipboard copy engine with `document.execCommand('copy')` fallback for restrictive iframe contexts
+- fix: Precision response parser that cleanly removes terminal status bars, active prompts, and ANSI formatting before synthesis
+- chore: Remove redundant theme button from toolbar (available in context menu) and clean up popup notifications
 - feat: Add terminal Font Size selector (`A- / 14px / A+`) in context menu with persistent storage and i18n support
 - feat: Add dedicated vertical `Enter` button to the right of arrow keys in the D-Pad menu
 - feat: High-contrast styled Export (`#238636` green) and Import (`#8957e5` purple) configuration buttons
