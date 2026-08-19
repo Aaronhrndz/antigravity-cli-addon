@@ -1284,7 +1284,41 @@
       localStorage.setItem('agy_current_session', currentSessionId);
     }
 
-    window.copyAuthUrl = function() {
+    async function copyToClipboard(text) {
+      if (!text) return false;
+      
+      // 1. Modern Async Clipboard API
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (err) {
+          console.warn("Async clipboard writeText failed, trying execCommand fallback:", err);
+        }
+      }
+      
+      // 2. Reliable execCommand('copy') fallback (works inside iframes/HTTP)
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '0';
+        ta.style.left = '0';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const success = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (success) return true;
+      } catch (err) {
+        console.error("execCommand fallback failed:", err);
+      }
+      return false;
+    }
+
+    window.copyAuthUrl = async function() {
       const iframe = getActiveIframe();
       if (!iframe) {
         showNotification("No terminal active");
@@ -1322,18 +1356,21 @@
         console.error("Error reading terminal text:", e);
       }
 
-      const match = fullText.match(/https:\/\/accounts\.google\.com\/o\/oauth2\/auth[\s\S]*?(?=\n\s*\n|\n\s*If you|authorization code|$)/i);
+      const match = fullText.match(/https:\/\/(?:accounts\.google\.com\/o\/oauth2\/auth|github\.com\/login\/oauth\/authorize)[\s\S]*?(?=\n\s*\n|\n\s*If you|authorization code|Enter the code|$)/i);
       if (match) {
         let cleanUrl = match[0].replace(/[\r\n\s]+/g, '');
         cleanUrl = cleanUrl.replace(/%2F2F/g, '%2F');
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(cleanUrl).then(() => {
-            showNotification("Auth Link copied to clipboard!");
-          }).catch(() => {
-            prompt("Copy Auth URL:", cleanUrl);
-          });
+        
+        const success = await copyToClipboard(cleanUrl);
+        if (success) {
+          showNotification("Auth Link copied to clipboard!");
         } else {
-          prompt("Copy Auth URL:", cleanUrl);
+          try {
+            window.open(cleanUrl, '_blank');
+            showNotification("Auth link opened in new tab!");
+          } catch(e) {
+            prompt("Copy Auth URL (Ctrl+C):", cleanUrl);
+          }
         }
       } else {
         showNotification("No Auth Link detected in terminal");
@@ -1949,10 +1986,12 @@
           text = window.getSelection().toString();
         }
         if (text && text.trim().length > 0) {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
+          const success = await copyToClipboard(text);
+          if (success) {
+            showNotification(t('text_copied'));
+          } else {
+            showNotification(t('clip_blocked'));
           }
-          showNotification(t('text_copied'));
         } else {
           showNotification(t('no_text_selected'));
         }
