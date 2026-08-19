@@ -1892,55 +1892,52 @@
         console.error("Error reading terminal buffer:", e);
       }
 
-      // Filter out trailing empty lines
-      let lines = rawLines.map(l => l.trimEnd());
-      while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
-        lines.pop();
+      let fullText = rawLines.join('\n');
+      if (!fullText.trim()) {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (doc && doc.body) fullText = doc.body.innerText;
+        } catch(e) {}
+      }
+
+      if (!fullText || !fullText.trim()) return '';
+
+      // Strip ANSI codes
+      fullText = fullText.replace(/\x1b\[[0-9;]*m/g, '');
+
+      let lines = fullText.split('\n').map(l => l.trimEnd());
+
+      // 1. Strip trailing empty lines, status lines, divider lines, and empty active prompts from the bottom
+      while (lines.length > 0) {
+        const last = lines[lines.length - 1].trim();
+        if (!last) {
+          lines.pop();
+        } else if (last.startsWith('?') || last.includes('for shortcuts') || /^(Gemini|Claude|GPT|DeepSeek|Antigravity)\s+[0-9]/i.test(last)) {
+          lines.pop();
+        } else if (/^[─\-_=~*#\s]{3,}$/.test(last) || /^[\u2500-\u257F\s]{3,}$/.test(last)) {
+          lines.pop();
+        } else if (last === '>' || last === '> []' || last === '❯' || last === '$' || last === '#' || last.startsWith('> [') || last.startsWith('❯ [')) {
+          lines.pop();
+        } else {
+          break;
+        }
       }
 
       if (lines.length === 0) return '';
 
-      // Discard bottom shortcuts / model status line (e.g. "? for shortcuts ... Gemini 3.7")
-      if (lines.length > 0) {
-        const last = lines[lines.length - 1].trim();
-        if (last.includes('for shortcuts') || last.startsWith('?') || /^(Gemini|Claude|GPT|DeepSeek|Antigravity)\s+[0-9]/i.test(last)) {
-          lines.pop();
-        }
-      }
-
-      // Discard trailing blank lines
-      while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
-        lines.pop();
-      }
-
-      // Discard active user input prompt line if present (e.g. ">", "> []", "❯", "$")
-      if (lines.length > 0) {
-        const last = lines[lines.length - 1].trim();
-        if (last === '>' || last === '> []' || last === '❯' || last === '$' || last === '#' || last.startsWith('> [') || last.startsWith('❯ [')) {
-          lines.pop();
-        }
-      }
-
-      // Discard trailing blank lines again
-      while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
-        lines.pop();
-      }
-
-      if (lines.length === 0) return '';
-
-      // Collect backwards all assistant response lines until we hit the user prompt (starts with "> <text>" or "❯ <text>") or separator
+      // 2. Collect backwards all response lines until we hit the user prompt "> <command>" or a previous divider line
       const responseLines = [];
       for (let i = lines.length - 1; i >= 0; i--) {
         const line = lines[i];
         const trimmed = line.trim();
 
-        // Stop if we hit a user command line (e.g. "> hola", "❯ test", "User:")
+        // Stop if we hit the user prompt that triggered this response: e.g. "> que tal", "❯ que tal"
         if (/^(>|❯|›|\$)\s+\S+/.test(trimmed) || trimmed.startsWith('User:') || trimmed.startsWith('USER:')) {
           break;
         }
 
-        // Stop if we hit a full horizontal divider line
-        if (/^[─\-_=~*#\s]{4,}$/.test(trimmed)) {
+        // Stop if we reached a preceding divider line
+        if (/^[─\-_=~*#\s]{4,}$/.test(trimmed) || /^[\u2500-\u257F\s]{4,}$/.test(trimmed)) {
           break;
         }
 
@@ -1949,24 +1946,19 @@
           break;
         }
 
-        // Capped at max 100 lines for a response
-        if (responseLines.length > 100) {
-          break;
-        }
-
         responseLines.unshift(line);
       }
 
-      // Clean up box drawing characters, ANSI codes, markdown fences, symbols
+      // 3. Clean up formatting (box characters, markdown, extra spaces)
       const cleaned = responseLines
         .map(line => line
           .replace(/[\u2500-\u257F]/g, ' ')
-          .replace(/\x1b\[[0-9;]*m/g, '')
           .replace(/```[a-zA-Z]*/g, '')
           .replace(/[`#*_\~]/g, '')
         )
         .filter(line => line.trim().length > 0)
-        .join('\n')
+        .join(' ')
+        .replace(/\s{2,}/g, ' ')
         .trim();
 
       return cleaned;
