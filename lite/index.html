@@ -1854,45 +1854,56 @@
         }
       } catch(e) {}
 
-      // Discard trailing blank lines
-      while (lines.length > 0 && !lines[lines.length - 1].trim()) {
-        lines.pop();
-      }
-
       if (lines.length === 0) return '';
 
-      // Skip current active prompt at bottom
+      function isStatusOrPromptLine(str) {
+        const s = str.trim();
+        if (!s) return true;
+        if (s.startsWith('?') || s.includes('for shortcuts') || s.includes('shortcuts')) return true;
+        if (/^(>|❯|›|\$|#|\?)\s*(\[\])?$/.test(s)) return true;
+        if (s.includes('╭─') || s.includes('╰─')) return true;
+        if (/^(Gemini|Claude|GPT|DeepSeek|Antigravity)\s+[0-9]/i.test(s)) return true;
+        return false;
+      }
+
+      function isUserPromptLine(str) {
+        const s = str.trim();
+        if (/^(>|❯|›)\s+\S+/.test(s)) return true;
+        if (s.startsWith('User:') || s.startsWith('USER:')) return true;
+        return false;
+      }
+
+      function isHeaderOrBannerLine(str) {
+        const s = str.trim();
+        if (!s) return true;
+        if (s.includes('Antigravity CLI') || s.includes('antigravity-cli')) return true;
+        if (s.includes('@gmail.com') || s.includes('@google.com')) return true;
+        if (/^[─\-_=~*#\s]{4,}$/.test(s)) return true;
+        if (/^\/config|\/homeassistant|\/share/.test(s)) return true;
+        return false;
+      }
+
+      // Scan backwards from bottom to find where assistant response ends
       let endIdx = lines.length - 1;
-      while (endIdx >= 0 && (
-        lines[endIdx].includes('╰─') || 
-        lines[endIdx].includes('╭─') || 
-        lines[endIdx].startsWith('>') || 
-        lines[endIdx].startsWith('❯') ||
-        lines[endIdx].includes('antigravity>') ||
-        !lines[endIdx].trim()
-      )) {
+      while (endIdx >= 0 && isStatusOrPromptLine(lines[endIdx])) {
         endIdx--;
       }
 
       if (endIdx < 0) return '';
 
-      // Find start of the assistant response (search backwards up to previous prompt or max 120 lines)
+      // Scan backwards from endIdx to find where assistant response begins (after user prompt)
       let startIdx = 0;
       for (let i = endIdx; i >= 0; i--) {
         const l = lines[i];
-        if (
-          l.includes('╰─') || 
-          l.includes('╭─') || 
-          (l.startsWith('>') && i < endIdx - 1) || 
-          (l.startsWith('❯') && i < endIdx - 1) ||
-          l.includes('User:') ||
-          l.includes('USER:') ||
-          l.includes('antigravity>')
-        ) {
+        if (isUserPromptLine(l)) {
           startIdx = i + 1;
           break;
         }
-        if (endIdx - i > 120) {
+        if (isHeaderOrBannerLine(l) && i < endIdx) {
+          startIdx = i + 1;
+          break;
+        }
+        if (endIdx - i > 150) {
           startIdx = i;
           break;
         }
@@ -1902,6 +1913,7 @@
 
       // Clean up box drawing characters, ANSI codes, markdown fences, symbols
       const cleaned = raw
+        .filter(line => !isHeaderOrBannerLine(line) && !isStatusOrPromptLine(line))
         .map(line => line
           .replace(/[\u2500-\u257F]/g, ' ')
           .replace(/\x1b\[[0-9;]*m/g, '')
